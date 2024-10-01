@@ -9,6 +9,7 @@ uvicorn = "*"
 sqlalchemy = "*"
 pyjwt = "*"
 passlib = "*"
+pydantic = "*"
 
 [dev-packages]
 
