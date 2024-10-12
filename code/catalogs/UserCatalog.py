@@ -8,10 +8,10 @@ class UserCatalog:
     users = {}  
 
     def __init__(self):
-        self.engine = create_engine('postgresql://user:password@db:5432/userdb')
+        self.engine = create_engine('postgresql://user:password@localhost:5432/userdb')
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
-        self._load_users()
+        #self._load_users()
 
     @classmethod
     def get_instance(cls):
@@ -29,6 +29,8 @@ class UserCatalog:
     def add_user(self, name, password):
         session = self.Session()
         new_user = User(name=name, password=password)
+        print(new_user.name)
+        UserCatalog.users[name] = new_user.__dict__
         session.add(new_user)
         session.commit()
         session.close()

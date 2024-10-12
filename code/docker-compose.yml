@@ -1,13 +1,6 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    depends_on:
-      - db
-    environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/userdb
-
   db:
     image: postgres:13
     environment:
@@ -16,6 +9,8 @@ services:
       - POSTGRES_DB=userdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # Expose the database to your host
 
 volumes:
   postgres_data:
