@@ -58,20 +58,22 @@ def main():
         elif choice == '2':
             # Sign up as client
             name = input("Enter your name: ")
-            phone = input("Enter your phone number: ")
+            phone_number = input("Enter your phone number: ")
+            email = input("Enter your email: ")
             is_underage = input("Are you under 18? (yes/no): ").strip().lower()
             guardian_id = None
             if is_underage == "yes":
                 guardian_id = input("Enter guardian ID: ")
-            signup_client_process(name, phone, is_underage == "yes", guardian_id, db)
+            signup_client_process(name, phone_number, email, is_underage == "yes", guardian_id, db)
 
         elif choice == '3':
             # Sign up as instructor
             name = input("Enter your name: ")
-            phone = input("Enter your phone number: ")
+            phone_number = input("Enter your phone number: ")
+            email = input("Enter your email: ")
             specialization = input("Enter your specialization: ")
             available_cities = input("Enter available cities (comma separated): ").split(",")
-            signup_instructor_process(name, phone, specialization, available_cities, db)
+            signup_instructor_process(name, phone_number, email, specialization, available_cities, db)
 
         elif choice == '4':
             # View public offerings

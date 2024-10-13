@@ -51,8 +51,8 @@ class Client(Base):
     name = Column(String, nullable=False)
     phone_number = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
-    guardian_name = Column(String, nullable=True)  # For underage clients
-    guardian_phone = Column(String, nullable=True)
+    is_underage = Column(Boolean, nullable=False)
+    guardian_id = Column(String, nullable=True)  # For underage clients
 
     # Relationships
     user = relationship("User", back_populates="client")

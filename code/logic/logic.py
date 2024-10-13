@@ -17,13 +17,13 @@ def login_admin(admin_id, db: Session):
 
 # SIGNUP PROCESS FUNCTIONS
 
-def signup_client_process(name, phone_number, is_underage, guardian_id, db: Session):
+def signup_client_process(name, phone_number, email, is_underage, guardian_id, db: Session):
     """Process for signing up a client."""
-    return signup_client(name, phone_number, is_underage, guardian_id, db)
+    return signup_client(name, phone_number, email, is_underage, guardian_id, db)
 
-def signup_instructor_process(name, phone_number, specialization, available_cities, db: Session):
+def signup_instructor_process(name, phone_number, email, specialization, available_cities, db: Session):
     """Process for signing up an instructor."""
-    return register_instructor(name, phone_number, specialization, available_cities, db)
+    return register_instructor(name, phone_number, email, specialization, available_cities, db)
 
 # PUBLIC FUNCTIONS
 
@@ -31,9 +31,9 @@ def view_offerings(db: Session):
     """View all available offerings. Filter by teaching status if necessary."""
     return db.query(Offering).filter(Offering.is_available == True, Offering.status == "Teaching").all()
 
-def signup_client(name, phone_number, is_underage, guardian_id, db: Session):
+def signup_client(name, phone_number, email, is_underage, guardian_id, db: Session):
     """Sign up a new client."""
-    client = Client(name=name, phone_number=phone_number, is_underage=is_underage, guardian_id=guardian_id)
+    client = Client(name=name, phone_number=phone_number, email=email, is_underage=is_underage, guardian_id=guardian_id)
     db.add(client)
     db.commit()
     return client
@@ -93,9 +93,9 @@ def teach_offering(instructor_id, offering_id, db: Session):
         print("Offering not found or instructor does not match.")
         return None
 
-def register_instructor(name, phone, specialization, available_cities, db: Session):
+def register_instructor(name, phone_number, email, specialization, available_cities, db: Session):
     """Register a new instructor."""
-    instructor = Instructor(name=name, phone=phone, specialization=specialization, available_cities=available_cities)
+    instructor = Instructor(name=name, phone_number=phone_number, email=email, specialization=specialization, available_cities=available_cities)
     db.add(instructor)
     db.commit()
     return instructor
