@@ -1,4 +1,4 @@
-from db.config import SessionLocal, get_db
+from db.config import get_db
 from logic.logic import *
 
 def main():
@@ -21,41 +21,66 @@ def main():
             
             if user_type == "client":
                 client_id = input("Enter your client ID: ")
-                client_id = login_client(client_id, db)  # Call the login function with the inputted ID
-                if client_id:
-                    client_menu(client_id, db)
-                else:
-                    print("Invalid client ID.")
-            
+                try:
+                    client_id = int(client_id)  # Ensure client ID is an integer
+                    client = login_client(client_id, db)  # Call the login function with the inputted ID
+                    if client:
+                        client_menu(client_id, db)
+                    else:
+                        print("Invalid client ID.")
+                except ValueError:
+                    print("Client ID must be a valid number.")
+
             elif user_type == "instructor":
                 instructor_id = input("Enter your instructor ID: ")
-                instructor_id = login_instructor(instructor_id, db)  # Call the login function with the inputted ID
-                if instructor_id:
-                    instructor_menu(instructor_id, db)
-                else:
-                    print("Invalid instructor ID.")
-            
+                try:
+                    instructor_id = int(instructor_id)  # Ensure instructor ID is an integer
+                    instructor = login_instructor(instructor_id, db)  # Call the login function with the inputted ID
+                    if instructor:
+                        instructor_menu(instructor_id, db)
+                    else:
+                        print("Invalid instructor ID.")
+                except ValueError:
+                    print("Instructor ID must be a valid number.")
+
             elif user_type == "admin":
                 admin_id = input("Enter your admin ID: ")
-                admin_id = login_admin(admin_id, db)  # Call the login function with the inputted ID
-                if admin_id:
-                    admin_menu(admin_id, db)
-                else:
-                    print("Invalid admin ID.")
+                try:
+                    admin_id = int(admin_id)  # Ensure admin ID is an integer
+                    admin = login_admin(admin_id, db)  # Call the login function with the inputted ID
+                    if admin:
+                        admin_menu(admin_id, db)
+                    else:
+                        print("Invalid admin ID.")
+                except ValueError:
+                    print("Admin ID must be a valid number.")
 
         elif choice == '2':
             # Sign up as client
-            signup_client_process(db)
+            name = input("Enter your name: ")
+            phone = input("Enter your phone number: ")
+            is_underage = input("Are you under 18? (yes/no): ").strip().lower()
+            guardian_id = None
+            if is_underage == "yes":
+                guardian_id = input("Enter guardian ID: ")
+            signup_client_process(name, phone, is_underage == "yes", guardian_id, db)
 
         elif choice == '3':
             # Sign up as instructor
-            signup_instructor_process(db)
+            name = input("Enter your name: ")
+            phone = input("Enter your phone number: ")
+            specialization = input("Enter your specialization: ")
+            available_cities = input("Enter available cities (comma separated): ").split(",")
+            signup_instructor_process(name, phone, specialization, available_cities, db)
 
         elif choice == '4':
             # View public offerings
             offerings = view_offerings(db)
-            for offering in offerings:
-                print(offering)
+            if offerings:
+                for offering in offerings:
+                    print(offering)
+            else:
+                print("No offerings available.")
 
         elif choice == '5':
             print("Goodbye!")
@@ -76,8 +101,9 @@ def client_menu(client_id, db):
         choice = input("Select an option: ")
         if choice == '1':
             offerings = view_offerings(db)
-            for offering in offerings:
-                print(offering)
+            if offerings:
+                for offering in offerings:
+                    print(offering)
 
         elif choice == '2':
             offering_id = input("Enter Offering ID to book: ")
@@ -85,8 +111,9 @@ def client_menu(client_id, db):
 
         elif choice == '3':
             bookings = view_client_bookings(client_id, db)
-            for booking in bookings:
-                print(booking)
+            if bookings:
+                for booking in bookings:
+                    print(booking)
 
         elif choice == '4':
             booking_id = input("Enter Booking ID to cancel: ")
@@ -106,8 +133,9 @@ def instructor_menu(instructor_id, db):
         choice = input("Select an option: ")
         if choice == '1':
             offerings = view_instructor_offerings(instructor_id, db)
-            for offering in offerings:
-                print(offering)
+            if offerings:
+                for offering in offerings:
+                    print(offering)
 
         elif choice == '2':
             offering_id = input("Enter Offering ID to teach: ")
@@ -131,11 +159,17 @@ def admin_menu(admin_id, db):
         choice = input("Select an option: ")
         if choice == '1':
             offerings = view_offerings(db)
-            for offering in offerings:
-                print(offering)
+            if offerings:
+                for offering in offerings:
+                    print(offering)
 
         elif choice == '2':
-            create_offering(db)
+            location = input("Enter location: ")
+            lesson_type = input("Enter lesson type: ")
+            start_time = input("Enter start time: ")
+            end_time = input("Enter end time: ")
+            instructor_id = input("Enter instructor ID: ")
+            create_offering(location, lesson_type, start_time, end_time, instructor_id, db)
 
         elif choice == '3':
             account_id = input("Enter Account ID to delete: ")
@@ -143,8 +177,9 @@ def admin_menu(admin_id, db):
 
         elif choice == '4':
             bookings = view_client_bookings_by_admin(db)
-            for booking in bookings:
-                print(booking)
+            if bookings:
+                for booking in bookings:
+                    print(booking)
 
         elif choice == '5':
             offering_id = input("Enter Offering ID to modify: ")

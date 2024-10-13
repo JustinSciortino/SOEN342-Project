@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from db.config import Base
 import enum
 
-# Enum for lesson types
+# Enum for offering types
 class OfferingType(enum.Enum):
     group = "group"
     private = "private"
@@ -13,9 +13,6 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    phone_number = Column(String, nullable=False)
-    email = Column(String, nullable=False, unique=True)
     
     # Relationships
     instructor = relationship("Instructor", back_populates="user", uselist=False)
@@ -27,29 +24,33 @@ class Admin(Base):
     __tablename__ = "admins"
 
     id = Column(Integer, ForeignKey('users.id'), primary_key=True)
-    name = Column(String, nullable=False)
 
     # Relationships
     user = relationship("User", back_populates="admin")
-
 
 # Instructor Model
 class Instructor(Base):
     __tablename__ = "instructors"
 
     id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    name = Column(String, nullable=False)
+    phone_number = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
     specialization = Column(String, nullable=False)
     availability = Column(String, nullable=False)  # Availability can be stored as JSON or a string pattern
 
     # Relationships
     user = relationship("User", back_populates="instructor")
-    lessons = relationship("Lesson", back_populates="instructor")
+    offerings = relationship("Offering", back_populates="instructor")
 
 # Client Model
 class Client(Base):
     __tablename__ = "clients"
 
     id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    name = Column(String, nullable=False)
+    phone_number = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
     guardian_name = Column(String, nullable=True)  # For underage clients
     guardian_phone = Column(String, nullable=True)
 
@@ -81,11 +82,11 @@ class Schedule(Base):
 
     # Relationships
     location = relationship("Location", back_populates="schedules")
-    lessons = relationship("Lesson", back_populates="schedule")
+    offerings = relationship("Offering", back_populates="schedule")
 
-# Lesson Model
+# Offering Model
 class Offering(Base):
-    __tablename__ = "lessons"
+    __tablename__ = "offerings"
 
     id = Column(Integer, primary_key=True, index=True)
     type = Column(Enum(OfferingType), nullable=False)
@@ -93,21 +94,23 @@ class Offering(Base):
     end_time = Column(Time, nullable=False)
     schedule_id = Column(Integer, ForeignKey('schedules.id'), nullable=False)
     instructor_id = Column(Integer, ForeignKey('instructors.id'), nullable=True)
+    is_available = Column(Boolean, default=True)
+    status = Column(String, default="Available")  # Adding status field to track offering state
 
     # Relationships
-    schedule = relationship("Schedule", back_populates="lessons")
-    instructor = relationship("Instructor", back_populates="lessons")
-    bookings = relationship("Booking", back_populates="lesson")
+    schedule = relationship("Schedule", back_populates="offerings")
+    instructor = relationship("Instructor", back_populates="offerings")
+    bookings = relationship("Booking", back_populates="offering")
 
 # Booking Model
 class Booking(Base):
     __tablename__ = "bookings"
 
     id = Column(Integer, primary_key=True, index=True)
-    lesson_id = Column(Integer, ForeignKey('lessons.id'), nullable=False)
+    offering_id = Column(Integer, ForeignKey('offerings.id'), nullable=False)
     client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
     booked_at = Column(DateTime, nullable=False)
 
     # Relationships
-    lesson = relationship("Lesson", back_populates="bookings")
+    offering = relationship("Offering", back_populates="bookings")
     client = relationship("Client", back_populates="bookings")
