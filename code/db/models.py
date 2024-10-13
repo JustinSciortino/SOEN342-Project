@@ -1,18 +1,12 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
 from sqlalchemy.orm import relationship
-from config import Base
+from db.config import Base
 import enum
 
 # Enum for lesson types
-class LessonType(enum.Enum):
+class OfferingType(enum.Enum):
     group = "group"
     private = "private"
-
-# Enum for user roles
-class UserRole(enum.Enum):
-    admin = "admin"
-    client = "client"
-    instructor = "instructor"
 
 # User Model (Parent class for Client and Instructor)
 class User(Base):
@@ -22,11 +16,22 @@ class User(Base):
     name = Column(String, nullable=False)
     phone_number = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
-    role = Column(Enum(UserRole), nullable=False)
     
     # Relationships
     instructor = relationship("Instructor", back_populates="user", uselist=False)
     client = relationship("Client", back_populates="user", uselist=False)
+    admin = relationship("Admin", back_populates="user", uselist=False)
+
+# Admin Model
+class Admin(Base):
+    __tablename__ = "admins"
+
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    name = Column(String, nullable=False)
+
+    # Relationships
+    user = relationship("User", back_populates="admin")
+
 
 # Instructor Model
 class Instructor(Base):
@@ -79,11 +84,11 @@ class Schedule(Base):
     lessons = relationship("Lesson", back_populates="schedule")
 
 # Lesson Model
-class Lesson(Base):
+class Offering(Base):
     __tablename__ = "lessons"
 
     id = Column(Integer, primary_key=True, index=True)
-    type = Column(Enum(LessonType), nullable=False)
+    type = Column(Enum(OfferingType), nullable=False)
     start_time = Column(Time, nullable=False)
     end_time = Column(Time, nullable=False)
     schedule_id = Column(Integer, ForeignKey('schedules.id'), nullable=False)

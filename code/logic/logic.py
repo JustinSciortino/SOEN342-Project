@@ -1,6 +1,4 @@
 from db.models import Client, Instructor, Admin, Offering, Location, Booking 
-
-from db.models import Client, Instructor, Admin
 from sqlalchemy.orm import Session
 
 # LOGIN FUNCTIONS
@@ -17,43 +15,6 @@ def login_admin(admin_id, db: Session):
     admin = db.query(Admin).filter(Admin.id == admin_id).first()
     return admin if admin else None
 
-# MENU FUNCTIONS
-
-def client_menu(client_id, db: Session):
-    client = login_client(client_id, db)
-    if client:
-        return {
-            "view_offerings": view_offerings(db),
-            "view_bookings": view_client_bookings(client_id, db),
-            "make_booking": "Call book_offering() with offering ID",
-            "cancel_booking": "Call cancel_booking() with booking ID",
-            "logout": "Logout successful"
-        }
-    return "Invalid client"
-
-def instructor_menu(instructor_id, db: Session):
-    instructor = login_instructor(instructor_id, db)
-    if instructor:
-        return {
-            "view_offerings": view_instructor_offerings(instructor_id, db),
-            "teach_offering": "Call teach_offering() with offering ID",
-            "logout": "Logout successful"
-        }
-    return "Invalid instructor"
-
-def admin_menu(admin_id, db: Session):
-    admin = login_admin(admin_id, db)
-    if admin:
-        return {
-            "create_offering": "Call create_offering() with necessary details",
-            "view_client_bookings": view_client_bookings_by_admin(db),
-            "delete_account": "Call delete_account() with account ID",
-            "modify_offering": "Call modify_offering() with offering ID and updates",
-            "cancel_offering": "Call cancel_offering() with offering ID",
-            "logout": "Logout successful"
-        }
-    return "Invalid admin"
-
 # SIGNUP PROCESS FUNCTIONS
 
 def signup_client_process(name, phone, is_underage, guardian_id, db: Session):
@@ -65,7 +26,7 @@ def signup_instructor_process(name, phone, specialization, available_cities, db:
 # PUBLIC
 
 def view_offerings(db):
-    return db.query(Offering).filter(Offering.is_available == True).all()
+    return db.query(Offering).filter(Offering.is_available == True).all() # have to make it so they can only see ones that have teaching status 
 
 def signup_client(name, phone, is_underage, guardian_id, db):
     client = Client(name=name, phone=phone, is_underage=is_underage, guardian_id=guardian_id)

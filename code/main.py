@@ -18,18 +18,30 @@ def main():
 
         if choice == '1':
             user_type = input("Login as (client/instructor/admin): ")
+            
             if user_type == "client":
-                client_id = login_client(db)
+                client_id = input("Enter your client ID: ")
+                client_id = login_client(client_id, db)  # Call the login function with the inputted ID
                 if client_id:
                     client_menu(client_id, db)
+                else:
+                    print("Invalid client ID.")
+            
             elif user_type == "instructor":
-                instructor_id = login_instructor(db)
+                instructor_id = input("Enter your instructor ID: ")
+                instructor_id = login_instructor(instructor_id, db)  # Call the login function with the inputted ID
                 if instructor_id:
                     instructor_menu(instructor_id, db)
+                else:
+                    print("Invalid instructor ID.")
+            
             elif user_type == "admin":
-                admin_id = login_admin(db)
+                admin_id = input("Enter your admin ID: ")
+                admin_id = login_admin(admin_id, db)  # Call the login function with the inputted ID
                 if admin_id:
                     admin_menu(admin_id, db)
+                else:
+                    print("Invalid admin ID.")
 
         elif choice == '2':
             # Sign up as client
@@ -123,7 +135,7 @@ def admin_menu(admin_id, db):
                 print(offering)
 
         elif choice == '2':
-            create_offering_process(db)
+            create_offering(db)
 
         elif choice == '3':
             account_id = input("Enter Account ID to delete: ")
@@ -136,7 +148,7 @@ def admin_menu(admin_id, db):
 
         elif choice == '5':
             offering_id = input("Enter Offering ID to modify: ")
-            modify_offering_process(offering_id, db)
+            modify_offering(offering_id, db)
 
         elif choice == '6':
             offering_id = input("Enter Offering ID to cancel: ")
