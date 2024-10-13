@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Database connection URL
-DATABASE_URL = "postgresql://postgres:BXO-8951@localhost:5432/lesson_management"
+DATABASE_URL = "postgresql://postgres:<<putyourdbpasswordhere>>@localhost:5432/lesson_management"
 
 # Create engine and session
 engine = create_engine(DATABASE_URL)
