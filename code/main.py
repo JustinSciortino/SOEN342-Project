@@ -1,7 +1,8 @@
 from database import get_session, engine, create_tables
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect
-from catalogs import UsersCatalog
+from catalogs import UsersCatalog, LocationsCatalog
+from models import SpaceType
 
 def createSampleObjects(db: Session):
     user_catalog = UsersCatalog.get_instance(db)
@@ -13,18 +14,31 @@ def createSampleObjects(db: Session):
     except ValueError as e:
         print(f"Error creating admin: {str(e)}")
 
+def createLocations(db: Session):
+    location_catalog = LocationsCatalog.get_instance(db)
+    try:
+        location1 = location_catalog.create_location(name="TD Bank", address="1234 Street", capacity=50, city="Montreal", space_type=SpaceType.rink)
+        location2 = location_catalog.create_location(name="FB Dungeon", address="5678 Street", capacity=20, city="Laval", space_type=SpaceType.field)
+        location3 = location_catalog.create_location(name="Googleplex", address="91011 Street", capacity=100, city="Terrebonne", space_type=SpaceType.pool)
+        location4 = location_catalog.create_location(name="Amazon", address="121314 Street", capacity=50, city="Dorval", space_type=SpaceType.studio)
+
+    except ValueError as e:
+        print(f"Error creating location: {str(e)}")
+
 def main():
     create_tables()
     db: Session = next(get_session())  
     user_catalog = UsersCatalog.get_instance(db)
+    location_catalog = LocationsCatalog.get_instance(db)
     inspector = inspect(engine)
-    print("Existing tables:")
-    print(inspector.get_table_names())
+    #print("Existing tables:")
+    #print(inspector.get_table_names())
     
 
 
-    print("Welcome to the Lesson Management System")
-    #createSampleObjects(db)
+    print("\n\nWelcome to the Lesson Management System")
+    createSampleObjects(db)
+    createLocations(db)
     main_menu_options = """
     Options:
     1. Login
@@ -99,11 +113,11 @@ def main():
 
             if user.get_type() == "instructor":
                 print(f"\nWelcome {user.get_name()}! You have successfully logged in as an instructor.")
-                instructor_menu(instructor=user, db=db)
+                user.instructor_menu(db=db)
             
             if user.get_type() == "admin": 
                 print(f"\nWelcome {user.get_name()}! You have successfully logged in as an admin.")
-                admin_menu(admin=user, db=db)
+                user.admin_menu(db)
         
         if choice ==2: #TODO Implement after finishing Client model
             print("\n--------Register as Client--------")
@@ -152,7 +166,7 @@ def main():
 
             
             print(f"Welcome {instructor.get_name()}! You have successfully registered as an instructor.")
-            instructor_menu(instructor, db)
+            instructor.instructor_menu(db)
 
         if choice == 4: 
             if user_catalog.has_admin():
@@ -184,12 +198,10 @@ def main():
 
                 
                 print(f"Welcome {admin.get_name()}! You have successfully registered as an admin.")
-                admin_menu(admin, db)
+                admin.admin_menu(db)
                 
-
-        if choice == 5:
+        if choice == 5:#TODO Implement view offerings
             print("\n--------View Offerings--------")
-            #TODO Implement view offerings
             pass
 
         if choice == 6:
@@ -198,13 +210,9 @@ def main():
 
     db.close()
 
-
 def client_menu(client, db):
     pass #TODO Add update account functionality 
-def admin_menu(admin, db):
-    pass
-def instructor_menu(instructor, db):
-    pass
+
 
 
     """ while True:

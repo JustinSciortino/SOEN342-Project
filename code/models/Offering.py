@@ -8,7 +8,7 @@ class Offering(Base):
     __tablename__ = "offerings"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
-    type = Column(Enum(OfferingType), nullable=False)
+    type = mapped_column(Enum(OfferingType), nullable=False)
     instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=True)
     instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -21,7 +21,19 @@ class Offering(Base):
     location_id: Mapped[int] = mapped_column(Integer, ForeignKey('locations.id'), nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    def __init__(self):
+    def __init__(self, 
+                 offering_type: OfferingType, 
+                 instructor_id: int, 
+                 is_available: bool, 
+                 status: str, 
+                 location_id: int, 
+                 capacity: int):
+        self.type = offering_type
+        self.instructor_id = instructor_id
+        self.is_available = is_available
+        self.status = status
+        self.location_id = location_id
+        self.capacity = capacity
         self.bookings = []
 
 

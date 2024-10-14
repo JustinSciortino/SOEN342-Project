@@ -21,3 +21,11 @@ To run main.py
 3. Show the volume to be deleted by entering ```docker volume ls```
 4. Remove the volume named ```code_postgres_data``` by entering ```docker volume rm code_postgres_data```
 5. Rebuild by doing ```docker-compose up --buid -d```
+
+## View DB information in terminal (Commands)
+1. ```docker exec -it code-db-1 psql -U user -d lesson_management```
+2. ```\l``` to view all databases
+3. ```\c lesson_management``` to connect to the database
+4. ```\dt``` to see the database tables
+5. ```select * from tableName;``` or any other SQL command
+
