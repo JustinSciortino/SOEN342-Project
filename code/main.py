@@ -1,9 +1,211 @@
-from database.config import get_db
+from database import get_session, engine, create_tables
+from sqlalchemy.orm import Session
+from sqlalchemy import inspect
+from catalogs import UsersCatalog
+
+def createSampleObjects(db: Session):
+    user_catalog = UsersCatalog.get_instance(db)
+    try:
+        new_admin = user_catalog.register_admin("admin", "pass")
+        #print(new_admin)
+        new_instructor = user_catalog.register_instructor("instructor", "pass", "1234567890", ["Math", "Science"], ["Toronto", "Vancouver"])
+        #print(new_instructor)
+    except ValueError as e:
+        print(f"Error creating admin: {str(e)}")
 
 def main():
-    db: Session = next(get_db())  # Open a session
+    create_tables()
+    db: Session = next(get_session())  
+    user_catalog = UsersCatalog.get_instance(db)
+    inspector = inspect(engine)
+    print("Existing tables:")
+    print(inspector.get_table_names())
+    
+
 
     print("Welcome to the Lesson Management System")
+    #createSampleObjects(db)
+    main_menu_options = """
+    Options:
+    1. Login
+    2. Register as Client
+    3. Register as Instructor
+    4. Register as Admin
+    5. View Offerings (Public)
+    6. Exit"""
+
+    while True:
+        print(main_menu_options)
+        choice = int(input("\nSelect an option: "))
+
+        if choice == 1:
+
+            print("\n--------Login--------")
+            user_type = str(input("Login as (client/instructor/admin): "))
+
+            if user_type not in ["client", "instructor", "admin"]:
+                print("Invalid user type. Please try again.")
+                continue
+
+            user_name = None
+            
+            while True:
+                user_name = str(input("Enter your name: "))
+                if not user_name:
+                    print("Name cannot be empty. Please try again.")
+                    continue
+                break
+
+            user_phone_number = None
+
+            if user_type == "instructor":
+
+                while True:
+                    user_phone_number = str(input("Enter your phone number: "))
+                    if not user_phone_number:
+                        print("Phone number cannot be empty. Please try again.")
+                        continue
+                    if len(user_phone_number) != 10:
+                        print("Phone number must be 10 digits long. Please try again.")
+                        continue
+                    break
+
+            user_password = None
+
+            while True:
+                user_password = str(input("Enter your password: "))
+                if not user_password:
+                    print("Password cannot be empty. Please try again.")
+                    continue
+                break
+
+            try:
+                if user_phone_number:
+                    user = user_catalog.login(user_name, user_password, user_phone_number)
+                else:
+                    user = user_catalog.login(user_name, user_password)
+
+            except ValueError as e:
+                print(f"{e} - You will be redirected to the main menu")
+                continue
+
+            if user is None:
+                print("\nInvalid credentials. Please try again.")
+                continue
+
+            if user.get_type() == "client":
+                print(f"\nWelcome {user.get_name()}! You have successfully logged in as a client.")
+                client_menu(client=user, db=db)
+
+            if user.get_type() == "instructor":
+                print(f"\nWelcome {user.get_name()}! You have successfully logged in as an instructor.")
+                instructor_menu(instructor=user, db=db)
+            
+            if user.get_type() == "admin": 
+                print(f"\nWelcome {user.get_name()}! You have successfully logged in as an admin.")
+                admin_menu(admin=user, db=db)
+        
+        if choice ==2: #TODO Implement after finishing Client model
+            print("\n--------Register as Client--------")
+            client_name = str(input("Enter your name: "))
+            client_is_underage = str(input("Are you under 18? (yes/no): "))
+
+        if choice == 3: 
+            print("\n--------Register as Instructor--------")
+            instructor_name = None
+            instructor_phone_number = None
+            instructor_specialization = None
+            instructor_available_cities = None
+
+            while True:
+                instructor_name = str(input("Enter your name: "))
+                if not instructor_name:
+                    print("Name cannot be empty. Please try again.")
+                    continue
+                break
+
+            while True:
+                instructor_phone_number = str(input("Enter your phone number: "))
+                if len(instructor_phone_number) != 10:
+                    print("Phone number must be 10 digits long. Please try again.")
+                    continue
+                break
+
+            while True:
+                instructor_specialization = str(input("Enter your specialization: "))
+                if not instructor_specialization:
+                    print("Specialization cannot be empty. Please try again.")
+                    continue
+                break
+
+            while True:
+                instructor_available_cities = str(input("Enter available cities (comma separated): "))
+                if not instructor_available_cities:
+                    print("Available cities cannot be empty. Please try again.")
+                    continue
+                break
+            try:
+                instructor = user_catalog.register_instructor(instructor_name, "pass", instructor_phone_number, instructor_specialization.split(","), instructor_available_cities.split(","))
+            except ValueError as e:
+                print(f"{e} - The account was not created and you will be redirected to the main menu")
+                continue
+
+            
+            print(f"Welcome {instructor.get_name()}! You have successfully registered as an instructor.")
+            instructor_menu(instructor, db)
+
+        if choice == 4: 
+            if user_catalog.has_admin():
+                print("\nAn admin already exists for this organization. You will be redirected to the main menu.")
+                continue
+            else:
+                print("\n--------Register as Admin--------")
+                admin_name = None
+                admin_password = None
+
+                while True:
+                    admin_name = str(input("Enter your name: "))
+                    if not admin_name:
+                        print("Name cannot be empty. Please try again.")
+                        continue
+                    break
+
+                while True:
+                    admin_password = str(input("Enter your password: "))
+                    if not admin_password:
+                        print("Password cannot be empty. Please try again.")
+                        continue
+                    break
+                try:
+                    admin = user_catalog.register_admin(admin_name, admin_password)
+                except ValueError as e:
+                    print(f"{e} - The account was not created and you will be redirected to the main menu")
+                    continue
+
+                
+                print(f"Welcome {admin.get_name()}! You have successfully registered as an admin.")
+                admin_menu(admin, db)
+                
+
+        if choice == 5:
+            print("\n--------View Offerings--------")
+            #TODO Implement view offerings
+            pass
+
+        if choice == 6:
+            print("\nGoodbye!")
+            break
+
+    db.close()
+
+
+def client_menu(client, db):
+    pass #TODO Add update account functionality 
+def admin_menu(admin, db):
+    pass
+def instructor_menu(instructor, db):
+    pass
+
 
     """ while True:
         print("\nOptions:")

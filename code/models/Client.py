@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
 from sqlalchemy.orm import relationship
-from database.config import Base
+from database import Base
 
-# Client Model
 class Client(Base):
     __tablename__ = "clients"
 
@@ -14,5 +13,5 @@ class Client(Base):
     guardian_id = Column(String, nullable=True)  # For underage clients
 
     # Relationships
-    user = relationship("User", back_populates="client")
+    #user = relationship("User", back_populates="client")
     bookings = relationship("Booking", back_populates="client")
