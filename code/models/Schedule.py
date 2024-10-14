@@ -6,7 +6,7 @@ class Schedule(Base):
     __tablename__ = "schedules"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
-    timeslots: Mapped[list["Timeslot"]] = relationship("Timeslot", backref="schedule")
+    timeslots: Mapped[list["Timeslot"]] = relationship("Timeslot", back_populates="schedule")
     location: Mapped["Location"] = relationship("Location", back_populates="schedule")
     location_id: Mapped[int] = mapped_column(Integer, ForeignKey("locations.id"), nullable=False)
 

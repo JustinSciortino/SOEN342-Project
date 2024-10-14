@@ -1,5 +1,5 @@
-from .Instructor import Instructor
 from .User import User
+from .Instructor import Instructor
 from .Admin import Admin
 from .Timeslot import Timeslot
 from .Offering import Offering

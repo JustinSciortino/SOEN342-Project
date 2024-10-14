@@ -13,5 +13,5 @@ class Client(Base):
     guardian_id = Column(String, nullable=True)  # For underage clients
 
     # Relationships
-    user = relationship("User", back_populates="client")
+    #user = relationship("User", back_populates="client")
     bookings = relationship("Booking", back_populates="client")
