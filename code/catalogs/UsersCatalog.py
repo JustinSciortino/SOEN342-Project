@@ -71,3 +71,25 @@ class UsersCatalog:
     
     def has_admin(self):
         return self.session.query(Admin).first() is not None
+    
+    def delete_user(self, name: str):
+        user = self.session.query(User).filter(User.name == name).first()
+        if not user:
+            raise ValueError(f"User with name '{name}' does not exist")
+        
+        if user.get_type() == "admin":
+            raise ValueError("Cannot delete admin")
+        
+        self.session.delete(user)
+        self.session.commit()
+        return user
+    
+    def get_all_users(self):
+        return self.session.query(User).all()
+    
+    def get_user(self, name: str):
+        user = self.session.query(User).filter(User.name == name).first()
+        if not user:
+            raise ValueError(f"User with name '{name}' does not exist")
+        
+        return user

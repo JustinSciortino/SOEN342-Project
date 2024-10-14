@@ -8,3 +8,4 @@ from .Schedule import Schedule
 from .Booking import Booking
 from .Location import Location
 from .Client import Client
+from .SpaceType import SpaceType

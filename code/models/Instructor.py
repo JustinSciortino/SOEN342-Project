@@ -1,6 +1,6 @@
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time, ARRAY
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database import Base
 from models import User
 
@@ -27,3 +27,15 @@ class Instructor(User):
 
     def __repr__(self) -> str:
         return f"Instructor {self.id} {self.name} ({self.phone_number}), has the following specilizations: {self.specialization} and the following cities: {self.available_cities}"
+    
+    def instructor_menu(self, db:Session):
+        from catalogs import UsersCatalog, LocationsCatalog
+        instructor_menu_options = """
+        Instructor Options:
+        1. Select Offering
+        2. View my Offerings
+        3. Modify my Offering
+        4. Modify my Account
+        5. Logout and return to main menu
+        """
+        print(instructor_menu_options)
