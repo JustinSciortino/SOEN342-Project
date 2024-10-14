@@ -5,3 +5,6 @@ from .Timeslot import Timeslot
 from .Offering import Offering
 from .City import City
 from .Schedule import Schedule
+from .Booking import Booking
+from .Location import Location
+from .Client import Client

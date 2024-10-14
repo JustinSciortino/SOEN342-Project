@@ -1,10 +1,54 @@
-from database import get_session
+from database import get_session, engine, create_tables
 from sqlalchemy.orm import Session
+from sqlalchemy import inspect
+from catalogs import UsersCatalog
+from models import City
+
+def createSampleObjects(db: Session):
+    city1 = City(name="City A")
+    city2 = City(name="City B")
+    db.add(city1)
+    db.add(city2)
+    db.commit()
+    user_catalog = UsersCatalog.get_instance(db)
+    try:
+        user_catalog.register_admin("admin", "pass")
+    except ValueError as e:
+        print(f"Error creating admin: {str(e)}")
 
 def main():
-    db: Session = next(get_session())  # Open a session
+    create_tables()
+    db: Session = next(get_session())  
+    user_catalog = UsersCatalog.get_instance(db)
+    inspector = inspect(engine)
+    print("Existing tables:")
+    print(inspector.get_table_names())
+    createSampleObjects(db)
+
 
     print("Welcome to the Lesson Management System")
+    main_menu_options = """
+    Options:
+    1. Login
+    2. Register as Client
+    3. Register as Instructor
+    4. View Offerings (Public)
+    5. Exit"""
+
+    while True:
+        print(main_menu_options)
+        choice = int(input("Select an option: "))
+
+        if choice == 1:
+
+            print("------Login------")
+            user_name = str(input("Enter your name: "))
+            user_password = str(input("Enter your password: "))
+            user = user_catalog.login(user_name, user_password)
+            print(user.type)
+
+
+
 
     """ while True:
         print("\nOptions:")

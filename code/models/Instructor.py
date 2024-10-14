@@ -10,7 +10,7 @@ class Instructor(Base):
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
     specialization: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
-    available_cities: Mapped[list["City"]] = relationship("City", backref="instructor", nullable=False)
+    available_cities: Mapped[list["City"]] = relationship("City", backref="instructor")
     offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="instructor")
 
     __mapper_args__ = {
