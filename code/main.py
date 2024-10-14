@@ -6,7 +6,7 @@ def main():
 
     print("Welcome to the Lesson Management System")
 
-    while True:
+    """ while True:
         print("\nOptions:")
         print("1. Login")
         print("2. Register as Client")
@@ -192,7 +192,7 @@ def admin_menu(admin_id, db):
             cancel_offering(offering_id, db)
 
         elif choice == '7':
-            break
+            break """
 
 if __name__ == "__main__":
     main()
