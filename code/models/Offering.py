@@ -1,22 +1,29 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
-from sqlalchemy.orm import relationship
-from database.config import Base
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from database import Base
 from OfferingType import OfferingType
 
 # Offering Model
 class Offering(Base):
     __tablename__ = "offerings"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
     type = Column(Enum(OfferingType), nullable=False)
-    start_time = Column(Time, nullable=False)
-    end_time = Column(Time, nullable=False)
-    schedule_id = Column(Integer, ForeignKey('schedules.id'), nullable=False)
-    instructor_id = Column(Integer, ForeignKey('instructors.id'), nullable=True)
-    is_available = Column(Boolean, default=True)
-    status = Column(String, default="Available")  # Adding status field to track offering state
+    instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=True)
+    instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
+    is_available: Mapped[bool] = mapped_column(Boolean, default=True)
+    status: Mapped[str] = mapped_column(String, default="Not-Available")  
+    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering", nullable=True)
+    bookings_id: Mapped[list[int]]=mapped_column(Mapped[list[int]], default=[])
+    timeslot: Mapped["Timeslot"] = relationship("Timeslot", back_populates="offerings", nullable=False)
+    timeslot_id: Mapped[int] = mapped_column(Integer, ForeignKey('timeslots.id'), nullable=False)
+    location: Mapped["Location"] = relationship("Location", back_populates="offerings", nullable=False)
+    location_id: Mapped[int] = mapped_column(Integer, ForeignKey('locations.id'), nullable=False)
+    capacity: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    # Relationships
-    schedule = relationship("Schedule", back_populates="offerings")
-    instructor = relationship("Instructor", back_populates="offerings")
-    bookings = relationship("Booking", back_populates="offering")
+    def __init__(self):
+        self.bookings = []
+
+
+    #start_time = Column(Time, nullable=False)
+    #end_time = Column(Time, nullable=False)

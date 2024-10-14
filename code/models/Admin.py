@@ -6,7 +6,7 @@ from database.config import Base
 class Admin(Base):
     __tablename__ = "admins"
 
-    id: Mapped[int] = mapped_column(ForeignKey('users.id'), primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
 
     __mapper_args__ = {
         "polymorphic_identity": "Admin",
