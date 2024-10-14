@@ -37,7 +37,7 @@ class Instructor(Base):
     phone_number = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     specialization = Column(String, nullable=False)
-    availability = Column(String, nullable=False)  # Availability can be stored as JSON or a string pattern
+    availabl_cities = Column(String, nullable=False)  # Availability can be stored as JSON or a string pattern
 
     # Relationships
     user = relationship("User", back_populates="instructor")
