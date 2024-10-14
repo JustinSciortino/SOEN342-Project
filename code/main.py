@@ -1,7 +1,8 @@
-from database.config import get_db
+from database import get_session
+from sqlalchemy.orm import Session
 
 def main():
-    db: Session = next(get_db())  # Open a session
+    db: Session = next(get_session())  # Open a session
 
     print("Welcome to the Lesson Management System")
 

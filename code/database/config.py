@@ -14,11 +14,3 @@ Base = declarative_base()
 
 Base.metadata.drop_all(bind=engine)  # Drops the tables
 Base.metadata.create_all(bind=engine)  # Recreates the tables
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()

@@ -1,14 +1,16 @@
-# User Model (Parent class for Client and Instructor)
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
-from sqlalchemy.orm import relationship
-from database.config import Base
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from database import Base
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    
-    # Relationships
-    instructor = relationship("Instructor", back_populates="user", uselist=False)
-    client = relationship("Client", back_populates="user", uselist=False)
-    admin = relationship("Admin", back_populates="user", uselist=False)
+    id : Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
+    type: Mapped[str]
+
+    __mapper_args__ = {
+        "polymorphic_identity": "user",
+        "polymorphic_on": "type",
+    }
