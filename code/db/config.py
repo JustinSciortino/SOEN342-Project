@@ -11,8 +11,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Base class for your models
 Base = declarative_base()
 
-# Create all tables based on models
-Base.metadata.create_all(bind=engine)
+Base.metadata.drop_all(bind=engine)  # Drops the tables
+Base.metadata.create_all(bind=engine)  # Recreates the tables
+
 
 def get_db():
     db = SessionLocal()

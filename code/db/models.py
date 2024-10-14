@@ -12,7 +12,7 @@ class OfferingType(enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     
     # Relationships
     instructor = relationship("Instructor", back_populates="user", uselist=False)
@@ -23,7 +23,7 @@ class User(Base):
 class Admin(Base):
     __tablename__ = "admins"
 
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
 
     # Relationships
     user = relationship("User", back_populates="admin")
@@ -32,7 +32,7 @@ class Admin(Base):
 class Instructor(Base):
     __tablename__ = "instructors"
 
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     phone_number = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
@@ -47,7 +47,7 @@ class Instructor(Base):
 class Client(Base):
     __tablename__ = "clients"
 
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     phone_number = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
