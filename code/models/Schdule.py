@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
 from sqlalchemy.orm import relationship
-from db.config import Base
+from database.config import Base
 
 # Schedule Model (for time slots in locations)
 class Schedule(Base):

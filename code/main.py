@@ -1,5 +1,4 @@
-from db.config import get_db
-from logic.logic import *
+from database.config import get_db
 
 def main():
     db: Session = next(get_db())  # Open a session

@@ -1,7 +1,7 @@
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
 from sqlalchemy.orm import relationship
-from db.config import Base
+from database.config import Base
 
 # Instructor Model
 class Instructor(Base):
