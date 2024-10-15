@@ -47,7 +47,7 @@ class Offering(Base):
         return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and {self.capacity-len(self.bookings)} spots available at {self.location}"
     
     def repr_admin(self):
-        return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity}, {len(self.bookings)} number of bookings and {self.capacity-len(self.bookings)} spots available at {self.location} and is {self.status}"
+        return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and the course is {self.specialization.name}, {len(self.bookings)} number of bookings and {self.capacity-len(self.bookings)} spots available at {self.location} and is {self.status}"
     
     def get_id(self) -> int:
         return self.id

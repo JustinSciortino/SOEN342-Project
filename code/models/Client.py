@@ -30,7 +30,7 @@ class Client(Base):
             return f"Client {self.id} ({self.phone_number}) is a legal guardian of {self.minor}"
         return f"Client {self.id} ({self.phone_number}) is a client"
     
-    def cancel_booking(self, booking: Booking):
+    def cancel_booking(self, booking: "Booking"):
         if booking in self.bookings:
             booking.cancel()  # Cancel the booking
             self.bookings.remove(booking)  # Remove from client's bookings

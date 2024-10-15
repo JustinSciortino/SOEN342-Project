@@ -33,11 +33,20 @@ class Schedule(Base):
     def delete(self):
         self.timeslots = []
     
-    def is_conflicting(self, timeslot: Timeslot): #TODO: Also needs to check start and end date for conflicts
+    def is_conflicting(self, timeslot: Timeslot):
+        from datetime import datetime
         for ts in self.timeslots:
-            if ts.day_of_week == timeslot.day_of_week:
-                if ts.start_time <= timeslot.start_time <= ts.end_time:
-                    return True
-                if ts.start_time <= timeslot.end_time <= ts.end_time:
-                    return True
+            # Combine date and time to create datetime objects
+            ts_start_datetime = datetime.combine(ts.start_date, ts.start_time)
+            ts_end_datetime = datetime.combine(ts.end_date, ts.end_time)
+            timeslot_start_datetime = datetime.combine(timeslot.start_date, timeslot.start_time)
+            timeslot_end_datetime = datetime.combine(timeslot.end_date, timeslot.end_time)
+            
+            # Check for date range conflicts
+            if ts_start_datetime <= timeslot_end_datetime and timeslot_start_datetime <= ts_end_datetime:
+                if ts.day_of_week == timeslot.day_of_week:
+                    if (ts.start_time <= timeslot.start_time < ts.end_time) or \
+                    (ts.start_time < timeslot.end_time <= ts.end_time) or \
+                    (timeslot.start_time <= ts.start_time and ts.end_time <= timeslot.end_time):
+                        return True
         return False

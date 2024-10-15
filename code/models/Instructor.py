@@ -29,7 +29,7 @@ class Instructor(User):
     def __repr__(self) -> str:
         return f"Instructor {self.id} {self.name} ({self.phone_number}), has the following specilizations: {self.specialization} and the following cities: {self.available_cities}"
     
-    def cancel_offer(self, offering: Offering):
+    def cancel_offer(self, offering: "Offering"):
         if offering in self.offerings:
             offering.cancel()  # Cancel the offering
             self.offerings.remove(offering)

@@ -63,3 +63,17 @@ class LocationsCatalog:
         self.session.delete(location)
         self.session.commit()
         return location
+    
+    def add_timeslot(self, location: Location, timeslot: "Timeslot"):
+        try:            
+            location.schedule.add_timeslot(timeslot)
+            self.session.commit()
+            return True
+        except IntegrityError as e:
+            self.session.rollback()
+            print(f"Error adding timeslot: {str(e)}")
+            return False
+        except Exception as e:
+            self.session.rollback()
+            print(f"An unexpected error occurred: {str(e)}")
+            return False

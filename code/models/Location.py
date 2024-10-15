@@ -37,6 +37,9 @@ class Location(Base):
     def get_capacity(self) -> int:
         return self.capacity
     
+    def get_space_type(self):
+        return self.space_type
+
     def get_name(self) -> str:
         return self.name
     
@@ -48,4 +51,4 @@ class Location(Base):
         self.schedule = None  
 
     def __repr__(self):
-        return f"Location {self.id} {self.name} ({self.address}), has a capacity of {self.capacity} and is located in {self.city} and has {self.space_type} space type(s)."
+        return f"Location {self.id} {self.name} ({self.address}), has a capacity of {self.capacity} and is located in {self.city} and has {self.space_type} space type(s)"

@@ -84,12 +84,11 @@ class Admin(User):
         5. Delete Client/Instructor Account
         6. View and Cancel a Client Bookings
         7. Add Location
-        8. Modify Location
-        9. View Location Schedule
-        10. Delete Location
-        11. Get All Locations
-        12. Get Location based on City and optionally Name and Address
-        13. Logout and return to main menu"""
+        8. View Location Schedule
+        9. Delete Location
+        10. Get All Locations
+        11. Get Location based on City and optionally Name and Address
+        12. Logout and return to main menu"""
 
         while True:
             choice = None
@@ -102,8 +101,8 @@ class Admin(User):
                 
                 try:
                     choice = int(choice)
-                    if choice not in range(1, 14):
-                        print("\nInvalid choice. Please enter a number between 1 and 13.")
+                    if choice not in range(1, 13):
+                        print("\nInvalid choice. Please enter a number between 1 and 12.")
                         continue
                     break
                 except ValueError:
@@ -114,7 +113,7 @@ class Admin(User):
             if choice == 1:
                 print("\n--------View Offerings--------")
                 offering_city = None
-                offering_space_type = None
+                offering_specialization = None
                 offering_type = None
                 _quit = False
 
@@ -124,11 +123,13 @@ class Admin(User):
                     _quit = True
 
                 if _quit == False:
-                    from models import SpaceType
-                    print(f"Available space types: {[space_type.value for space_type in SpaceType]}")
-                    offering_space_type = input("Enter offering space type (e.g., 'rink', 'field', etc.)(or 'q' to quit or 'enter' to not add a space type): ").strip() or None
-                    if offering_space_type is not None and offering_space_type.lower() == 'q':
+                    from models import SpecializationType
+                    print(f"Available space types: {[spec.value for spec in SpecializationType]}")
+                    offering_specialization = input("Enter offering specialization ()(or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
+                    if offering_specialization is not None and offering_specialization.lower() == 'q':
                         _quit = True
+                    if _quit == False and offering_specialization:
+                        offering_specialization = SpecializationType(offering_specialization)
                 
                 if _quit == False:
                     from models import OfferingType
@@ -138,13 +139,16 @@ class Admin(User):
                         _quit = True
 
                 if _quit == False:
-                    offerings = offerings_catalog.get_all_offerings(city=offering_city, space_type=offering_space_type, _type=offering_type, is_admin=True)
+                    offerings = offerings_catalog.get_all_offerings(city=offering_city, specialization=offering_specialization, _type=offering_type, is_admin=True)
 
                     if not offerings:
                         print("\nNo offerings found.")
 
                     for offering in offerings:
                         print(offering.repr_admin())
+                else:
+                    print("\nYou will be redirected back to the admin menu.")
+                    continue
 
             if choice == 2:
                 print("\n--------Create Offering--------")
@@ -172,12 +176,17 @@ class Admin(User):
                     end_time = None
 
                     while True:
+                        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
                         day_of_week = str(input("Enter day of the week (e.g., 'Monday', 'Tuesday', etc.)(or 'q' to quit): "))
                         if day_of_week.lower() == 'q':
                             _quit = True
                             break
                         if not day_of_week:
                             print("Day of the week cannot be empty. Please try again.")
+                            continue
+
+                        if day_of_week not in days:
+                            print("Invalid day of the week. Please enter a valid day.")
                             continue
                         break
                     
@@ -265,7 +274,8 @@ class Admin(User):
 
                         while True:
                             from models import OfferingType
-                            print(f"Available offering types: {[offering_type.value for offering_type in OfferingType]}")
+                            valid_offering_types = [offering_type.value.lower() for offering_type in OfferingType]
+                            print(f"Available offering types: {valid_offering_types}")
                             offering_type_input = input("Enter offering type (e.g. private or group)(or 'q' to quit): ").lower()
                             if offering_type_input == 'q':
                                 _quit = True
@@ -275,17 +285,42 @@ class Admin(User):
                                 print("Offering type cannot be empty. Please try again.")
                                 continue
 
-                            try:
-                                offering_type = OfferingType(offering_type_input)
-                            except ValueError:
-                                print("Invalid offering type. Please enter a valid option from the list.")
+                            if offering_type_input not in valid_offering_types:
+                                print(f"Invalid offering type. Please enter one of: {', '.join(valid_offering_types)}")
                                 continue
+
+                            offering_type = OfferingType(offering_type_input)
                             break
 
-                        #!Incomplete
                         if _quit == False:
-                            from models import SpecializationType, SPACE_SPECIALIZATION_MAP
-                            print(f"Available offering types: {[offering_type.value for offering_type in OfferingType]}")
+                            from models import SpecializationType, SPACE_SPECIALIZATION_MAP, SpaceType
+                            while True:
+
+                                available_specs = set()
+                                for space_type in location.get_space_type():
+                                    space_type_enum = SpaceType(space_type)
+                                    available_specs.update(SPACE_SPECIALIZATION_MAP[space_type_enum])
+                                
+                                print(f"Available specializations: {[spec.value for spec in available_specs]}")
+                                specialization_input = input("Enter offering specialization (or 'q' to quit): ").strip().lower()
+                                
+                                if specialization_input == 'q':
+                                    _quit = True
+                                    break
+                                
+                                if not specialization_input:
+                                    print("Specialization cannot be empty. Please try again.")
+                                    continue
+                                
+                                try:
+                                    specialization = SpecializationType(specialization_input)
+                                    if specialization not in available_specs:
+                                        print(f"Invalid specialization for the given space type(s). Please choose from the available options.")
+                                        continue
+                                    break
+                                except ValueError:
+                                    print(f"Invalid specialization. Please enter one of: {', '.join([spec.value for spec in available_specs])}")
+                                    continue
 
                         if _quit == False and offering_type == OfferingType.group:
                             while True:
@@ -304,8 +339,9 @@ class Admin(User):
 
                         if _quit == False:
                             try:
-                                offering = offerings_catalog.create_offering(location=location, timeslot=timeslot, capacity=offering_capacity, offering_type=offering_type)
-                                #! Need to add the timeslot to the schedule of location, needs to be done in the catalog and commited/saved
+                                offering = offerings_catalog.create_offering(location=location, timeslot=timeslot, capacity=offering_capacity, offering_type=offering_type, specialization=specialization)
+                                locations_catalog.add_timeslot(location, timeslot)
+                                
                             except ValueError as e:
                                 print(f"{e} - The offering was not created and you will be redirected to the main menu")
                                 continue
@@ -434,11 +470,8 @@ class Admin(User):
             if choice == 8:
                 pass
 
-            if choice == 9:
-                pass
-
             #! Needs to be tested - Also needs an input for location_id
-            if choice == 10:
+            if choice == 9:
                 print("\n--------Delete Location--------")
                 location_city = None
                 location_name = None
@@ -487,13 +520,13 @@ class Admin(User):
                 else:
                     print("\nYou will be redirected back to the admin menu.")
 
-            if choice == 11:
+            if choice == 10:
                 pass
             
             #! Needs to be tested
-            if choice == 12:
+            if choice == 11:
                 print("\n--------Get Location based on City and optionally Name and Address--------")
                 self.admin_get_location(db)
                 
-            if choice == 13:
+            if choice == 12:
                 return
