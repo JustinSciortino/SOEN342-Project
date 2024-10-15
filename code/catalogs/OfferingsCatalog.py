@@ -73,13 +73,10 @@ class OfferingsCatalog:
 
 def has_time_conflict(self, new_offering):
     for offering in self.offerings:
-        # Assuming offerings have a 'timeslot' with 'start_time', 'end_time', 'start_date', and 'end_date'
         if (offering.timeslot.start_date <= new_offering.timeslot.end_date and
             new_offering.timeslot.start_date <= offering.timeslot.end_date):
-            # The offering occurs on overlapping days
             if (offering.timeslot.start_time < new_offering.timeslot.end_time and
                 new_offering.timeslot.start_time < offering.timeslot.end_time):
-                # The offering occurs in overlapping times
                 return True
     return False
 
