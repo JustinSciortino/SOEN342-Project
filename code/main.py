@@ -17,10 +17,10 @@ def createSampleObjects(db: Session):
 def createLocations(db: Session):
     location_catalog = LocationsCatalog.get_instance(db)
     try:
-        location1 = location_catalog.create_location(name="TD Bank", address="1234 Street", capacity=50, city="Montreal", space_type=SpaceType.rink)
-        location2 = location_catalog.create_location(name="FB Dungeon", address="5678 Street", capacity=20, city="Laval", space_type=SpaceType.field)
-        location3 = location_catalog.create_location(name="Googleplex", address="91011 Street", capacity=100, city="Terrebonne", space_type=SpaceType.pool)
-        location4 = location_catalog.create_location(name="Amazon", address="121314 Street", capacity=50, city="Dorval", space_type=SpaceType.studio)
+        location1 = location_catalog.create_location(name="TD Bank", address="1234 Street", capacity=50, city="Montreal", space_type=[SpaceType.rink, SpaceType.field])
+        location2 = location_catalog.create_location(name="FB Dungeon", address="5678 Street", capacity=20, city="Laval", space_type=[SpaceType.field, SpaceType.pool])
+        location3 = location_catalog.create_location(name="Googleplex", address="91011 Street", capacity=100, city="Terrebonne", space_type=[SpaceType.pool, SpaceType.gym])
+        location4 = location_catalog.create_location(name="Amazon", address="121314 Street", capacity=50, city="Dorval", space_type=[SpaceType.studio, SpaceType.gym])
 
     except ValueError as e:
         print(f"Error creating location: {str(e)}")
@@ -51,8 +51,24 @@ def main():
     6. Exit"""
 
     while True:
-        print(main_menu_options)
-        choice = int(input("\nSelect an option: "))
+
+        choice = None
+        while True:
+            print(main_menu_options)
+            choice = input("\nSelect an option: ")
+            if choice.strip() == "":
+                print("Invalid choice. Please enter a number.")
+                continue
+            
+            try:
+                choice = int(choice)
+                if choice not in range(1, 7):
+                    print("\nInvalid choice. Please enter a number between 1 and 6.")
+                    continue
+                break
+            except ValueError:
+                print("\nInvalid choice. Please enter a valid number.")
+                continue
 
         if choice == 1:
 
@@ -150,7 +166,7 @@ def main():
             client_name = str(input("Enter your name: "))
             client_is_underage = str(input("Are you under 18? (yes/no): "))
 
-        if choice == 3: 
+        if choice == 3: #! Needs to be updated
             print("\n--------Register as Instructor--------")
             instructor_name = None
             instructor_phone_number = None
@@ -181,7 +197,7 @@ def main():
                         continue
                     break
             
-            if _quit == False:
+            if _quit == False: #! Needs to be updated to have SpecializationType enum
                 while True:
                     instructor_specialization = str(input("Enter your specialization (or 'q' to quit): "))
                     if instructor_specialization.lower() == 'q':

@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database.config import Base
-from models import User, SpaceType
+from models import User, SpaceType, Offering
+from .SpaceSpecializationMap import SPACE_SPECIALIZATION_MAP
 import datetime
 
 
@@ -102,14 +103,14 @@ class Admin(User):
                 try:
                     choice = int(choice)
                     if choice not in range(1, 14):
-                        print("Invalid choice. Please enter a number between 1 and 13.")
+                        print("\nInvalid choice. Please enter a number between 1 and 13.")
                         continue
                     break
                 except ValueError:
-                    print("Invalid choice. Please enter a valid number.")
+                    print("\nInvalid choice. Please enter a valid number.")
                     continue
 
-            #! Needs to be tested
+
             if choice == 1:
                 print("\n--------View Offerings--------")
                 offering_city = None
@@ -118,35 +119,35 @@ class Admin(User):
                 _quit = False
 
 
-                offering_city = str(input("Enter offering city (or 'q' to quit or 'enter' to not add a city): "))
-                if offering_city.lower() == 'q':
+                offering_city = input("Enter offering city (or 'q' to quit or 'enter' to not add a city): ").strip() or None
+                if offering_city is not None and offering_city.lower() == 'q':
                     _quit = True
 
                 if _quit == False:
+                    from models import SpaceType
                     print(f"Available space types: {[space_type.value for space_type in SpaceType]}")
-                    offering_space_type = str(input("Enter offering space type (e.g., 'rink', 'field', etc.)(or 'q' to quit or 'enter' to not add a space type): "))
-                    if offering_space_type.lower() == 'q':
+                    offering_space_type = input("Enter offering space type (e.g., 'rink', 'field', etc.)(or 'q' to quit or 'enter' to not add a space type): ").strip() or None
+                    if offering_space_type is not None and offering_space_type.lower() == 'q':
                         _quit = True
                 
                 if _quit == False:
                     from models import OfferingType
                     print(f"Available offering types: {[offering_type.value for offering_type in OfferingType]}")
-                    offering_type = str(input("Enter offering type (or 'q' to quit or 'enter' to not add an offering type): "))
-                    if offering_type.lower() == 'q':
+                    offering_type = input("Enter offering type (or 'q' to quit or 'enter' to not add an offering type): ").strip() or None
+                    if offering_type is not None and offering_type.lower() == 'q':
                         _quit = True
 
                 if _quit == False:
-                    offerings = offerings_catalog.get_offerings(city=offering_city, space_type=offering_space_type, type=offering_type)
+                    offerings = offerings_catalog.get_all_offerings(city=offering_city, space_type=offering_space_type, _type=offering_type, is_admin=True)
 
                     if not offerings:
-                        print("No offerings found.")
+                        print("\nNo offerings found.")
 
                     for offering in offerings:
-                        print(offering)
+                        print(offering.repr_admin())
 
             if choice == 2:
                 print("\n--------Create Offering--------")
-                #self.admin_get_location(db)
                 location_id = None
                 _quit=False
 
@@ -239,8 +240,12 @@ class Admin(User):
                             if not end_date_str:
                                 print("End date cannot be empty. Please try again.")
                                 continue
+
                             try:
                                 end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date()
+                                if end_date < start_date:
+                                    print("End date must be after start date. Please try again.")
+                                    continue
                                 break
                             except ValueError:
                                 print("Invalid date format. Please use YYYY-MM-DD format.")
@@ -256,6 +261,7 @@ class Admin(User):
 
                         offering_type = None
                         offering_capacity = None
+                        specialization = None
 
                         while True:
                             from models import OfferingType
@@ -276,6 +282,11 @@ class Admin(User):
                                 continue
                             break
 
+                        #!Incomplete
+                        if _quit == False:
+                            from models import SpecializationType, SPACE_SPECIALIZATION_MAP
+                            print(f"Available offering types: {[offering_type.value for offering_type in OfferingType]}")
+
                         if _quit == False and offering_type == OfferingType.group:
                             while True:
                                 offering_capacity = str(input("Enter offering capacity (or 'q' to quit): "))
@@ -286,6 +297,9 @@ class Admin(User):
                                     print("Capacity cannot be empty. Please try again.")
                                     continue
                                 offering_capacity = int(offering_capacity)
+                                if offering_capacity <= location.get_capacity() and offering_capacity > 0:
+                                    print(f"Capacity must be greater than 0 and less than or equal to the location capacity of {location.get_capacity()}. Please try again.")
+                                    continue
                                 break
 
                         if _quit == False:
@@ -393,13 +407,13 @@ class Admin(User):
                 if _quit == False:
                     while True:
                         print(f"Available space types: {[space_type.value for space_type in SpaceType]}")
-                        space_type_input = input("Enter location space type (e.g., 'rink', 'field', etc.)(or 'q' to quit): ").lower()
+                        space_type_input = input("Enter location space type(s) seperated by a comma (e.g., 'rink', 'field', etc.)(or 'q' to quit): ").lower().split(",")
                         if space_type_input == 'q':
                             _quit = True
                             break
                 
                         try:
-                            location_space_type = SpaceType(space_type_input)
+                            location_space_type = [SpaceType(space_type.strip()) for space_type in space_type_input]
                         except ValueError:
                             print("Invalid space type. Please enter a valid option from the list.")
                             continue

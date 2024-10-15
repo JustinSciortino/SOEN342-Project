@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, E
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database import Base
 from .OfferingType import OfferingType
+from .SpecializationType import SpecializationType
 
 # Offering Model
 class Offering(Base):
@@ -11,9 +12,10 @@ class Offering(Base):
     type = mapped_column(Enum(OfferingType), nullable=False)
     instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=True)
     instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
-    is_available: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_available: Mapped[bool] = mapped_column(Boolean, default=False)
     status: Mapped[str] = mapped_column(String, default="Not-Available")  
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering")
+    specialization = mapped_column(Enum(SpecializationType), nullable=False)
     #bookings_id: Mapped[list[int]]=mapped_column(ARRAY(Integer), default=[])
     timeslot: Mapped["Timeslot"] = relationship(back_populates="offering")
     #timeslot_id: Mapped[int] = mapped_column(Integer, ForeignKey('timeslots.id'), nullable=False)
@@ -22,23 +24,25 @@ class Offering(Base):
     capacity: Mapped[int] = mapped_column(Integer, nullable=True)
 
     def __init__(self, 
-                 offering_type: OfferingType,  
+                 offering_type: OfferingType, 
+                 specialization: SpecializationType, 
                  location: "Location", 
                  capacity: int, 
                  timeslot: "Timeslot"):
         self.type = offering_type
         self.timeslot = timeslot
+        self.specialization = specialization
         self.instructor = None
         self.instructor_id = None
         self.location = location
         self.location_id = location.get_id()
-        self.is_available = True
+        self.is_available = False
         self.status = "Not-Available"
         self.capacity = capacity
         self.bookings = []
 
     def repr_user(self):
-        return f"Offering {self.id} is a {self.type} class with a capacity of {self.capacity} and {self.capacity-len(self.bookings)} spots available at {self.location}"
+        return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and {self.capacity-len(self.bookings)} spots available at {self.location}"
     
     def repr_admin(self):
         return f"Offering {self.id} is a {self.type} class with a capacity of {self.capacity}, {len(self.bookings)} number of bookings and {self.capacity-len(self.bookings)} spots available at {self.location} and is {self.status}"
@@ -92,6 +96,9 @@ class Offering(Base):
     
     def get_capacity(self) -> int:
         return self.capacity
+    
+    def get_specialization(self) -> SpecializationType:
+        return self.specialization
     
     def set_capacity(self, capacity: int):
         if capacity < len(self.bookings):
