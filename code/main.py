@@ -188,12 +188,15 @@ def main():
             client_name = str(input("Enter your name: "))
             client_is_underage = str(input("Are you under 18? (yes/no): "))
 
-        if choice == 3: #! Needs to be updated
+        if choice == 3: 
+            from models import SpecializationType
             print("\n--------Register as Instructor--------")
             instructor_name = None
             instructor_phone_number = None
             instructor_specialization = None
             instructor_available_cities = None
+            password = None
+            valid_specializations = []
             _quit = False
 
             while True:
@@ -218,17 +221,36 @@ def main():
                         print("Phone number must be 10 digits long. Please try again.")
                         continue
                     break
-            
-            if _quit == False: #! Needs to be updated to have SpecializationType enum
+
+            if _quit == False:
                 while True:
-                    instructor_specialization = str(input("Enter your specialization (or 'q' to quit): "))
+                    password = str(input("Enter your password (or 'q' to quit): "))
+                    if password.lower() == 'q':
+                        _quit = True
+                        print("\nYou will be redirected to the main menu")
+                        break
+                    if not password:
+                        print("Password cannot be empty. Please try again.")
+                        continue
+                    break
+            
+            if _quit == False: 
+                while True:
+                    print(f"Available specialization types: {[spec.value for spec in SpecializationType]}")
+                    instructor_specialization = input("Enter instructor specialization as a list seperated by commas (or 'q' to quit): ")
                     if instructor_specialization.lower() == 'q':
                         _quit = True
                         print("\nYou will be redirected to the main menu")
                         break
-                    if not instructor_specialization:
-                        print("Specialization cannot be empty. Please try again.")
-                        continue
+                    if _quit == False and instructor_specialization:
+                        specialization_list = [spec.strip().lower() for spec in instructor_specialization.split(",")]
+
+                        for spec in specialization_list:
+                            try:
+                                valid_specializations.append(SpecializationType(spec))
+                            except ValueError:
+                                print(f"'{spec}' is not a valid specialization type. Please try again.")
+                                break
                     break
             
             if _quit == False:
@@ -245,7 +267,7 @@ def main():
 
             if _quit == False:
                 try:
-                    instructor = user_catalog.register_instructor(instructor_name, "pass", instructor_phone_number, instructor_specialization.split(","), instructor_available_cities.split(","))
+                    instructor = user_catalog.register_instructor(instructor_name, password, instructor_phone_number, valid_specializations, instructor_available_cities.split(","))
                 except ValueError as e:
                     print(f"{e} - The account was not created and you will be redirected to the main menu")
                     continue
