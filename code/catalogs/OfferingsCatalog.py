@@ -25,7 +25,6 @@ class OfferingsCatalog:
         self.session.commit()
         return offering
     
-<<<<<<< HEAD
     def get_all_offerings(self, city: str = None, space_type: "SpaceType" = None, _type: OfferingType = None):
         if city is not None and space_type is not None and _type is not None:
             return self.session.query(Offering).filter(Offering.location.city == city, Offering.location.space_type == space_type, Offering.offering_type == _type).all()
@@ -50,7 +49,7 @@ class OfferingsCatalog:
 
     def get_offerings_by_instructor_id(self, instructor_id: int):
         return self.session.query(Offering).filter(Offering.instructor_id == instructor_id).all()
-=======
+
     def get_all_offerings(self, city: str = None, space_type: "SpaceType" = None, _type: OfferingType = None, is_admin: bool = False):
         query = self.session.query(Offering).join(Offering.location)
 
@@ -71,4 +70,4 @@ class OfferingsCatalog:
                 query = query.filter(Offering.type == _type)
 
         return query.all()
->>>>>>> aaabd11 (odifued Location class, added mapping)
+
