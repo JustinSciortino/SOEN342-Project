@@ -2,14 +2,14 @@ from database import get_session, engine, create_tables
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect
 from catalogs import UsersCatalog, LocationsCatalog
-from models import SpaceType
+from models import SpaceType, SpecializationType
 
 def createSampleObjects(db: Session):
     user_catalog = UsersCatalog.get_instance(db)
     try:
         new_admin = user_catalog.register_admin("admin", "pass")
         #print(new_admin)
-        new_instructor = user_catalog.register_instructor("instructor", "pass", "1234567890", ["Math", "Science"], ["Toronto", "Vancouver"])
+        new_instructor = user_catalog.register_instructor("instructor", "pass", "1234567890", [SpecializationType.hockey, SpecializationType.soccer], ["Toronto", "Vancouver"])
         #print(new_instructor)
     except ValueError as e:
         print(f"Error creating admin: {str(e)}")
