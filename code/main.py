@@ -25,6 +25,8 @@ def createLocations(db: Session):
     except ValueError as e:
         print(f"Error creating location: {str(e)}")
 
+    
+
 def main():
     create_tables()
     db: Session = next(get_session())  
@@ -55,69 +57,93 @@ def main():
         if choice == 1:
 
             print("\n--------Login--------")
-            user_type = str(input("Login as (client/instructor/admin): "))
+            _quit = False
+            while True:
+                user_type = str(input("Login as (client/instructor/admin) (or 'q' to quit): "))
+                if user_type.lower() == 'q':
+                    _quit = True
+                    print("\nYou will be redirected to the main menu")
+                    break
 
-            if user_type not in ["client", "instructor", "admin"]:
-                print("Invalid user type. Please try again.")
-                continue
+                if user_type not in ["client", "instructor", "admin"]:
+                    print("Invalid user type. Please try again.")
+                    continue
+                break
 
             user_name = None
             
-            while True:
-                user_name = str(input("Enter your name: "))
-                if not user_name:
-                    print("Name cannot be empty. Please try again.")
-                    continue
-                break
-
-            user_phone_number = None
-
-            if user_type == "instructor":
-
+            if _quit == False:
                 while True:
-                    user_phone_number = str(input("Enter your phone number: "))
-                    if not user_phone_number:
-                        print("Phone number cannot be empty. Please try again.")
-                        continue
-                    if len(user_phone_number) != 10:
-                        print("Phone number must be 10 digits long. Please try again.")
+                    user_name = str(input("Enter your name (or 'q' to quit): "))
+                    if user_name.lower() == 'q':
+                        _quit = True
+                        print("\nYou will be redirected to the main menu")
+                        break
+                    if not user_name:
+                        print("Name cannot be empty. Please try again.")
                         continue
                     break
 
+            user_phone_number = None
+
+            if _quit == False:
+
+                if user_type == "instructor":
+
+                    while True:
+                        user_phone_number = str(input("Enter your phone number (or 'q' to quit): "))
+                        if user_phone_number.lower() == 'q':
+                            _quit = True
+                            print("\nYou will be redirected to the main menu")
+                            break
+                        if not user_phone_number:
+                            print("Phone number cannot be empty. Please try again.")
+                            continue
+                        if len(user_phone_number) != 10:
+                            print("Phone number must be 10 digits long. Please try again.")
+                            continue
+                        break
+
             user_password = None
 
-            while True:
-                user_password = str(input("Enter your password: "))
-                if not user_password:
-                    print("Password cannot be empty. Please try again.")
+            if _quit == False:
+                while True:
+                    user_password = str(input("Enter your password (or 'q' to quit): "))
+                    if user_password.lower() == 'q':
+                        _quit = True
+                        print("\nYou will be redirected to the main menu")
+                        break
+                    if not user_password:
+                        print("Password cannot be empty. Please try again.")
+                        continue
+                    break
+
+            if _quit == False:
+                try:
+                    if user_phone_number:
+                        user = user_catalog.login(user_name, user_password, user_phone_number)
+                    else:
+                        user = user_catalog.login(user_name, user_password)
+
+                except ValueError as e:
+                    print(f"{e} - You will be redirected to the main menu")
                     continue
-                break
 
-            try:
-                if user_phone_number:
-                    user = user_catalog.login(user_name, user_password, user_phone_number)
-                else:
-                    user = user_catalog.login(user_name, user_password)
+                if user is None:
+                    print("\nInvalid credentials. Please try again.")
+                    continue
 
-            except ValueError as e:
-                print(f"{e} - You will be redirected to the main menu")
-                continue
+                if user.get_type() == "client":
+                    print(f"\nWelcome {user.get_name()}! You have successfully logged in as a client.")
+                    client_menu(client=user, db=db)
 
-            if user is None:
-                print("\nInvalid credentials. Please try again.")
-                continue
-
-            if user.get_type() == "client":
-                print(f"\nWelcome {user.get_name()}! You have successfully logged in as a client.")
-                client_menu(client=user, db=db)
-
-            if user.get_type() == "instructor":
-                print(f"\nWelcome {user.get_name()}! You have successfully logged in as an instructor.")
-                user.instructor_menu(db=db)
-            
-            if user.get_type() == "admin": 
-                print(f"\nWelcome {user.get_name()}! You have successfully logged in as an admin.")
-                user.admin_menu(db)
+                if user.get_type() == "instructor":
+                    print(f"\nWelcome {user.get_name()}! You have successfully logged in as an instructor.")
+                    user.instructor_menu(db=db)
+                
+                if user.get_type() == "admin": 
+                    print(f"\nWelcome {user.get_name()}! You have successfully logged in as an admin.")
+                    user.admin_menu(db)
         
         if choice ==2: #TODO Implement after finishing Client model
             print("\n--------Register as Client--------")
@@ -130,43 +156,65 @@ def main():
             instructor_phone_number = None
             instructor_specialization = None
             instructor_available_cities = None
+            _quit = False
 
             while True:
-                instructor_name = str(input("Enter your name: "))
+                instructor_name = str(input("Enter your name (or 'q' to quit): "))
+                if instructor_name.lower() == 'q':
+                    _quit = True
+                    print("\nYou will be redirected to the main menu")
+                    break
                 if not instructor_name:
                     print("Name cannot be empty. Please try again.")
                     continue
                 break
-
-            while True:
-                instructor_phone_number = str(input("Enter your phone number: "))
-                if len(instructor_phone_number) != 10:
-                    print("Phone number must be 10 digits long. Please try again.")
-                    continue
-                break
-
-            while True:
-                instructor_specialization = str(input("Enter your specialization: "))
-                if not instructor_specialization:
-                    print("Specialization cannot be empty. Please try again.")
-                    continue
-                break
-
-            while True:
-                instructor_available_cities = str(input("Enter available cities (comma separated): "))
-                if not instructor_available_cities:
-                    print("Available cities cannot be empty. Please try again.")
-                    continue
-                break
-            try:
-                instructor = user_catalog.register_instructor(instructor_name, "pass", instructor_phone_number, instructor_specialization.split(","), instructor_available_cities.split(","))
-            except ValueError as e:
-                print(f"{e} - The account was not created and you will be redirected to the main menu")
-                continue
-
             
-            print(f"Welcome {instructor.get_name()}! You have successfully registered as an instructor.")
-            instructor.instructor_menu(db)
+            if _quit == False:
+                while True:
+                    instructor_phone_number = str(input("Enter your phone number (or 'q' to quit): "))
+                    if instructor_phone_number.lower() == 'q':
+                        _quit = True
+                        print("\nYou will be redirected to the main menu")
+                        break
+                    if len(instructor_phone_number) != 10:
+                        print("Phone number must be 10 digits long. Please try again.")
+                        continue
+                    break
+            
+            if _quit == False:
+                while True:
+                    instructor_specialization = str(input("Enter your specialization (or 'q' to quit): "))
+                    if instructor_specialization.lower() == 'q':
+                        _quit = True
+                        print("\nYou will be redirected to the main menu")
+                        break
+                    if not instructor_specialization:
+                        print("Specialization cannot be empty. Please try again.")
+                        continue
+                    break
+            
+            if _quit == False:
+                while True:
+                    instructor_available_cities = str(input("Enter available cities (comma separated) (or 'q' to quit): "))
+                    if instructor_available_cities.lower() == 'q':
+                        _quit = True
+                        print("\nYou will be redirected to the main menu")
+                        break
+                    if not instructor_available_cities:
+                        print("Available cities cannot be empty. Please try again.")
+                        continue
+                    break
+
+            if _quit == False:
+                try:
+                    instructor = user_catalog.register_instructor(instructor_name, "pass", instructor_phone_number, instructor_specialization.split(","), instructor_available_cities.split(","))
+                except ValueError as e:
+                    print(f"{e} - The account was not created and you will be redirected to the main menu")
+                    continue
+
+                
+                print(f"Welcome {instructor.get_name()}! You have successfully registered as an instructor.")
+                instructor.instructor_menu(db)
 
         if choice == 4: 
             if user_catalog.has_admin():
@@ -176,29 +224,41 @@ def main():
                 print("\n--------Register as Admin--------")
                 admin_name = None
                 admin_password = None
+                _quit = False
 
                 while True:
-                    admin_name = str(input("Enter your name: "))
+                    admin_name = str(input("Enter your name (or 'q' to quit): "))
+                    if admin_name.lower() == 'q':
+                        _quit = True
+                        print("\nYou will be redirected to the main menu")
+                        break
                     if not admin_name:
                         print("Name cannot be empty. Please try again.")
                         continue
                     break
-
-                while True:
-                    admin_password = str(input("Enter your password: "))
-                    if not admin_password:
-                        print("Password cannot be empty. Please try again.")
-                        continue
-                    break
-                try:
-                    admin = user_catalog.register_admin(admin_name, admin_password)
-                except ValueError as e:
-                    print(f"{e} - The account was not created and you will be redirected to the main menu")
-                    continue
-
                 
-                print(f"Welcome {admin.get_name()}! You have successfully registered as an admin.")
-                admin.admin_menu(db)
+                if _quit == False:
+                    while True:
+                        admin_password = str(input("Enter your password (or 'q' to quit): "))
+                        if admin_password.lower() == 'q':
+                            _quit = True
+                            print("\nYou will be redirected to the main menu")
+                            break
+                        if not admin_password:
+                            print("Password cannot be empty. Please try again.")
+                            continue
+                        break
+
+                if _quit == False:
+                    try:
+                        admin = user_catalog.register_admin(admin_name, admin_password)
+                    except ValueError as e:
+                        print(f"{e} - The account was not created and you will be redirected to the main menu")
+                        continue
+
+                    
+                    print(f"Welcome {admin.get_name()}! You have successfully registered as an admin.")
+                    admin.admin_menu(db)
                 
         if choice == 5:#TODO Implement view offerings
             print("\n--------View Offerings--------")

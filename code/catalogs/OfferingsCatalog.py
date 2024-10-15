@@ -15,17 +15,8 @@ class OfferingsCatalog:
             cls._instance = cls(session)
         return cls._instance
     
-    #! To be validated/verified
-    def create_offering(self, name: str, offering_type: OfferingType, location_id: int, instructor_id: int, schedule_id: int):
-        existing_offering = self.session.query(Offering).filter(Offering.name == name, 
-                                                                 Offering.location_id == location_id,
-                                                                 Offering.instructor_id == instructor_id,
-                                                                 Offering.schedule_id == schedule_id
-                                                                 ).first()
-        if existing_offering:
-            raise ValueError(f"Offering '{name}' already exists")
-        
-        offering = Offering(name=name, offering_type=offering_type, location_id=location_id, instructor_id=instructor_id, schedule_id=schedule_id)
+    def create_offering(self, location: "Location", capacity: int, timeslot: "Timeslot", offering_type: OfferingType):
+        offering = Offering(location=location, capacity=capacity, timeslot=timeslot, offering_type=offering_type)
 
         if not offering:
             raise ValueError("Offering not created")
@@ -33,3 +24,18 @@ class OfferingsCatalog:
         self.session.add(offering)
         self.session.commit()
         return offering
+    
+    def get_all_offerings(self, city: str = None, space_type: "SpaceType" = None, _type: OfferingType = None):
+        if city is not None and space_type is not None and _type is not None:
+            return self.session.query(Offering).filter(Offering.location.city == city, Offering.location.space_type == space_type, Offering.offering_type == _type).all()
+        if city is not None and space_type is not None:
+            return self.session.query(Offering).filter(Offering.location.city == city, Offering.location.space_type == space_type).all()
+        if city is not None and _type is not None:
+            return self.session.query(Offering).filter(Offering.location.city == city, Offering.offering_type == _type).all()
+        if city:
+            return self.session.query(Offering).filter(Offering.location.city == city).all()
+        if space_type:
+            return self.session.query(Offering).filter(Offering.location.space_type == space_type).all()
+        if _type:
+            return self.session.query(Offering).filter(Offering.offering_type == _type).all()
+        return self.session.query(Offering).all()

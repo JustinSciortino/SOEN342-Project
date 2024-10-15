@@ -27,6 +27,9 @@ class Schedule(Base):
         self.timeslots.remove(timeslot)
         return self
     
+    def get_id(self) -> int:
+        return self.id
+    
     def is_conflicting(self, timeslot: Timeslot): #TODO: Also needs to check start and end date for conflicts
         for ts in self.timeslots:
             if ts.day_of_week == timeslot.day_of_week:

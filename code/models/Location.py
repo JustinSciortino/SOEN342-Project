@@ -30,6 +30,9 @@ class Location(Base):
 
     def get_schedule(self):
         return self.schedule
+    
+    def get_id(self) -> int:   
+        return self.id
 
     def __repr__(self):
         return f"Location {self.id} {self.name} ({self.address}), has a capacity of {self.capacity} and is located in {self.city}"
