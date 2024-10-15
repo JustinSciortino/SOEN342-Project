@@ -7,5 +7,7 @@ from .City import City
 from .Schedule import Schedule
 from .Booking import Booking
 from .Location import Location
+from .Booking import Booking
 from .Client import Client
 from .SpaceType import SpaceType
+from .Minor import Minor
