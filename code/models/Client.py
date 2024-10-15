@@ -10,7 +10,7 @@ class Client(Base):
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
     is_legal_guardian: Mapped[bool] = mapped_column(Boolean, nullable=False)
     minor: Mapped["Minor"] = relationship("Minor", back_populates="guardian")  # For underage clients
-    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client")
+    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client", cascade="all, delete-orphan")
 
     __mapper_args__ = {
         "polymorphic_identity": "client",
@@ -29,6 +29,17 @@ class Client(Base):
         if self.is_legal_guardian:
             return f"Client {self.id} ({self.phone_number}) is a legal guardian of {self.minor}"
         return f"Client {self.id} ({self.phone_number}) is a client"
+    
+    def cancel_booking(self, booking: Booking):
+        if booking in self.bookings:
+            booking.cancel()  # Cancel the booking
+            self.bookings.remove(booking)  # Remove from client's bookings
+
+    def delete(self):
+        # Cancel all associated bookings before deletion
+        for booking in self.bookings:
+            booking.cancel()
+        self.bookings = []  
     
     def get_id(self) -> int:
         return self.id

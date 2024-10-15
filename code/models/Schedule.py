@@ -7,8 +7,8 @@ class Schedule(Base):
     __tablename__ = "schedules"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
-    timeslots: Mapped[list["Timeslot"]] = relationship("Timeslot", back_populates="schedule")
-    location: Mapped["Location"] = relationship("Location", back_populates="schedule")
+    timeslots: Mapped[list["Timeslot"]] = relationship("Timeslot", back_populates="schedule", cascade="all, delete-orphan")
+    location: Mapped["Location"] = relationship("Location", back_populates="schedule", )
     location_id: Mapped[int] = mapped_column(Integer, ForeignKey("locations.id"), nullable=False)
 
     def __init__(self, location, location_id:int):
@@ -29,6 +29,9 @@ class Schedule(Base):
     
     def get_id(self) -> int:
         return self.id
+    
+    def delete(self):
+        self.timeslots = []
     
     def is_conflicting(self, timeslot: Timeslot): #TODO: Also needs to check start and end date for conflicts
         for ts in self.timeslots:

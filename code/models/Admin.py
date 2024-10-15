@@ -82,7 +82,7 @@ class Admin(User):
         3. Modify Offering
         4. Cancel Offering
         5. Delete Client/Instructor Account
-        6. View Client Bookings
+        6. View and Cancel a Client Bookings
         7. Add Location
         8. Modify Location
         9. View Location Schedule
@@ -305,6 +305,7 @@ class Admin(User):
                         if _quit == False:
                             try:
                                 offering = offerings_catalog.create_offering(location=location, timeslot=timeslot, capacity=offering_capacity, offering_type=offering_type)
+                                #! Need to add the timeslot to the schedule of location, needs to be done in the catalog and commited/saved
                             except ValueError as e:
                                 print(f"{e} - The offering was not created and you will be redirected to the main menu")
                                 continue
@@ -350,7 +351,7 @@ class Admin(User):
             if choice == 6:
                 pass
 
-            #! Needs to be tested
+
             if choice == 7:
                 print("\n--------Add Location--------")
                 location_name = None
@@ -406,6 +407,7 @@ class Admin(User):
                 
                 if _quit == False:
                     while True:
+                        from models import SpaceType
                         print(f"Available space types: {[space_type.value for space_type in SpaceType]}")
                         space_type_input = input("Enter location space type(s) seperated by a comma (e.g., 'rink', 'field', etc.)(or 'q' to quit): ").lower().split(",")
                         if space_type_input == 'q':
