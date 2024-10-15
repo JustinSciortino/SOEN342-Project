@@ -74,7 +74,7 @@ class Admin(User):
 
                 if _quit == False:
                     from models import SpecializationType
-                    print(f"Available space types: {[spec.value for spec in SpecializationType]}")
+                    print(f"Available specialization types: {[spec.value for spec in SpecializationType]}")
                     offering_specialization = input("Enter offering specialization ()(or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
                     if offering_specialization is not None and offering_specialization.lower() == 'q':
                         _quit = True
