@@ -10,7 +10,7 @@ class Instructor(User):
 
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
-    specialization: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
+    specialization: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False) #! To be fixed needs to use the Specialization Enum
     available_cities: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="instructor")
 

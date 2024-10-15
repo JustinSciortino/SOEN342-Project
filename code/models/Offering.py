@@ -19,24 +19,78 @@ class Offering(Base):
     #timeslot_id: Mapped[int] = mapped_column(Integer, ForeignKey('timeslots.id'), nullable=False)
     location: Mapped["Location"] = relationship("Location", back_populates="offerings")
     location_id: Mapped[int] = mapped_column(Integer, ForeignKey('locations.id'), nullable=False)
-    capacity: Mapped[int] = mapped_column(Integer, nullable=False)
+    capacity: Mapped[int] = mapped_column(Integer, nullable=True)
 
     def __init__(self, 
-                 offering_type: OfferingType, 
-                 instructor_id: int, 
-                 is_available: bool, 
-                 status: str, 
-                 location_id: int, 
-                 capacity: int):
+                 offering_type: OfferingType,  
+                 location: "Location", 
+                 capacity: int, 
+                 timeslot: "Timeslot"):
         self.type = offering_type
-        self.instructor_id = instructor_id
-        self.is_available = is_available
-        self.status = status
-        self.location_id = location_id
+        self.timeslot = timeslot
+        self.instructor = None
+        self.instructor_id = None
+        self.location = location
+        self.location_id = location.get_id()
+        self.is_available = True
+        self.status = "Not-Available"
         self.capacity = capacity
         self.bookings = []
 
+    def repr_user(self):
+        return f"Offering {self.id} is a {self.type} class with a capacity of {self.capacity} and {self.capacity-len(self.bookings)} spots available at {self.location}"
+    
+    def repr_admin(self):
+        return f"Offering {self.id} is a {self.type} class with a capacity of {self.capacity}, {len(self.bookings)} number of bookings and {self.capacity-len(self.bookings)} spots available at {self.location} and is {self.status}"
+    
+    def get_id(self) -> int:
+        return self.id
+    
+    def get_type(self) -> OfferingType:
+        return self.type
 
-
-    #start_time = Column(Time, nullable=False)
-    #end_time = Column(Time, nullable=False)
+    def get_instructor(self):
+        return self.instructor
+    
+    def set_instructor(self, instructor: "Instructor"):
+        self.instructor = instructor
+        return self
+    
+    def get_is_available(self) -> bool:
+        return self.is_available
+    
+    def set_is_available(self, is_available: bool):
+        self.is_available = is_available
+        return self
+    
+    def get_status(self) -> str:
+        return self.status
+    
+    def set_status(self, status: str):
+        self.status = status
+        return self
+    
+    def get_bookings(self):
+        return self.bookings
+    
+    def get_timeslot(self):
+        return self.timeslot
+    
+    def get_location(self):
+        return self.location
+    
+    def get_capacity(self) -> int:
+        return self.capacity
+    
+    def set_capacity(self, capacity: int):
+        if capacity < len(self.bookings):
+            raise ValueError("Capacity cannot be less than the number of bookings")
+        self.capacity = capacity
+        return self
+    
+    def add_booking(self, booking: "Booking"):
+        if self.status == "Not-Available":
+            raise ValueError("Offering is not available for booking")
+        self.bookings.append(booking)
+        return self
+    

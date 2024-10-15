@@ -46,7 +46,14 @@ class LocationsCatalog:
         
         return location
     
-    def delete_location(self, city: str, name: str, address: str):
+    def get_location_by_id(self, _id: int):
+        location = self.session.query(Location).filter(Location.id == _id).first()
+        if not location:
+            raise ValueError(f"Location with id '{_id}' does not exist")
+        
+        return location
+    
+    def delete_location(self, city: str, name: str, address: str, _id: int = None): #! Needs to be fixed to delete based on id as well
         location = self.session.query(Location).filter(Location.city == city, 
                                                        Location.name == name, 
                                                        Location.address == address).first()

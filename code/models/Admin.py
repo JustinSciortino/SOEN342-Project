@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, E
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database.config import Base
 from models import User, SpaceType
+import datetime
 
 
 class Admin(User):
@@ -18,6 +19,54 @@ class Admin(User):
 
     def __repr__(self) -> str:
         return f"Admin {self.id} {self.name}"
+    
+    def admin_get_location(self, db: Session):
+        from catalogs import LocationsCatalog
+        locations_catalog = LocationsCatalog.get_instance(db)
+        location_city = None
+        location_name = None
+        location_address = None
+        _quit = False
+
+        while True:
+            location_city = str(input("Enter location city (or 'q' to quit): "))
+            if location_city.lower() == 'q':
+                _quit = True
+                break
+            if not location_city:
+                print("City cannot be empty. Please try again.")
+                continue
+            break
+
+        if _quit == False:
+            location_name = str(input("Enter location name (optional - click Enter to not add a name)(or 'q' to quit): "))
+            if location_name.lower() == 'q':
+                _quit = True
+
+        if _quit == False:
+            location_address = str(input("Enter location address (optional - click Enter to not add an address)(or 'q' to quit): "))
+            if location_address.lower() == 'q':
+                _quit = True
+        
+        if _quit == False:
+            if location_name and location_address:
+                try:
+                    location = locations_catalog.get_location(city=location_city, name=location_name, address=location_address)
+                    return location
+                    print('\n',location)
+                except ValueError as e:
+                    print(f"{e} - The location was not found.")
+                    return    
+            else:
+                try:
+                    location = locations_catalog.get_location(city=location_city)
+                    for l in location:
+                        print('\n',l)
+                except ValueError as e:
+                    print(f"{e} - The location was not found.")
+                    return
+        else:
+            print("\nYou will be redirected back to the admin menu.")
     
     def admin_menu(self, db: Session):
         from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog
@@ -42,21 +91,223 @@ class Admin(User):
         13. Logout and return to main menu"""
 
         while True:
-            print(admin_menu_options)
-            choice = int(input("\nSelect an option: "))
+            choice = None
+            while True:
+                print(admin_menu_options)
+                choice = input("\nSelect an option: ")
+                if choice.strip() == "":
+                    print("Invalid choice. Please enter a number.")
+                    continue
+                
+                try:
+                    choice = int(choice)
+                    if choice not in range(1, 14):
+                        print("Invalid choice. Please enter a number between 1 and 13.")
+                        continue
+                    break
+                except ValueError:
+                    print("Invalid choice. Please enter a valid number.")
+                    continue
 
+            #! Needs to be tested
             if choice == 1:
-                pass
+                print("\n--------View Offerings--------")
+                offering_city = None
+                offering_space_type = None
+                offering_type = None
+                _quit = False
+
+
+                offering_city = str(input("Enter offering city (or 'q' to quit or 'enter' to not add a city): "))
+                if offering_city.lower() == 'q':
+                    _quit = True
+
+                if _quit == False:
+                    print(f"Available space types: {[space_type.value for space_type in SpaceType]}")
+                    offering_space_type = str(input("Enter offering space type (e.g., 'rink', 'field', etc.)(or 'q' to quit or 'enter' to not add a space type): "))
+                    if offering_space_type.lower() == 'q':
+                        _quit = True
+                
+                if _quit == False:
+                    from models import OfferingType
+                    print(f"Available offering types: {[offering_type.value for offering_type in OfferingType]}")
+                    offering_type = str(input("Enter offering type (or 'q' to quit or 'enter' to not add an offering type): "))
+                    if offering_type.lower() == 'q':
+                        _quit = True
+
+                if _quit == False:
+                    offerings = offerings_catalog.get_offerings(city=offering_city, space_type=offering_space_type, type=offering_type)
+
+                    if not offerings:
+                        print("No offerings found.")
+
+                    for offering in offerings:
+                        print(offering)
 
             if choice == 2:
-                pass
+                print("\n--------Create Offering--------")
+                #self.admin_get_location(db)
+                location_id = None
+                _quit=False
+
+                while True:
+                    location_id = str(input("Enter location id (or 'q' to quit): "))
+                    if location_id.lower() == 'q':
+                        _quit = True
+                        break
+                    if not location_id:
+                        print("Id cannot be empty. Please try again.")
+                        continue
+                    break
+                location_id = int(location_id)
+                
+                location = locations_catalog.get_location_by_id(location_id)
+
+                if location and _quit == False:
+                    day_of_week = None
+                    start_time = None
+                    start_date = None
+                    end_date = None
+                    end_time = None
+
+                    while True:
+                        day_of_week = str(input("Enter day of the week (e.g., 'Monday', 'Tuesday', etc.)(or 'q' to quit): "))
+                        if day_of_week.lower() == 'q':
+                            _quit = True
+                            break
+                        if not day_of_week:
+                            print("Day of the week cannot be empty. Please try again.")
+                            continue
+                        break
+                    
+                    if _quit == False:
+                        while True:
+                            start_time_str = input("Enter start time (e.g., '09:00')(or 'q' to quit): ")
+                            if start_time_str.lower() == 'q':
+                                _quit = True
+                                break
+                            if not start_time_str:
+                                print("Start time cannot be empty. Please try again.")
+                                continue
+                            try:
+                                start_time = datetime.datetime.strptime(start_time_str, "%H:%M").time()
+                                break
+                            except ValueError:
+                                print("Invalid time format. Please use HH:MM format.")
+                    
+                    if _quit == False:
+                        while True:
+                            start_date_str = input("Enter start date (e.g., '2022-01-01')(or 'q' to quit): ")
+                            if start_date_str.lower() == 'q':
+                                _quit = True
+                                break
+
+                            if not start_date_str:
+                                print("Start date cannot be empty. Please try again.")
+                                continue
+
+                            try:
+                                start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").date()
+                                break
+                            except ValueError:
+                                print("Invalid date format. Please use YYYY-MM-DD format.")
+                    
+                    if _quit == False:
+                        while True:
+                            end_time_str = input("Enter end time (e.g., '09:00')(or 'q' to quit): ")
+                            if end_time_str.lower() == 'q':
+                                _quit = True
+                                break
+                            if not end_time_str:
+                                print("End time cannot be empty. Please try again.")
+                                continue
+                            try:
+                                end_time = datetime.datetime.strptime(end_time_str, "%H:%M").time()
+                                if end_time <= start_time:
+                                    print("End time must be after start time. Please try again.")
+                                    continue
+                                break
+                            except ValueError:
+                                print("Invalid time format. Please use HH:MM format.")
+
+                    if _quit == False:
+                        while True:
+                            end_date_str = input("Enter end date (e.g., '2022-01-01')(or 'q' to quit): ")
+                            if end_date_str.lower() == 'q':
+                                _quit = True
+                                break
+                            if not end_date_str:
+                                print("End date cannot be empty. Please try again.")
+                                continue
+                            try:
+                                end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date()
+                                break
+                            except ValueError:
+                                print("Invalid date format. Please use YYYY-MM-DD format.")
+                    
+                    if _quit == False:
+                        from models import Timeslot
+                        timeslot = Timeslot(day_of_week=day_of_week, start_time=start_time, start_date=start_date, end_time=end_time, end_date=end_date, schedule_id=location.get_schedule().get_id())
+                        is_conflicting = location.get_schedule().is_conflicting(timeslot)
+
+                        if is_conflicting:
+                            print("Timeslot conflicts with existing timeslots. Offering cannot be created.")
+                            continue
+
+                        offering_type = None
+                        offering_capacity = None
+
+                        while True:
+                            from models import OfferingType
+                            print(f"Available offering types: {[offering_type.value for offering_type in OfferingType]}")
+                            offering_type_input = input("Enter offering type (e.g. private or group)(or 'q' to quit): ").lower()
+                            if offering_type_input == 'q':
+                                _quit = True
+                                break
+
+                            if not offering_type_input:
+                                print("Offering type cannot be empty. Please try again.")
+                                continue
+
+                            try:
+                                offering_type = OfferingType(offering_type_input)
+                            except ValueError:
+                                print("Invalid offering type. Please enter a valid option from the list.")
+                                continue
+                            break
+
+                        if _quit == False and offering_type == OfferingType.group:
+                            while True:
+                                offering_capacity = str(input("Enter offering capacity (or 'q' to quit): "))
+                                if offering_capacity.lower() == 'q':
+                                    _quit = True
+                                    break
+                                if not offering_capacity:
+                                    print("Capacity cannot be empty. Please try again.")
+                                    continue
+                                offering_capacity = int(offering_capacity)
+                                break
+
+                        if _quit == False:
+                            try:
+                                offering = offerings_catalog.create_offering(location=location, timeslot=timeslot, capacity=offering_capacity, offering_type=offering_type)
+                            except ValueError as e:
+                                print(f"{e} - The offering was not created and you will be redirected to the main menu")
+                                continue
+                            print(f"Offering {offering.get_id()} has been successfully created.")
+                
+                    else:
+                        print("\nYou will be redirected back to the admin menu.")
+                        continue
+
 
             if choice == 3:
                 pass
 
             if choice == 4:
                 pass
-
+            
+            #! Needs to be tested
             if choice == 5:
                 print("\n--------Delete Client/Instructor Account--------")
                 account_name = None
@@ -85,6 +336,7 @@ class Admin(User):
             if choice == 6:
                 pass
 
+            #! Needs to be tested
             if choice == 7:
                 print("\n--------Add Location--------")
                 location_name = None
@@ -169,7 +421,9 @@ class Admin(User):
             if choice == 9:
                 pass
 
+            #! Needs to be tested - Also needs an input for location_id
             if choice == 10:
+                print("\n--------Delete Location--------")
                 location_city = None
                 location_name = None
                 location_address = None
@@ -219,52 +473,11 @@ class Admin(User):
 
             if choice == 11:
                 pass
-
+            
+            #! Needs to be tested
             if choice == 12:
                 print("\n--------Get Location based on City and optionally Name and Address--------")
-                location_city = None
-                location_name = None
-                location_address = None
-                _quit = False
-
-                while True:
-                    location_city = str(input("Enter location city (or 'q' to quit): "))
-                    if location_city.lower() == 'q':
-                        _quit = True
-                        break
-                    if not location_city:
-                        print("City cannot be empty. Please try again.")
-                        continue
-                    break
-
-                if _quit == False:
-                    location_name = str(input("Enter location name (optional - click Enter to not add a name)(or 'q' to quit): "))
-                    if location_name.lower() == 'q':
-                        _quit = True
-                        break
-                if _quit == False:
-                    location_address = str(input("Enter location address (optional - click Enter to not add an address)(or 'q' to quit): "))
-                    if location_address.lower() == 'q':
-                        _quit = True
-                        break
+                self.admin_get_location(db)
                 
-                if _quit == False:
-                    if location_name and location_address:
-                        try:
-                            location = locations_catalog.get_location(city=location_city, name=location_name, address=location_address)
-                            print('\n',location)
-                        except ValueError as e:
-                            print(f"{e} - The location was not found.")
-                            continue    
-                    else:
-                        try:
-                            location = locations_catalog.get_location(city=location_city)
-                            print('\n',location)
-                        except ValueError as e:
-                            print(f"{e} - The location was not found.")
-                            continue
-                else:
-                    print("\nYou will be redirected back to the admin menu.")
-
             if choice == 13:
                 return
