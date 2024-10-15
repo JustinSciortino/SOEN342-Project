@@ -71,35 +71,34 @@ def instructor_menu(self, db: Session):
             else:
                 print("\nAvailable Offerings:")
                 for offering in offerings:
-                    print(offering.repr_instructor()) 
+                    print(offering.repr_instructor())  #
 
                 selected_offering_id = None
                 while True:
                     selected_offering_id = input("\nEnter the ID of the offering you want to select (or 'q' to quit): ")
-                    if selected_offering_id.strip() == "":
-                        print("Invalid choice. Please enter a number.")
-                        continue
-                    if selected_offering_id.strip().lower() == "q":
-                        return
+                    if selected_offering_id.lower() == 'q':
+                        return  
                     try:
                         selected_offering_id = int(selected_offering_id)
                         selected_offering = next((off for off in offerings if off.id == selected_offering_id), None)
                         if selected_offering:
+                            if self.has_time_conflict(selected_offering):
+                                print("You cannot book this offering because it conflicts with an existing offering.")
+                            else:
+                                selected_offering.instructor_id = self.id
+                                self.offerings.append(selected_offering)
+                                try:
+                                    db.commit()  
+                                    print(f"Successfully selected offering with ID {selected_offering.id} and assigned it to you.")
+                                except Exception as e:
+                                    db.rollback()  
+                                    print(f"Error: {e}. Could not update offering.")
                             break
                         else:
-                            print("Invalid offering ID. PLease select a valid offering from the list above.")
+                            print("Invalid offering ID. Please select a valid offering from the list.")
                     except ValueError:
-                        print("Invalid choice. Please enter a valid number.")
+                        print("Invalid input. Please enter a valid offering ID.")
 
-                    selected_offering.instructor_id = self.id
-                    self.offerings.append(selected_offering)
-
-                    try:
-                        db.commit()
-                        print(f"Successfully selected offering with ID {selected_offering.id} and assigned it to you.")
-                    except Exception as e:
-                        db.rollback()  
-                        print(f"Error: {e}. Could not update offering.")
 
 
         if choice == 2:
