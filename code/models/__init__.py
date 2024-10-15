@@ -12,3 +12,4 @@ from .Client import Client
 from .SpaceType import SpaceType
 from .Minor import Minor
 from .OfferingType import OfferingType
+from .SpecializationType import SpecializationType

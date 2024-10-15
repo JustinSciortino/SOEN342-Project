@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from models import User, Client, Instructor, Admin
+from models import User, Client, Instructor, Admin, SpecializationType
+
 
 class UsersCatalog:
     _instance = None
@@ -31,7 +32,7 @@ class UsersCatalog:
         self.session.commit()
         return admin
     
-    def register_instructor(self, name: str, password: str, phone_number: str, specialization: list[str], available_cities: list[str]):
+    def register_instructor(self, name: str, password: str, phone_number: str, specialization: list[SpecializationType], available_cities: list[str]):
         existing_user = self.session.query(User).filter(User.name == name).first()
         
         if existing_user:
@@ -41,6 +42,9 @@ class UsersCatalog:
     
         if existing_instructor:
             raise ValueError(f"Instructor with phone number '{phone_number}' already exists")
+        
+        if not all(isinstance(spec, SpecializationType) for spec in specialization):
+            raise ValueError("All specializations must be of type SpecializationType")
 
         instructor = Instructor(name=name, password=password, phone_number=phone_number, specialization=specialization, available_cities=available_cities)
 
