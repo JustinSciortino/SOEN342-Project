@@ -27,6 +27,9 @@ class Schedule(Base):
         self.timeslots.remove(timeslot)
         return self
     
+    def get_timeslots(self):
+        return self.timeslots
+    
     def get_id(self) -> int:
         return self.id
     

@@ -17,7 +17,7 @@ class Location(Base):
     #city: Mapped['City'] = relationship("City", backref="location")
     #city_id: Mapped[int] = mapped_column(Integer, ForeignKey('cities.id'), nullable=False)
     schedule: Mapped["Schedule"] = relationship("Schedule", back_populates="location", uselist=False, cascade="all, delete-orphan")
-    offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="location", cascade="all, delete-orphan")
+    offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="location")
 
     def __init__(self, name: str, address: str, capacity: int, city: str, space_type: list[SpaceType]):
         self.name = name

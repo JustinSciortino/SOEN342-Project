@@ -21,54 +21,6 @@ class Admin(User):
     def __repr__(self) -> str:
         return f"Admin {self.id} {self.name}"
     
-    def admin_get_location(self, db: Session):
-        from catalogs import LocationsCatalog
-        locations_catalog = LocationsCatalog.get_instance(db)
-        location_city = None
-        location_name = None
-        location_address = None
-        _quit = False
-
-        while True:
-            location_city = str(input("Enter location city (or 'q' to quit): "))
-            if location_city.lower() == 'q':
-                _quit = True
-                break
-            if not location_city:
-                print("City cannot be empty. Please try again.")
-                continue
-            break
-
-        if _quit == False:
-            location_name = str(input("Enter location name (optional - click Enter to not add a name)(or 'q' to quit): "))
-            if location_name.lower() == 'q':
-                _quit = True
-
-        if _quit == False:
-            location_address = str(input("Enter location address (optional - click Enter to not add an address)(or 'q' to quit): "))
-            if location_address.lower() == 'q':
-                _quit = True
-        
-        if _quit == False:
-            if location_name and location_address:
-                try:
-                    location = locations_catalog.get_location(city=location_city, name=location_name, address=location_address)
-                    return location
-                    print('\n',location)
-                except ValueError as e:
-                    print(f"{e} - The location was not found.")
-                    return    
-            else:
-                try:
-                    location = locations_catalog.get_location(city=location_city)
-                    for l in location:
-                        print('\n',l)
-                except ValueError as e:
-                    print(f"{e} - The location was not found.")
-                    return
-        else:
-            print("\nYou will be redirected back to the admin menu.")
-    
     def admin_menu(self, db: Session):
         from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog
         locations_catalog = LocationsCatalog.get_instance(db)
@@ -79,16 +31,14 @@ class Admin(User):
         Admin Options:
         1. View Offerings
         2. Create Offering
-        3. Modify Offering
-        4. Cancel Offering
-        5. Delete Client/Instructor Account
-        6. View and Cancel a Client Bookings
-        7. Add Location
-        8. View Location Schedule
-        9. Delete Location
-        10. Get All Locations
-        11. Get Location based on City and optionally Name and Address
-        12. Logout and return to main menu"""
+        3. Cancel Offering
+        4. Delete Client/Instructor Account
+        5. Add Location
+        6. View Location Schedule
+        7. Delete Location
+        8. Get All Locations
+        9. Get Location from ID or City (and optionally Name and Address)
+        10. Logout and return to main menu"""
 
         while True:
             choice = None
@@ -101,8 +51,8 @@ class Admin(User):
                 
                 try:
                     choice = int(choice)
-                    if choice not in range(1, 13):
-                        print("\nInvalid choice. Please enter a number between 1 and 12.")
+                    if choice not in range(1, 11):
+                        print("\nInvalid choice. Please enter a number between 1 and 10.")
                         continue
                     break
                 except ValueError:
@@ -162,6 +112,9 @@ class Admin(User):
                         break
                     if not location_id:
                         print("Id cannot be empty. Please try again.")
+                        continue
+                    if not location_id.isdigit():
+                        print("Id must be a number. Please try again.")
                         continue
                     break
                 location_id = int(location_id)
@@ -350,33 +303,62 @@ class Admin(User):
                     else:
                         print("\nYou will be redirected back to the admin menu.")
                         continue
-
-
-            if choice == 3:
-                pass
-
-            if choice == 4:
-                pass
             
-            #! Needs to be tested
-            if choice == 5:
-                print("\n--------Delete Client/Instructor Account--------")
-                account_name = None
+            #! Needs to be tested after integrating client menu
+            if choice == 3:
+                print("\n--------Cancel Offering--------")
+                offering_id = None
+                offering = None
                 _quit = False
 
                 while True:
-                    account_name = str(input("Enter the name of the account to delete (or 'q' to quit): "))
+                    offering_id = str(input("Enter offering ID (or 'q' to quit): "))
+                    if offering_id.lower() == 'q':
+                        _quit = True
+                        break
+                    if not offering_id:
+                        print("Id cannot be empty. Please try again.")
+                        continue
+                    if not offering_id.isdigit():
+                        print("Id must be a number. Please try again.")
+                        continue
+                    break
+
+                if _quit == False:
+                    offering_id = int(offering_id)
+                    try:
+                        offering = offerings_catalog.get_offering_by_id(offering_id)
+                        #offering.cancel_offering()
+                        offerings_catalog.cancel_offering(offering=offering)
+                        print(f"Offering {offering.get_id()} has been successfully cancelled.")
+                    except ValueError as e:
+                        print(f"\n{e} - The offering was not found.")
+                        continue
+                else:
+                    print("\nYou will be redirected back to the admin menu.")
+                    continue
+            
+            if choice == 4:
+                print("\n--------Delete Client/Instructor Account--------")
+                account_name = None
+                account_id = None
+                _quit = False
+
+                while True:
+                    account_name = str(input("Enter the name or ID of the account to delete (or 'q' to quit): "))
                     if account_name.lower() == 'q':
                         _quit = True
                         break
                     if not account_name:
                         print("Name cannot be empty. Please try again.")
                         continue
+                    if account_name.isdigit():
+                        account_id = int(account_name)
                     break
 
                 if _quit == False:
                     try:
-                        users_catalog.delete_user(account_name)
+                        users_catalog.delete_user(account_name, account_id)
                     except ValueError as e:
                         print(f"{e} - The account was not deleted and you will be redirected to the main menu")
                         continue
@@ -384,11 +366,7 @@ class Admin(User):
                 else:
                     print("\nYou will be redirected back to the admin menu.")
 
-            if choice == 6:
-                pass
-
-
-            if choice == 7:
+            if choice == 5:
                 print("\n--------Add Location--------")
                 location_name = None
                 location_address = None
@@ -467,28 +445,65 @@ class Admin(User):
                 else:
                     print("\nYou will be redirected back to the admin menu.")
 
-            if choice == 8:
-                pass
+            if choice == 6:
+                print("\n--------View Location Schedule--------")
+                location_id = None
+                location = None
+                _quit = False
 
-            #! Needs to be tested - Also needs an input for location_id
-            if choice == 9:
+                while True:
+                    location_id = str(input("Enter location ID (or 'q' to quit): "))
+                    if location_id.lower() == 'q':
+                        _quit = True
+                        break
+                    if not location_id:
+                        print("Id cannot be empty. Please try again.")
+                        continue
+                    if not location_id.isdigit():
+                        print("Id must be a number. Please try again.")
+                        continue
+                    break
+
+                if _quit == False:
+                    location_id = int(location_id)
+                    try:
+                        location = locations_catalog.get_location_by_id(location_id)
+                    except ValueError as e:
+                        print(f"\n{e} - The location was not found.")
+                        continue
+
+                if location and _quit == False:
+                    timeslots = location.get_schedule().get_timeslots()
+                    print(f"\nLocation {location.get_name()} schedule:")
+                    for timeslot in timeslots:
+                        print('\n',timeslot)
+                else:
+                    print("\nYou will be redirected back to the admin menu.")
+                    continue
+
+            if choice == 7:
                 print("\n--------Delete Location--------")
                 location_city = None
                 location_name = None
                 location_address = None
+                location_id = None
                 _quit = False
 
                 while True:
-                    location_city = str(input("Enter location city (or 'q' to quit): "))
+                    location_city = str(input("Enter location city or ID (or 'q' to quit): "))
                     if location_city.lower() == 'q':
                         _quit = True
                         break
                     if not location_city:
                         print("City cannot be empty. Please try again.")
                         continue
+
+                    if location_city.isdigit():
+                        location_id = int(location_city)
+                        break
                     break
 
-                if _quit == False:
+                if _quit == False and not location_id:
                     while True:
                         location_name = str(input("Enter location name (or 'q' to quit): "))
                         if location_name.lower() == 'q':
@@ -499,7 +514,7 @@ class Admin(User):
                             continue
                         break
 
-                if _quit == False:
+                if _quit == False and not location_id:
                     while True:
                         location_address = str(input("Enter location address (or 'q' to quit): "))
                         if location_address.lower() == 'q':
@@ -512,21 +527,76 @@ class Admin(User):
 
                 if _quit == False:
                     try:
-                        locations_catalog.delete_location(location_city, location_name, location_address)  
+                        locations_catalog.delete_location(location_city, location_name, location_address, location_id)  
                     except ValueError as e:
                         print(f"{e} - The location was not deleted.")
                         continue
-                    print(f"Location {location_name} has been successfully deleted.")
+                    print(f"Location has been successfully deleted.")
                 else:
                     print("\nYou will be redirected back to the admin menu.")
 
-            if choice == 10:
-                pass
+            if choice == 8:
+                print("\n--------Get All Locations--------")
+                locations = locations_catalog.get_all_locations()
+                if not locations:
+                    print("\nNo locations found.")
+                for location in locations:
+                    print("\n",location)
             
-            #! Needs to be tested
-            if choice == 11:
-                print("\n--------Get Location based on City and optionally Name and Address--------")
-                self.admin_get_location(db)
+            if choice == 9:
+                print("\n--------Get Location from ID or City (and optionally Name and Address)--------")
+                location_city = None
+                location_name = None
+                location_address = None
+                location_id = None
+                _quit = False
+
+                while True:
+                    location_city = str(input("Enter location city or ID (or 'q' to quit): "))
+                    if location_city.lower() == 'q':
+                        _quit = True
+                        break
+                    if not location_city:
+                        print("City cannot be empty. Please try again.")
+                        continue
+                    if location_city.isdigit():
+                        location_id = int(location_city)
+                        break
+                    break
                 
-            if choice == 12:
+                if _quit == False and not location_id:
+                    location_name = str(input("Enter location name (optional - click Enter to not add a name)(or 'q' to quit): "))
+                    if location_name.lower() == 'q':
+                        _quit = True
+
+                if _quit == False and not location_id:
+                    location_address = str(input("Enter location address (optional - click Enter to not add an address)(or 'q' to quit): "))
+                    if location_address.lower() == 'q':
+                        _quit = True
+                
+                if _quit == False:
+                    if location_name and location_address:
+                        try:
+                            location = locations_catalog.get_location(city=location_city, name=location_name, address=location_address)
+                            print('\n',location)
+                        except ValueError as e:
+                            print(f"{e} - The location was not found.")
+                            break  
+                    else:
+                        try:
+                            if location_id:
+                                location = locations_catalog.get_location_by_id(location_id)
+                                print('\n',location)
+                            else:
+                                location = locations_catalog.get_location(city=location_city)
+                                for l in location:
+                                    print('\n',l)
+                        except ValueError as e:
+                            print(f"{e} - The location was not found.")
+                            break
+                else:
+                    print("\nYou will be redirected back to the admin menu.")
+                
+            if choice == 10:
+                print(f"\nLogging out as admin and returning to the main menu. Goodbye {self.name}!")
                 return

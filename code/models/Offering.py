@@ -14,13 +14,13 @@ class Offering(Base):
     instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
     is_available: Mapped[bool] = mapped_column(Boolean, default=False) #? Only available once instructor is assigned
     status: Mapped[str] = mapped_column(String, default="Not-Available")  #? Only made not available to the client if they already booked the offering
-    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering", cascade="all, delete-orphan")
+    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering")
     specialization = mapped_column(Enum(SpecializationType), nullable=False)
     #bookings_id: Mapped[list[int]]=mapped_column(ARRAY(Integer), default=[])
     timeslot: Mapped["Timeslot"] = relationship(back_populates="offering", cascade="all, delete-orphan")
     #timeslot_id: Mapped[int] = mapped_column(Integer, ForeignKey('timeslots.id'), nullable=False)
     location: Mapped["Location"] = relationship("Location", back_populates="offerings")
-    location_id: Mapped[int] = mapped_column(Integer, ForeignKey('locations.id'), nullable=False)
+    location_id: Mapped[int] = mapped_column(Integer, ForeignKey('locations.id'), nullable=True)
     capacity: Mapped[int] = mapped_column(Integer, nullable=True)
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -47,8 +47,12 @@ class Offering(Base):
         return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and {self.capacity-len(self.bookings)} spots available at {self.location}"
     
     def repr_admin(self):
-        return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and the course is {self.specialization.name}, {len(self.bookings)} number of bookings and {self.capacity-len(self.bookings)} spots available at {self.location} and is {self.status}"
-    
+        if self.type == OfferingType.group:
+            return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and the course is {self.specialization.name}, {len(self.bookings)} number of bookings and {self.capacity-len(self.bookings)} spots available at {self.location} and is {self.status}"
+        else:
+            return f"\nOffering {self.id} is a {self.type.name} class and the course is {self.specialization.name}, at {self.location} and is {self.status}"
+
+
     def get_id(self) -> int:
         return self.id
     
@@ -92,6 +96,16 @@ class Offering(Base):
         return self.specialization
     
     def cancel(self):
+        self.is_cancelled = True
+        self.location= None
+        self.location_id = None
+        self.status = "Not-Available"
+        for booking in self.bookings:
+            booking.cancel()
+
+    def cancel_offering(self):
+        self.status = "Not-Available"
+        self.is_available = False
         self.is_cancelled = True
         for booking in self.bookings:
             booking.cancel()

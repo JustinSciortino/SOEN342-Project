@@ -46,3 +46,15 @@ class OfferingsCatalog:
                 query = query.filter(Offering.type == _type)
 
         return query.all()
+    
+    def get_offering_by_id(self, _id: int):
+        offering = self.session.query(Offering).filter(Offering.id == _id).first()
+        if not offering:
+            raise ValueError(f"Offering with id '{_id}' does not exist")
+        
+        return offering
+    
+    def cancel_offering(self, offering: Offering):
+        offering.cancel_offering()
+        self.session.commit()
+        return offering
