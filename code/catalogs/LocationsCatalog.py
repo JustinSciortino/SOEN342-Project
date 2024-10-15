@@ -15,11 +15,11 @@ class LocationsCatalog:
             cls._instance = cls(session)
         return cls._instance
     
-    def create_location(self, name: str, address: str, capacity: int, city: str, space_type: SpaceType):
+    def create_location(self, name: str, address: str, capacity: int, city: str, space_type: list[SpaceType]):
         existing_location = self.session.query(Location).filter(Location.name == name, 
                                                                 Location.address == address,
                                                                 Location.city == city, 
-                                                                Location.space_type == space_type
+                                                                Location.space_type == [space.value for space in space_type]
                                                                 ).first()
         if existing_location:
             raise ValueError(f"Location '{name}' located at {address} in {city} already exists")
