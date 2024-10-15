@@ -14,7 +14,7 @@ class Offering(Base):
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
     status: Mapped[str] = mapped_column(String, default="Not-Available")  
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering")
-    bookings_id: Mapped[list[int]]=mapped_column(ARRAY(Integer), default=[])
+    #bookings_id: Mapped[list[int]]=mapped_column(ARRAY(Integer), default=[])
     timeslot: Mapped["Timeslot"] = relationship(back_populates="offering")
     #timeslot_id: Mapped[int] = mapped_column(Integer, ForeignKey('timeslots.id'), nullable=False)
     location: Mapped["Location"] = relationship("Location", back_populates="offerings")

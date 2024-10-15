@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database.config import Base
+from models import Offering, Client
 
 # Booking Model
 class Booking(Base):
@@ -8,9 +9,11 @@ class Booking(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     client: Mapped["Client"] = relationship("Client", back_populates="bookings")
+    client_id: Mapped[int] = mapped_column(Integer, ForeignKey('clients.id'))
     status: Mapped[str] = mapped_column(String, default="Available")
     active: Mapped[str] = mapped_column(String, default=True)
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
+    offering_id: Mapped[int] = mapped_column(Integer, ForeignKey('offerings.id'))
     offering: Mapped["Offering"] = relationship("Offering", back_populates="bookings")
 
     def __init__(self, client: Client, status: str, active: str, is_cancelled: bool, offering: Offering):
@@ -19,6 +22,8 @@ class Booking(Base):
         self.active = active
         self.is_cancelled = is_cancelled
         self.offering = offering
+        self.offering_id = offering.get_id()
+        self.client_id = client.get_id()    
 
     def __repr__(self) -> str:
         return f"Booking {self.id} is {self.status} for {self.client} in {self.offering}"
