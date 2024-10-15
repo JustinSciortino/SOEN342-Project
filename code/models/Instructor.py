@@ -13,7 +13,7 @@ class Instructor(User):
     specialization: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False) 
     #specialization = mapped_column(ARRAY(Enum(SpecializationType)), nullable=False)
     available_cities: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
-    offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="instructor")
+    offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="instructor", cascade="all, delete-orphan")
 
     __mapper_args__ = {
         "polymorphic_identity": "instructor",
@@ -29,6 +29,16 @@ class Instructor(User):
     def __repr__(self) -> str:
         return f"Instructor {self.id} {self.name} ({self.phone_number}), has the following specilizations: {self.specialization} and the following cities: {self.available_cities}"
     
+    def cancel_offer(self, offering: "Offering"):
+        if offering in self.offerings:
+            offering.cancel()  # Cancel the offering
+            self.offerings.remove(offering)
+
+    def delete(self):
+        for offering in self.offerings:
+            offering.cancel()  # Cancel all offerings
+        self.offerings = []  # Optionally clear offerings
+
     def instructor_menu(self, db:Session):
         from catalogs import UsersCatalog, LocationsCatalog
         instructor_menu_options = """

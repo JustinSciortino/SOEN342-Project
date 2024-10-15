@@ -76,8 +76,13 @@ class UsersCatalog:
     def has_admin(self):
         return self.session.query(Admin).first() is not None
     
-    def delete_user(self, name: str):
-        user = self.session.query(User).filter(User.name == name).first()
+    def delete_user(self, name: str=None, id: int=None):
+        if not name and not id:
+            raise ValueError("Name or id must be provided")
+        if id:
+            user = self.session.query(User).filter(User.id == id).first()
+        else:
+            user = self.session.query(User).filter(User.name == name).first()
         if not user:
             raise ValueError(f"User with name '{name}' does not exist")
         

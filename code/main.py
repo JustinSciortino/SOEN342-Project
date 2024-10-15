@@ -1,26 +1,48 @@
 from database import get_session, engine, create_tables
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect
-from catalogs import UsersCatalog, LocationsCatalog
+from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog
 from models import SpaceType, SpecializationType
 
 def createSampleObjects(db: Session):
     user_catalog = UsersCatalog.get_instance(db)
+    
     try:
         new_admin = user_catalog.register_admin("admin", "pass")
-        #print(new_admin)
-        new_instructor = user_catalog.register_instructor("instructor", "pass", "1234567890", [SpecializationType.hockey, SpecializationType.soccer], ["Toronto", "Vancouver"])
-        #print(new_instructor)
+
+        instructor1 = user_catalog.register_instructor("instructor1", "pass", "1234567890", [SpecializationType.hockey, SpecializationType.soccer], ["Montreal", "Laval"])
+        instructor2 = user_catalog.register_instructor("instructor2", "pass", "1234567891", [SpecializationType.swim, SpecializationType.yoga], ["Terrebonne", "Laval"])
+        instructor3 = user_catalog.register_instructor("instructor3", "pass", "1234567892", [SpecializationType.dance, SpecializationType.soccer], ["Montreal", "Dorval"])
+
+        #client1 = Client(name="Alice Smith", password="password123", phone_number="123-456-7890", is_legal_guardian=False),
+        #client2 = Client(name="Bob Johnson", password="securePass456", phone_number="987-654-3210", is_legal_guardian=True, minor_name="Tom Johnson", minor_age=15),
+        #client3 = Client(name="Charlie Davis", password="charlie123", phone_number="555-555-5555", is_legal_guardian=True, minor_name="Emily Davis", minor_age=12),
+        #client4 = Client(name="Diana Adams", password="dianaSecure", phone_number="444-444-4444", is_legal_guardian=False),
+
     except ValueError as e:
         print(f"Error creating admin: {str(e)}")
 
-def createLocations(db: Session):
+def createLocationsAndOfferings(db: Session):
+    from models import Timeslot, OfferingType, SpecializationType
+    import datetime
+    offerings_catalog = OfferingsCatalog.get_instance(db)
     location_catalog = LocationsCatalog.get_instance(db)
     try:
         location1 = location_catalog.create_location(name="TD Bank", address="1234 Street", capacity=50, city="Montreal", space_type=[SpaceType.rink, SpaceType.field])
         location2 = location_catalog.create_location(name="FB Dungeon", address="5678 Street", capacity=20, city="Laval", space_type=[SpaceType.field, SpaceType.pool])
         location3 = location_catalog.create_location(name="Googleplex", address="91011 Street", capacity=100, city="Terrebonne", space_type=[SpaceType.pool, SpaceType.gym])
         location4 = location_catalog.create_location(name="Amazon", address="121314 Street", capacity=50, city="Dorval", space_type=[SpaceType.studio, SpaceType.gym])
+
+        timeslot1 = Timeslot(start_time=datetime.time(9, 0), end_time=datetime.time(10, 0), day_of_week="Monday",start_date=datetime.date(2024, 10, 16), end_date=datetime.date(2024, 10, 16), schedule_id=location1.get_schedule().get_id())
+        timeslot2 = Timeslot(start_time=datetime.time(10, 0), end_time=datetime.time(11, 0), day_of_week="Tuesday",start_date=datetime.date(2024, 10, 17), end_date=datetime.date(2024, 10, 17), schedule_id=location2.get_schedule().get_id())
+        timeslot3 = Timeslot(start_time=datetime.time(11, 0), end_time=datetime.time(12, 0), day_of_week="Wednesday",start_date=datetime.date(2024, 10, 18), end_date=datetime.date(2024, 10, 18), schedule_id=location3.get_schedule().get_id())
+        timeslot4 = Timeslot(start_time=datetime.time(12, 0), end_time=datetime.time(13, 0), day_of_week="Thursday",start_date=datetime.date(2024, 10, 19), end_date=datetime.date(2024, 10, 19), schedule_id=location4.get_schedule().get_id())
+
+        offering1 = offerings_catalog.create_offering(location=location1, capacity=50, timeslot=timeslot1, offering_type=OfferingType.private, specialization=SpecializationType.hockey)
+        offering2 = offerings_catalog.create_offering(location=location2, capacity=20, timeslot=timeslot2, offering_type=OfferingType.group, specialization=SpecializationType.soccer)
+        offering3 = offerings_catalog.create_offering(location=location3, capacity=100, timeslot=timeslot3, offering_type=OfferingType.private, specialization=SpecializationType.swim)
+        offering4 = offerings_catalog.create_offering(location=location4, capacity=50, timeslot=timeslot4, offering_type=OfferingType.group, specialization=SpecializationType.yoga)
+
 
     except ValueError as e:
         print(f"Error creating location: {str(e)}")
@@ -40,7 +62,7 @@ def main():
 
     print("\n\nWelcome to the Lesson Management System")
     createSampleObjects(db)
-    createLocations(db)
+    createLocationsAndOfferings(db)
     main_menu_options = """
     Options:
     1. Login

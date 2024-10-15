@@ -53,13 +53,36 @@ class LocationsCatalog:
         
         return location
     
-    def delete_location(self, city: str, name: str, address: str, _id: int = None): #! Needs to be fixed to delete based on id as well
-        location = self.session.query(Location).filter(Location.city == city, 
+    def delete_location(self, city: str=None, name: str=None, address: str=None, _id: int = None): #! Needs to be fixed to delete based on id as well
+
+        if _id:
+            location = self.session.query(Location).filter(Location.id == _id).first()
+        else:
+            location = self.session.query(Location).filter(Location.city == city, 
                                                        Location.name == name, 
                                                        Location.address == address).first()
         if not location:
             raise ValueError(f"Location '{city}' does not exist")
         
+        location.delete()
+        
         self.session.delete(location)
         self.session.commit()
         return location
+    
+    def add_timeslot(self, location: Location, timeslot: "Timeslot"):
+        try:            
+            location.schedule.add_timeslot(timeslot)
+            self.session.commit()
+            return True
+        except IntegrityError as e:
+            self.session.rollback()
+            print(f"Error adding timeslot: {str(e)}")
+            return False
+        except Exception as e:
+            self.session.rollback()
+            print(f"An unexpected error occurred: {str(e)}")
+            return False
+        
+    def get_all_locations(self):
+        return self.session.query(Location).all()

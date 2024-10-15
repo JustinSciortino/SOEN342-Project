@@ -26,4 +26,4 @@ class Timeslot(Base):
         self.schedule_id = schedule_id
     
     def __repr__(self):
-        return f"Timeslot {self.id} is on {self.day_of_week} from {self.start_time} to {self.end_time} starting on {self.start_date} and ending on {self.end_date}"
+        return f"Timeslot {self.id} is on {self.day_of_week} from {self.start_time} to {self.end_time} starting on {self.start_date} and ending on {self.end_date} for Offering {self.offering_id}"
