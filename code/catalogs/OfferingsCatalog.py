@@ -39,3 +39,13 @@ class OfferingsCatalog:
         if _type:
             return self.session.query(Offering).filter(Offering.offering_type == _type).all()
         return self.session.query(Offering).all()
+    
+    def get_available_offerings_for_instructor(self, instructor):
+        return self.session.query(Offering).filter(
+            Offering.location.city.in_(instructor.available_cities),  
+            Offering.offering_type.in_(instructor.specialization),    
+            Offering.instructor_id == None  
+        ).all()
+
+    def get_offerings_by_instructor_id(self, instructor_id: int):
+        return self.session.query(Offering).filter(Offering.instructor_id == instructor_id).all()
