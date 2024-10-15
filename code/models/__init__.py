@@ -13,3 +13,4 @@ from .SpaceType import SpaceType
 from .Minor import Minor
 from .OfferingType import OfferingType
 from .SpecializationType import SpecializationType
+from .SpaceSpecializationMap import SPACE_SPECIALIZATION_MAP
