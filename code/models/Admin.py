@@ -51,8 +51,10 @@ class Admin(User):
                 
                 try:
                     choice = int(choice)
+
                     if choice not in range(1, 11):
                         print("\nInvalid choice. Please enter a number between 1 and 10.")
+
                         continue
                     break
                 except ValueError:
@@ -73,10 +75,12 @@ class Admin(User):
                     _quit = True
 
                 if _quit == False:
+
                     from models import SpecializationType
                     print(f"Available specialization types: {[spec.value for spec in SpecializationType]}")
                     offering_specialization = input("Enter offering specialization ()(or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
                     if offering_specialization is not None and offering_specialization.lower() == 'q':
+
                         _quit = True
                     if _quit == False and offering_specialization:
                         offering_specialization = SpecializationType(offering_specialization)
@@ -89,16 +93,20 @@ class Admin(User):
                         _quit = True
 
                 if _quit == False:
+
                     offerings = offerings_catalog.get_all_offerings(city=offering_city, specialization=offering_specialization, _type=offering_type, is_admin=True)
+
 
                     if not offerings:
                         print("\nNo offerings found.")
 
                     for offering in offerings:
                         print(offering.repr_admin())
+
                 else:
                     print("\nYou will be redirected back to the admin menu.")
                     continue
+
 
             if choice == 2:
                 print("\n--------Create Offering--------")
@@ -245,6 +253,7 @@ class Admin(User):
                             offering_type = OfferingType(offering_type_input)
                             break
 
+
                         if _quit == False:
                             from models import SpecializationType, SPACE_SPECIALIZATION_MAP, SpaceType
                             while True:
@@ -274,6 +283,7 @@ class Admin(User):
                                 except ValueError:
                                     print(f"Invalid specialization. Please enter one of: {', '.join([spec.value for spec in available_specs])}")
                                     continue
+
 
                         if _quit == False and offering_type == OfferingType.group:
                             while True:

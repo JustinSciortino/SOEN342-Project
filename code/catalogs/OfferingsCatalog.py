@@ -25,7 +25,17 @@ class OfferingsCatalog:
         self.session.add(offering)
         self.session.commit()
         return offering
-    
+
+    def get_available_offerings_for_instructor(self, instructor):
+        return self.session.query(Offering).filter(
+            Offering.location.city.in_(instructor.available_cities),  
+            Offering.offering_type.in_(instructor.specialization),    
+            Offering.instructor_id == None  
+        ).all()
+
+    def get_offerings_by_instructor_id(self, instructor_id: int):
+        return self.session.query(Offering).filter(Offering.instructor_id == instructor_id).all()
+      
     def get_all_offerings(self, city: str = None, specialization: "SpecializationType" = None, _type: OfferingType = None, is_admin: bool = False):
         query = self.session.query(Offering).join(Offering.location)
 
@@ -46,7 +56,17 @@ class OfferingsCatalog:
                 query = query.filter(Offering.type == _type)
 
         return query.all()
-    
+
+
+def has_time_conflict(self, new_offering):
+    for offering in self.offerings:
+        if (offering.timeslot.start_date <= new_offering.timeslot.end_date and
+            new_offering.timeslot.start_date <= offering.timeslot.end_date):
+            if (offering.timeslot.start_time < new_offering.timeslot.end_time and
+                new_offering.timeslot.start_time < offering.timeslot.end_time):
+                return True
+    return False
+  
     def get_offering_by_id(self, _id: int):
         offering = self.session.query(Offering).filter(Offering.id == _id).first()
         if not offering:
@@ -58,3 +78,4 @@ class OfferingsCatalog:
         offering.cancel_offering()
         self.session.commit()
         return offering
+

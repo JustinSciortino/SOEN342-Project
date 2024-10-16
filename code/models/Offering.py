@@ -51,7 +51,16 @@ class Offering(Base):
             return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and the course is {self.specialization.name}, {len(self.bookings)} number of bookings and {self.capacity-len(self.bookings)} spots available at {self.location} and is {self.status}"
         else:
             return f"\nOffering {self.id} is a {self.type.name} class and the course is {self.specialization.name}, at {self.location} and is {self.status}"
-
+          
+    def repr_instructor(self):
+        return (
+            f"Offering ID: {self.id}\n"
+            f"Location: {self.location.name}, {self.location.city}\n"
+            f"Capacity: {self.capacity}\n"
+            f"Timeslot: {self.timeslot.day_of_week}, {self.timeslot.start_time} - {self.timeslot.end_time}\n"
+            f"Offering Type: {self.type.value}\n"
+            f"Available from {self.timeslot.start_date} to {self.timeslot.end_date}"
+        )
 
     def get_id(self) -> int:
         return self.id
