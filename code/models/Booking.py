@@ -28,6 +28,15 @@ class Booking(Base):
     def __repr__(self) -> str:
         return f"Booking {self.id} is {self.status} for {self.client} in {self.offering}"
     
+    def repr_client(self):
+        return (
+            f"Booking ID: {self.id}\n"
+            f"Offering: {self.offering.type.value}\n"
+            f"Location: {self.offering.location.name}, {self.offering.location.city}\n"
+            f"Timeslot: {self.offering.timeslot.day_of_week}, {self.offering.timeslot.start_time} - {self.offering.timeslot.end_time}\n"
+            f"Instructor: {self.offering.instructor.name}\n"
+        )
+
     def cancel(self):
         self.is_cancelled = True  
         if self.offering:

@@ -2,7 +2,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time, ARRAY
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database import Base
-from models import User, SpecializationType
+from models import User, SpecializationType, Offering
 
 # Instructor Model
 class Instructor(User):
@@ -104,7 +104,7 @@ def instructor_menu(self, db: Session):
 
         if choice == 2:
             print("\n--------View my Offerings--------")
-            my_offerings = offerings.get_offerings_by_instructor_id(self.id)
+            my_offerings = offerings_catalog.get_offerings_by_instructor_id(self.id)
             if not my_offerings:
                 print("You have no offerings.")
             else:
