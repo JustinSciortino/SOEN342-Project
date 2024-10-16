@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database.config import Base
-from models import Offering, Client
+from models import Offering, Client, Minor
 
 # Booking Model
 class Booking(Base):
@@ -10,6 +10,7 @@ class Booking(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     client: Mapped["Client"] = relationship("Client", back_populates="bookings")
     client_id: Mapped[int] = mapped_column(Integer, ForeignKey('clients.id'))
+    minor_id: Mapped[int] = mapped_column(Integer, ForeignKey('minors.id'), nullable=True)
     status: Mapped[str] = mapped_column(String, default="Available")
     active: Mapped[str] = mapped_column(String, default=True)
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -24,12 +25,22 @@ class Booking(Base):
         self.offering = offering
         self.offering_id = offering.get_id()
         self.client_id = client.get_id()    
+        self.minor_id = None
 
     def __repr__(self) -> str:
         if self.is_cancelled:
             return f"Booking {self.id} is {self.status} for {self.client} in {self.offering} and is cancelled"
         return f"Booking {self.id} is {self.status} for {self.client} in {self.offering} and is not cancelled"
     
+    def repr_client(self):
+        return (
+            f"Booking ID: {self.id}\n"
+            f"Offering: {self.offering.type.value}\n"
+            f"Location: {self.offering.location.name}, {self.offering.location.city}\n"
+            f"Timeslot: {self.offering.timeslot.day_of_week}, {self.offering.timeslot.start_time} - {self.offering.timeslot.end_time}\n"
+            f"Instructor: {self.offering.instructor.name}\n"
+        )
+
     def cancel(self):
         self.is_cancelled = True  
         if self.offering:

@@ -174,7 +174,7 @@ def main():
 
                 if user.get_type() == "client":
                     print(f"\nWelcome {user.get_name()}! You have successfully logged in as a client.")
-                    client_menu(client=user, db=db)
+                    user.client_menu(client=user, db=db)
 
                 if user.get_type() == "instructor":
                     print(f"\nWelcome {user.get_name()}! You have successfully logged in as an instructor.")
@@ -183,11 +183,100 @@ def main():
                 if user.get_type() == "admin": 
                     print(f"\nWelcome {user.get_name()}! You have successfully logged in as an admin.")
                     user.admin_menu(db)
-        
-        if choice ==2: #TODO Implement after finishing Client model
+     
+        if choice == 2:
             print("\n--------Register as Client--------")
-            client_name = str(input("Enter your name: "))
-            client_is_underage = str(input("Are you under 18? (yes/no): "))
+            
+            _quit = False
+            client_name = None
+            client_phone_number = None
+            client_password = None
+            client_is_legal_guardian = False
+            minor_name = None
+            minor_age = None
+            guardian_client_id = None
+            new_client = None
+
+            while True:
+                client_name = str(input("Enter your name (or 'q' to quit): "))
+                if client_name.lower() == 'q':
+                    _quit = True
+                    print("\nYou will be redirected to the main menu.")
+                    break
+                if not client_name:
+                    print("Name cannot be empty. Please try again.")
+                    continue
+                break
+            
+            if _quit == False:
+                client_is_minor = str(input("Are you under 18? (yes/no): ")).lower()
+
+                if client_is_minor == 'yes':
+                    guardian_option = str(input("Do you want to (1) create a new legal guardian, or (2) link to an existing guardian? (enter 1 or 2): "))
+
+                    if guardian_option == '1':
+                        legal_guardian_name = str(input("Enter the legal guardian's name: "))
+                        legal_guardian_phone = str(input("Enter the legal guardian's phone number: "))
+                        legal_guardian_password = str(input("Enter the legal guardian's password: "))
+
+                        try:
+                            new_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password, is_legal_guardian=True)
+                            user_catalog.add_and_commit(new_guardian)  
+
+                        except ValueError as e:
+                            print(f"Error registering legal guardian: {e}")
+                            return
+                        
+                        minor_name = client_name
+                        minor_age = int(input("Enter your age: "))
+                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age)
+
+                    elif guardian_option == '2':
+                        guardian_client_id = str(input("Enter the ID of the existing guardian: "))
+                        
+                        existing_guardian = user_catalog.get_client_by_id(guardian_client_id)
+
+                        if existing_guardian is None or not existing_guardian.is_legal_guardian:
+                            print("Invalid guardian ID or the client is not a legal guardian. You will be redirected to the main menu.")
+                            return
+                        
+                        existing_guardian.is_legal_guardian = True
+                        minor_name = client_name
+                        minor_age = int(input("Enter your age: "))
+                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age)
+
+                elif client_is_minor == 'no':
+                   
+                    while True:
+                        client_phone_number = str(input("Enter your phone number (or 'q' to quit): "))
+                        if client_phone_number.lower() == 'q':
+                            _quit = True
+                            print("\nYou will be redirected to the main menu.")
+                            break
+                        if len(client_phone_number) != 10:
+                            print("Phone number must be 10 digits long. Please try again.")
+                            continue
+                        break
+
+                    while True:
+                        client_password = str(input("Enter your password (or 'q' to quit): "))
+                        if client_password.lower() == 'q':
+                            _quit = True
+                            print("\nYou will be redirected to the main menu.")
+                            break
+                        if not client_password:
+                            print("Password cannot be empty. Please try again.")
+                            continue
+                        break
+
+                    if _quit == False:
+                        try:
+                            new_client = user_catalog.register_client(client_name, client_phone_number, client_password, is_legal_guardian=False)
+                            user_catalog.add_and_commit(new_client) 
+                        except ValueError as e:
+                            print(f"Error registering client: {e}")
+                            return
+
 
 
         if choice == 3: 
@@ -323,9 +412,19 @@ def main():
                     print(f"Welcome {admin.get_name()}! You have successfully registered as an admin.")
                     admin.admin_menu(db)
                 
-        if choice == 5:#TODO Implement view offerings
-            print("\n--------View Offerings--------")
-            pass
+        if choice == 5:
+            print("\n--------View Offerings (Public)--------")
+            
+            offerings_catalog = OfferingsCatalog.get_instance(db)
+
+            offerings_with_instructor = offerings_catalog.get_offerings_with_instructor()
+
+            if not offerings_with_instructor:
+                print("No offerings available at this time.")
+            else:
+                print("\nAvailable Offerings:")
+                for offering in offerings_with_instructor:
+                    print(offering.repr_client())  
 
         if choice == 6:
             print("\nGoodbye!")

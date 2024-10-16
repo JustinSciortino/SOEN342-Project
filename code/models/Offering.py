@@ -3,8 +3,9 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database import Base
 from .OfferingType import OfferingType
 from .SpecializationType import SpecializationType
+from models import Client, Timeslot, Booking, Location, Instructor
 
-# Offering Model
+
 class Offering(Base):
     __tablename__ = "offerings"
 
@@ -13,7 +14,7 @@ class Offering(Base):
     instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=True)
     instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
     is_available: Mapped[bool] = mapped_column(Boolean, default=False) #? Only available once instructor is assigned
-    status: Mapped[str] = mapped_column(String, default="Not-Available")  #? Only made not available to the client if they already booked the offering
+    status: Mapped[str] = mapped_column(String, default="Available")  #? Only made not available to the client if they already booked the offering
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering")
     specialization = mapped_column(Enum(SpecializationType), nullable=False)
     #bookings_id: Mapped[list[int]]=mapped_column(ARRAY(Integer), default=[])
@@ -61,6 +62,36 @@ class Offering(Base):
             f"Offering Type: {self.type.value}\n"
             f"Available from {self.timeslot.start_date} to {self.timeslot.end_date}"
         )
+    
+    def repr_client(self):
+        return (
+            f"Offering ID: {self.id}\n"
+            f"Location: {self.location.name}, {self.location.city}\n"
+            f"Capacity: {self.capacity}\n"
+            f"Timeslot: {self.timeslot.day_of_week}, {self.timeslot.start_time} - {self.timeslot.end_time}\n"
+            f"Offering Type: {self.type.value}\n"
+            f"Available from {self.timeslot.start_date} to {self.timeslot.end_date}\n"
+            f"Specialization: {self.specialization.value}\n"
+            f"Instructor: {self.instructor.name}\n"
+            f"Status: {self.status}"  
+        )
+
+    def update_status(self, client : Client):
+        client_has_booked = any(booking.client_id == client.get_id() for booking in self.bookings)
+        
+        no_spots_left = self.capacity - len(self.bookings) == 0
+
+        booked_timeslots = [booking.offering.timeslot for booking in client.get_bookings()]
+
+        time_conflict = Timeslot.is_conflicting(self.timeslot, booked_timeslots)
+
+        if client_has_booked:
+            self.status = "Not Available (Already Booked)"
+        elif no_spots_left:
+            self.status = "Not Available (No Spots Left)"
+        elif time_conflict:
+            self.status = "Not Available (Time Conflict)"
+        
 
     def get_id(self) -> int:
         return self.id
