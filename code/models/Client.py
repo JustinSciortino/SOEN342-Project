@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, E
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database import Base
 from models import Minor, Booking   
-from SpecializationType import SpecializationType
+from .SpecializationType import SpecializationType
 
 
 
