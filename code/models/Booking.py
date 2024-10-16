@@ -26,7 +26,9 @@ class Booking(Base):
         self.client_id = client.get_id()    
 
     def __repr__(self) -> str:
-        return f"Booking {self.id} is {self.status} for {self.client} in {self.offering}"
+        if self.is_cancelled:
+            return f"Booking {self.id} is {self.status} for {self.client} in {self.offering} and is cancelled"
+        return f"Booking {self.id} is {self.status} for {self.client} in {self.offering} and is not cancelled"
     
     def cancel(self):
         self.is_cancelled = True  

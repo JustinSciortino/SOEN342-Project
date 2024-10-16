@@ -22,10 +22,11 @@ class Admin(User):
         return f"Admin {self.id} {self.name}"
     
     def admin_menu(self, db: Session):
-        from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog
+        from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog, BookingsCatalog
         locations_catalog = LocationsCatalog.get_instance(db)
         users_catalog = UsersCatalog.get_instance(db)  
         offerings_catalog = OfferingsCatalog.get_instance(db)
+        bookings_catalog = BookingsCatalog.get_instance(db)
 
         admin_menu_options = """
         Admin Options:
@@ -33,12 +34,13 @@ class Admin(User):
         2. Create Offering
         3. Cancel Offering
         4. Delete Client/Instructor Account
-        5. Add Location
-        6. View Location Schedule
-        7. Delete Location
-        8. Get All Locations
-        9. Get Location from ID or City (and optionally Name and Address)
-        10. Logout and return to main menu"""
+        5. View Client Bookings (Optionally Cancel Client Booking)
+        6. Add Location
+        7. View Location Schedule
+        8. Delete Location
+        9. Get All Locations
+        10. Get Location from ID or City (and optionally Name and Address)
+        11. Logout and return to main menu"""
 
         while True:
             choice = None
@@ -52,8 +54,8 @@ class Admin(User):
                 try:
                     choice = int(choice)
 
-                    if choice not in range(1, 11):
-                        print("\nInvalid choice. Please enter a number between 1 and 10.")
+                    if choice not in range(1, 12):
+                        print("\nInvalid choice. Please enter a number between 1 and 11.")
 
                         continue
                     break
@@ -348,6 +350,7 @@ class Admin(User):
                     print("\nYou will be redirected back to the admin menu.")
                     continue
             
+            
             if choice == 4:
                 print("\n--------Delete Client/Instructor Account--------")
                 account_name = None
@@ -375,8 +378,90 @@ class Admin(User):
                     print(f"Account {account_name} has been successfully deleted.")
                 else:
                     print("\nYou will be redirected back to the admin menu.")
-
+            
+            #! Needs to be tested after client menu is integrated
             if choice == 5:
+                client_id = None
+                client_name = None
+                _quit = False
+                client = None
+
+                while True:
+                    client_name = str(input("Enter client name or ID (or 'q' to quit): "))
+                    if client_name.lower() == 'q':
+                        _quit = True
+                        break
+                    if not client_name:
+                        print("Name cannot be empty. Please try again.")
+                        continue
+                    if client_name.isdigit():
+                        client_id = int(client_name)
+                    break
+
+                if _quit == False:
+                    try:
+                        if client_id:
+                            client = users_catalog.get_user_by_id(client_id)
+                            if client.get_type() != "client":
+                                raise ValueError("The account is not a client.")
+                        else:
+                            client = users_catalog.get_user(client_name)
+                            if client.get_type() != "client":
+                                raise ValueError("The account is not a client.")
+                    except ValueError as e:
+                        print(f"{e} - The client was not found.")
+                        continue
+
+                    client_bookings = client.get_bookings()
+
+                    print(f"\nClient {client.get_name()} bookings:")
+                    for booking in client_bookings:
+                        print(booking)
+
+                    cancel_booking_id = None
+
+                    while True:
+                        cancel_booking_resp = str(input("Would you like to cancel a booking? (y/n): "))
+                        if cancel_booking_resp.lower() == 'n':
+                            break
+                        if not cancel_booking_resp:
+                            print("Response cannot be empty. Please try again.")
+                            continue
+                        if cancel_booking_resp.lower() != 'y' or cancel_booking_resp.lower() != 'n':
+                            print("Invalid response. Please enter 'y' or 'n'.")
+                            continue
+                        if cancel_booking_resp.lower() == 'y':
+                            while True:
+                                cancel_booking_id = str(input("Enter booking ID to cancel (or 'q' to quit): "))
+                                if cancel_booking_id.lower() == 'q':
+                                    _quit = True
+                                    break
+                                if not cancel_booking_id:
+                                    print("Id cannot be empty. Please try again.")
+                                    continue
+                                if not cancel_booking_id.isdigit():
+                                    print("Id must be a number. Please try again.")
+                                    continue
+                                break
+                            if _quit == False:
+                                cancel_booking_id = int(cancel_booking_id)
+                                try:
+                                    bookings_catalog.cancel_booking(cancel_booking_id)
+                                    print(f"Booking {cancel_booking_id} has been successfully cancelled.")
+                                    break
+                                except ValueError as e:
+                                    print(f"{e} - The booking was not found.")
+                                    continue
+                                break
+                            else:
+                                print("\nYou will be redirected back to the admin menu.")
+                                break
+                        
+                else:
+                    print("\nYou will be redirected back to the admin menu.")
+                    continue
+
+            if choice == 6:
                 print("\n--------Add Location--------")
                 location_name = None
                 location_address = None
@@ -455,7 +540,7 @@ class Admin(User):
                 else:
                     print("\nYou will be redirected back to the admin menu.")
 
-            if choice == 6:
+            if choice == 7:
                 print("\n--------View Location Schedule--------")
                 location_id = None
                 location = None
@@ -491,7 +576,7 @@ class Admin(User):
                     print("\nYou will be redirected back to the admin menu.")
                     continue
 
-            if choice == 7:
+            if choice == 8:
                 print("\n--------Delete Location--------")
                 location_city = None
                 location_name = None
@@ -545,7 +630,7 @@ class Admin(User):
                 else:
                     print("\nYou will be redirected back to the admin menu.")
 
-            if choice == 8:
+            if choice == 9:
                 print("\n--------Get All Locations--------")
                 locations = locations_catalog.get_all_locations()
                 if not locations:
@@ -553,7 +638,7 @@ class Admin(User):
                 for location in locations:
                     print("\n",location)
             
-            if choice == 9:
+            if choice == 10:
                 print("\n--------Get Location from ID or City (and optionally Name and Address)--------")
                 location_city = None
                 location_name = None
@@ -607,6 +692,6 @@ class Admin(User):
                 else:
                     print("\nYou will be redirected back to the admin menu.")
                 
-            if choice == 10:
+            if choice == 11:
                 print(f"\nLogging out as admin and returning to the main menu. Goodbye {self.name}!")
                 return
