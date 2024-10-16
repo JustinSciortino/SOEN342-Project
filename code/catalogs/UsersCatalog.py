@@ -76,6 +76,8 @@ class UsersCatalog:
     def has_admin(self):
         return self.session.query(Admin).first() is not None
     
+    #! Needs to be modified, needs to cancel all bookings associated with the Instructor Offering
+    #! Needs to be modified, needs to cancel all bookings associated with the Client
     def delete_user(self, name: str=None, id: int=None):
         if not name and not id:
             raise ValueError("Name or id must be provided")
@@ -110,10 +112,12 @@ class UsersCatalog:
         
         return user
     
+    #! Needs to check if existing user already exists 
     def register_client(self, name: str, phone_number: str, password: str, is_legal_guardian: bool):
         client = Client(name=name, phone_number=phone_number, password=password, is_legal_guardian=is_legal_guardian)
         return client  # Now we just return the created client object
 
+    #! Combine with the register_client method above
     def add_and_commit(self, client: "Client"):
         self.session.add(client)
         self.session.commit()

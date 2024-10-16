@@ -13,7 +13,7 @@ class Client(Base):
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
     is_legal_guardian: Mapped[bool] = mapped_column(Boolean, nullable=False)
     minor: Mapped["Minor"] = relationship("Minor", back_populates="guardian")  # For underage clients
-    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client")
+    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client", cascade="all, delete-orphan") #! Test to make sure they actually get deleted if Client is deleted
 
     __mapper_args__ = {
         "polymorphic_identity": "client",
