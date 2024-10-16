@@ -102,3 +102,10 @@ class UsersCatalog:
             raise ValueError(f"User with name '{name}' does not exist")
         
         return user
+    
+    def get_user_by_id(self, id: int):
+        user = self.session.query(User).filter(User.id == id).first()
+        if not user:
+            raise ValueError(f"User with id '{id}' does not exist")
+        
+        return user
