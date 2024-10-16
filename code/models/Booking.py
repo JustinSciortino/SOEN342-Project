@@ -28,6 +28,11 @@ class Booking(Base):
     def __repr__(self) -> str:
         return f"Booking {self.id} is {self.status} for {self.client} in {self.offering}"
     
+    def cancel(self):
+        self.is_cancelled = True  
+        if self.offering:
+            self.offering.bookings.remove(self) #? Remove booking from offering
+    
     def get_id(self) -> int:
         return self.id
     
@@ -39,6 +44,9 @@ class Booking(Base):
     
     def get_active(self) -> str:
         return self.active
+    
+    def cancel(self):
+        self.is_cancelled = True
     
     def get_is_cancelled(self) -> bool:
         return self.is_cancelled

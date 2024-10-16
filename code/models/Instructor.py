@@ -13,7 +13,7 @@ class Instructor(User):
     specialization: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False) 
     #specialization = mapped_column(ARRAY(Enum(SpecializationType)), nullable=False)
     available_cities: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
-    offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="instructor")
+    offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="instructor", cascade="all, delete-orphan")
 
     __mapper_args__ = {
         "polymorphic_identity": "instructor",
@@ -29,6 +29,7 @@ class Instructor(User):
     def __repr__(self) -> str:
         return f"Instructor {self.id} {self.name} ({self.phone_number}), has the following specilizations: {self.specialization} and the following cities: {self.available_cities}"
     
+
 def instructor_menu(self, db: Session):
     from catalogs import OfferingsCatalog, UsersCatalog
     offerings_catalog = OfferingsCatalog.get_instance(db)
@@ -207,3 +208,4 @@ def instructor_menu(self, db: Session):
         if choice == 5:
             print("\nLogging out...")
             return
+
