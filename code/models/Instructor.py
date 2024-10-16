@@ -72,7 +72,7 @@ class Instructor(User):
                 else:
                     print("\nAvailable Offerings:")
                     for offering in offerings:
-                        print(offering.repr_instructor())  #
+                        print(offering.repr_instructor())  
 
                     selected_offering_id = None
                     while True:
@@ -89,10 +89,10 @@ class Instructor(User):
                                     selected_offering.instructor_id = self.id
                                     self.offerings.append(selected_offering)
                                     try:
-                                        db.commit()  
+                                        db.commit()  #! Dont commit anything in Instructor.py - responsibility of catalog class to interact/abstract the db
                                         print(f"Successfully selected offering with ID {selected_offering.id} and assigned it to you.")
                                     except Exception as e:
-                                        db.rollback()  
+                                        db.rollback()  #! Dont commit anything in Instructor.py - responsibility of catalog class
                                         print(f"Error: {e}. Could not update offering.")
                                 break
                             else:
@@ -137,21 +137,22 @@ class Instructor(User):
                         except ValueError:
                             print("Invalid input. Please enter a valid offering ID.")
 
-                    for booking in selected_offering.bookings:
+                    #! Instead make a method in Offering that can call the cancel() method for each booking and does the work below
+                    for booking in selected_offering.bookings: 
                         if booking.minor_id:
                             print(f"Removing booking for minor with ID {booking.minor_id}.")
                         if booking.client_id:
                             print(f"Removing booking for client with ID {booking.client_id}.")
                         
-                        selected_offering.bookings.remove(booking)
-                        db.delete(booking)  
+                        selected_offering.bookings.remove(booking) #! Same question if we want to delete it or mark it as cancelled idk
+                        db.delete(booking)  #! Make a method in catalog class to do this stuff 
 
-                    selected_offering.instructor_id = None
+                    selected_offering.instructor_id = None #! Can be integrated in a method in Offering that can do this
                     self.offerings.remove(selected_offering)  
 
                     try:
-                        db.commit()  
-                        print(f"You have successfully removed yourself from offering with ID {selected_offering.id}.")
+                        db.commit()  #! No db stuff - put in catalog
+                        print(f"You have successfully removed yourself from offering with ID {selected_offering.id}.") 
                     except Exception as e:
                         db.rollback()  
                         print(f"Error: {e}. Could not update the offering.")
@@ -183,7 +184,7 @@ class Instructor(User):
                     if new_password.lower() != 'q' and new_password:
                         self.password = new_password 
 
-                if not _quit:
+                if not _quit: #! I dont think they should enter new specializations but add new ones to the existing ones
                     new_specializations_input = input(
                         f"Enter new specializations separated by commas (current: {', '.join(self.specialization)}) or 'q' to quit: "
                     ).strip()
@@ -193,6 +194,7 @@ class Instructor(User):
                     elif new_specializations_input:
                         try:
                             # Assuming SpecializationType enums are case-insensitive or matching input format
+                            #! I dont think this will work if you capitalize it, Should be all lower case but test and see
                             new_specializations = [
                                 SpecializationType(spec.strip().capitalize()) for spec in new_specializations_input.split(",")
                             ]
@@ -203,10 +205,10 @@ class Instructor(User):
 
                 if not _quit:
                     try:
-                        db.commit() 
+                        db.commit() #! No db stuff - put in catalog
                         print("Account details have been successfully updated.")
                     except Exception as e:
-                        db.rollback()  
+                        db.rollback()  #! No db stuff - put in catalog
                         print(f"Error: {e}. Could not update the account details.")
                 else:
                     print("No changes were made to the account.")
