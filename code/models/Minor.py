@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time, ARRAY
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database import Base
+from models import Booking
 
 class Minor(Base):
     __tablename__ = "minors"
@@ -10,6 +11,7 @@ class Minor(Base):
     age: Mapped[int] = mapped_column(Integer, nullable=False)
     guardian = relationship("Client", back_populates="minor")
     guardian_id: Mapped[int] = mapped_column(Integer, ForeignKey('clients.id'), nullable=False)
+    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="minor")
 
     def __init__(self, guardian, name: str, age: int):
         self.name = name

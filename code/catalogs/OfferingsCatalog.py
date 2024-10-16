@@ -57,8 +57,8 @@ class OfferingsCatalog:
 
         return query.all()
 
-    def has_time_conflict(self, new_offering):
-        for offering in self.offerings:
+    def has_time_conflict(self, instructorOfferings,  new_offering):
+        for offering in instructorOfferings:
             if (offering.timeslot.start_date <= new_offering.timeslot.end_date and
                 new_offering.timeslot.start_date <= offering.timeslot.end_date):
                 if (offering.timeslot.start_time < new_offering.timeslot.end_time and
@@ -66,14 +66,14 @@ class OfferingsCatalog:
                     return True
         return False
     
-        def get_offering_by_id(self, _id: int):
+    def get_offering_by_id(self, _id: int):
             offering = self.session.query(Offering).filter(Offering.id == _id).first()
             if not offering:
                 raise ValueError(f"Offering with id '{_id}' does not exist")
             
             return offering
         
-        def cancel_offering(self, offering: Offering):
+    def cancel_offering(self, offering: Offering):
             offering.cancel_offering()
             self.session.commit()
             return offering

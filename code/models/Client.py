@@ -55,11 +55,12 @@ class Client(Base):
 
         client_menu_options = """
         Client Options:
-        1. View Available Offerings (with Instructor)
+        1. View Available Offerings 
         2. Book an Available Offering
         3. View My Bookings
         4. Cancel a Booking
-        5. Logout and return to main menu
+        5. View Minor's Bookings (Only for Legal Guardians)
+        6. Logout and return to main menu
         """
 
         while True:
@@ -73,8 +74,8 @@ class Client(Base):
 
                 try:
                     choice = int(choice)
-                    if choice not in range(1, 6):
-                        print("Invalid choice. Please enter a number between 1 and 5.")
+                    if choice not in range(1, 7):
+                        print("Invalid choice. Please enter a number between 1 and 6.")
                         continue
                     break
                 except ValueError:
@@ -136,7 +137,17 @@ class Client(Base):
                     selected_offering = next((offering for offering in available_offerings if str(offering.id) == offering_id), None)
 
                     if selected_offering:
-                        bookings_catalog.create_booking(self, selected_offering)
+                        is_booking_for_minor = input("Is this booking for a minor? (yes/no): ").lower().strip()
+                        minor_id = None
+
+                        if is_booking_for_minor == 'yes' and self.is_legal_guardian:
+                            if self.minor:
+                                minor_id = self.minor.get_id()  
+                            else:
+                                print("No minor found for this legal guardian.")
+                                return
+
+                        bookings_catalog.create_booking(self, selected_offering, minor_id=minor_id)
                     else:
                         print("Invalid offering ID.")
 
@@ -172,10 +183,39 @@ class Client(Base):
                 if not selected_booking:
                     print("Invalid booking ID.")
                     return
+                
+                minor_id = None
+                if self.is_legal_guardian:
+                    if selected_booking.minor_id:  
+                        minor_id = selected_booking.minor_id
+                        print(f"Booking is also linked to minor ID: {minor_id}. Canceling booking for minor.")
 
-                bookings_catalog.cancel_booking(self, selected_booking)
+                bookings_catalog.cancel_booking(self, selected_booking, minor_id=minor_id)
 
             if choice == 5:
+                print("\n--------View Minor's Bookings--------")
+
+                if not self.is_legal_guardian:
+                    print("You are not a legal guardian. This option is not available.")
+                    return
+
+                bookings_catalog = BookingsCatalog.get_instance(db)
+
+                minor = self.get_minor()
+                if not minor:
+                    print("No minor associated with this account.")
+                    return
+
+                minor_bookings = bookings_catalog.get_minor_bookings(minor.get_id())
+
+                if not minor_bookings:
+                    print(f"No bookings found for minor: {minor.get_name()}.")
+                else:
+                    print(f"\nBookings for {minor.name}:")
+                    for booking in minor_bookings:
+                        print(booking.repr_client())
+
+            if choice == 6:
                 print("\nLogging out...")
                 return
     
