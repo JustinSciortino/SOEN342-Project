@@ -28,8 +28,8 @@ class OfferingsCatalog:
 
     def get_available_offerings_for_instructor(self, instructor):
         return self.session.query(Offering).filter(
-            Offering.location.city.in_(instructor.available_cities),  
-            Offering.specialization.in_(instructor.specialization),    
+            Offering.location.city.in_(instructor.available_cities),  #! Change to getters rather than directly accessing as long as it doestn break anything with mismatching types
+            Offering.specialization.in_(instructor.specialization),    #! Will be easier for the diagrams if we use getters and setters
             Offering.instructor_id == None  
         ).all()
 
@@ -58,8 +58,9 @@ class OfferingsCatalog:
         return query.all()
 
     def has_time_conflict(self, instructorOfferings,  new_offering):
+        #! Test to make sure it works - You may get an error message because you cant compare date and datetime objects, check the conflict method in Schedule.py to see how I did it if theres errors
         for offering in instructorOfferings:
-            if (offering.timeslot.start_date <= new_offering.timeslot.end_date and
+            if (offering.timeslot.start_date <= new_offering.timeslot.end_date and #! use getters for getting the timeslot, same for start_date, etc
                 new_offering.timeslot.start_date <= offering.timeslot.end_date):
                 if (offering.timeslot.start_time < new_offering.timeslot.end_time and
                     new_offering.timeslot.start_time < offering.timeslot.end_time):
