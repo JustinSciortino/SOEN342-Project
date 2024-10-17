@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database.config import Base
-from models import User, SpaceType, Offering
+from models import User
 from .SpaceSpecializationMap import SPACE_SPECIALIZATION_MAP
 import datetime
 
