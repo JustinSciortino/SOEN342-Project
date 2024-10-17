@@ -188,3 +188,77 @@
 - All associated `Booking` instances are deleted (for both minors and clients).
 - Changes are committed to the database.
 - If an error occurs, the transaction is rolled back, and a `ValueError` is raised.
+
+---
+
+## Contract CO10: Create Booking for Client
+
+**Operation**: `create_booking(self, client: Client, offering: Offering, minor_id: int = None)`
+
+**Cross References**: Booking Creation
+
+### Pre-conditions:
+- A session with the database exists and is active.
+- The `client` parameter is a valid Client instance.
+- The `offering` parameter is a valid Offering instance.
+- If provided, the `minor_id` corresponds to a valid Minor instance.
+
+### Post-conditions:
+- A `Booking` instance is created and linked to the `client` and `offering`.
+- The `offering` is updated to include the new booking.
+- If `minor_id` is provided, the booking is also linked to the corresponding Minor instance.
+- The new booking is committed to the database.
+- If an error occurs, the transaction is rolled back, and no booking is created.
+
+---
+
+## Contract CO11: Get Client Bookings
+
+**Operation**: `get_client_bookings(self, client: Client)`
+
+**Cross References**: View Bookings
+
+### Pre-conditions:
+- A session with the database exists and is active.
+- The `client` parameter is a valid Client instance.
+
+### Post-conditions:
+- Returns a list of all `Booking` instances associated with the `client`.
+
+---
+
+## Contract CO12: Cancel Client Booking
+
+**Operation**: `cancel_booking(self, client: Client, booking: Booking, minor_id: int = None)`
+
+**Cross References**: Cancel Booking
+
+### Pre-conditions:
+- A session with the database exists and is active.
+- The `client` parameter is a valid Client instance.
+- The `booking` parameter is a valid Booking instance.
+- If provided, the `minor_id` corresponds to a valid Minor instance linked to the booking.
+
+### Post-conditions:
+- The `Booking` instance is removed from the `client` and `offering`.
+- If a `minor_id` is provided, the booking is also removed from the Minor instance.
+- The `Booking` instance is either deleted or marked as canceled based on business rules.
+- The changes are committed to the database.
+- If an error occurs, the transaction is rolled back, and the booking remains active.
+
+---
+
+## Contract CO13: Get Minor Bookings
+
+**Operation**: `get_minor_bookings(self, minor_id: int)`
+
+**Cross References**: View Minor Bookings
+
+### Pre-conditions:
+- A session with the database exists and is active.
+- The `minor_id` is a valid ID corresponding to a Minor instance.
+
+### Post-conditions:
+- Returns a list of all `Booking` instances associated with the `minor_id`.
+
+
