@@ -25,13 +25,14 @@ class OfferingsCatalog:
         self.session.add(offering)
         self.session.commit()
         return offering
-
-    def get_available_offerings_for_instructor(self, instructor):
-        return self.session.query(Offering).filter(
-            Offering.location.city.in_(instructor.available_cities),  #! Change to getters rather than directly accessing as long as it doestn break anything with mismatching types
-            Offering.specialization.in_(instructor.specialization),    #! Will be easier for the diagrams if we use getters and setters
-            Offering.instructor_id == None  
+    
+    def get_available_offerings_for_instructor(self, cities, specializations):
+        return self.session.query(Offering).join(Offering.location).filter(
+            Location.city.in_(cities),  
+            Offering.specialization.in_(specializations),
+            Offering.instructor_id == None
         ).all()
+
 
     def get_offerings_by_instructor_id(self, instructor_id: int):
         return self.session.query(Offering).filter(Offering.instructor_id == instructor_id).all()
