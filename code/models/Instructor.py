@@ -2,7 +2,10 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time, ARRAY
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database import Base
-from models import User, SpecializationType, Offering
+from models import User, Offering
+from models.SpecializationType import SpecializationType
+from sqlalchemy.orm.attributes import flag_modified
+
 
 # Instructor Model
 class Instructor(User):
@@ -65,20 +68,20 @@ class Instructor(User):
 
             if choice == 1:
                 print("\n--------Select Offering--------")
-                offerings = offerings_catalog.get_available_offerings_for_instructor(self)
+                offerings = offerings_catalog.get_available_offerings_for_instructor(self.available_cities, self.specialization)
 
                 if not offerings:
                     print("No available offerings found that match your criteria.")
                 else:
                     print("\nAvailable Offerings:")
                     for offering in offerings:
-                        print(offering.repr_instructor())  
+                        print("\n" + offering.repr_instructor())  
 
                     selected_offering_id = None
                     while True:
                         selected_offering_id = input("\nEnter the ID of the offering you want to select (or 'q' to quit): ")
                         if selected_offering_id.lower() == 'q':
-                            return  
+                            break  
                         try:
                             selected_offering_id = int(selected_offering_id)
                             selected_offering = next((off for off in offerings if off.id == selected_offering_id), None)
@@ -120,7 +123,7 @@ class Instructor(User):
                     while True:
                         selected_offering_id = input("\nEnter the ID of the offering you want to remove yourself from (or 'q' to quit): ")
                         if selected_offering_id.lower() == 'q':
-                            return  
+                            break  
                         try:
                             selected_offering_id = int(selected_offering_id)
                             selected_offering = next((off for off in my_offerings if off.id == selected_offering_id), None)
@@ -172,15 +175,34 @@ class Instructor(User):
                     elif new_specializations_input:
                         try:
                             new_specializations = [
-                                SpecializationType(spec.strip().lower()) for spec in new_specializations_input.split(",")
+                                SpecializationType(spec.strip().lower()) for spec in new_specializations_input.split(",") 
+                                if spec.strip().lower() in [member.value for member in SpecializationType]
                             ]
                             # Add new specializations to the current ones, ensuring no duplicates
                             for spec in new_specializations:
                                 if spec.value not in self.specialization:
                                     self.specialization.append(spec.value)
+                            flag_modified(self, "specialization")
 
                         except ValueError as e:
                             print("Invalid specialization input. No changes made to specialization.")
+
+
+                if not _quit:  # Adding new cities without removing the old ones
+                    new_cities = []  # Initialize new_cities as an empty list
+                    new_cities_input = input(
+                        f"Enter new cities to add (current: {', '.join(self.available_cities)}) or 'q' to quit: "
+                    ).strip()
+
+                    if new_cities_input.lower() == 'q':
+                        _quit = True
+                    elif new_cities_input:
+                        new_cities = [city.strip().capitalize() for city in new_cities_input.split(",")]
+
+                    for city in new_cities:
+                        if city not in self.available_cities:
+                            self.available_cities.append(city)
+                    flag_modified(self, "specialization")
 
                 if not _quit:
                     try:

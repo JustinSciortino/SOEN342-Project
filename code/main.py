@@ -220,8 +220,8 @@ def main():
                         legal_guardian_password = str(input("Enter the legal guardian's password: "))
 
                         try:
-                            new_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password, is_legal_guardian=True)
-                            user_catalog.add_and_commit(new_guardian)  
+                            user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password, is_legal_guardian=True)
+                            
 
                         except ValueError as e:
                             print(f"Error registering legal guardian: {e}")
@@ -271,8 +271,8 @@ def main():
 
                     if _quit == False:
                         try:
-                            new_client = user_catalog.register_client(client_name, client_phone_number, client_password, is_legal_guardian=False)
-                            user_catalog.add_and_commit(new_client) 
+                            user_catalog.register_client(client_name, client_phone_number, client_password, is_legal_guardian=False)
+                            
                         except ValueError as e:
                             print(f"Error registering client: {e}")
                             return

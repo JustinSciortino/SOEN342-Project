@@ -56,8 +56,25 @@ class UsersCatalog:
         return instructor
     
     def register_client(self, name: str, phone_number: str, password: str, is_legal_guardian: bool):
+        existing_user = self.session.query(User).filter(User.name == name).first()
+
+        if existing_user:
+            raise ValueError(f"Client with name '{name}' already exists")
+        
+        existing_client = self.session.query(Client).filter(Client.phone_number == phone_number).first()
+
+        if existing_client:
+            raise ValueError(f"Client with phone number '{phone_number}' already exists")
+        
         client = Client(name=name, phone_number=phone_number, password=password, is_legal_guardian=is_legal_guardian)
-        return client  # Now we just return the created client object
+
+        if not client:
+            raise ValueError("Client not created")
+        
+        self.session.add(client)
+        self.session.commit()
+        return client
+
     
     def login(self, name: str, password: str, phone_number: str=None):
         user = self.session.query(User).filter(User.name == name).first()
@@ -114,10 +131,6 @@ class UsersCatalog:
         
         return user
 
-    def add_and_commit(self, client: "Client"):
-        self.session.add(client)
-        self.session.commit()
-
     def create_and_add_minor(self, guardian: "Client", name: str, age: int):
         minor = Minor(guardian=guardian, name=name, age=age)
         self.session.add(minor)
@@ -126,10 +139,11 @@ class UsersCatalog:
     def get_client_by_id(self, client_id: int):
         return self.session.query(Client).filter(Client.id == client_id).first()
     
-    def update_instructor(self, instructor: Instructor):
+    def update_instructor(self, instructor):
         try:
+            self.session.add(instructor) 
             self.session.commit()  # Save the changes to the instructor
-            print(f"Instructor {instructor.id} has been updated successfully.")
+            print(f"Instructor {instructor.name} has been updated successfully.")
         except Exception as e:
             self.session.rollback()  # Rollback if there's an error
             raise ValueError(f"Failed to update instructor: {str(e)}")
