@@ -14,10 +14,10 @@ def createSampleObjects(db: Session):
         instructor2 = user_catalog.register_instructor("instructor2", "pass", "1234567891", [SpecializationType.swim, SpecializationType.yoga], ["Terrebonne", "Laval"])
         instructor3 = user_catalog.register_instructor("instructor3", "pass", "1234567892", [SpecializationType.dance, SpecializationType.soccer], ["Montreal", "Dorval"])
 
-        #client1 = Client(name="Alice Smith", password="password123", phone_number="123-456-7890", is_legal_guardian=False),
-        #client2 = Client(name="Bob Johnson", password="securePass456", phone_number="987-654-3210", is_legal_guardian=True, minor_name="Tom Johnson", minor_age=15),
-        #client3 = Client(name="Charlie Davis", password="charlie123", phone_number="555-555-5555", is_legal_guardian=True, minor_name="Emily Davis", minor_age=12),
-        #client4 = Client(name="Diana Adams", password="dianaSecure", phone_number="444-444-4444", is_legal_guardian=False),
+        client1 = user_catalog.register_client(name="Alice Smith", password="password123", phone_number="123-456-7890", is_legal_guardian=False),
+        client2 = user_catalog.register_client(name="Bob Johnson", password="securePass456", phone_number="987-654-3210", is_legal_guardian=True, minor_name="Tom Johnson", minor_age=15),
+        client3 = user_catalog.register_client(name="Charlie Davis", password="charlie123", phone_number="555-555-5555", is_legal_guardian=True, minor_name="Emily Davis", minor_age=12),
+        client4 = user_catalog.register_client(name="Diana Adams", password="dianaSecure", phone_number="444-444-4444", is_legal_guardian=False),
 
     except ValueError as e:
         print(f"Error creating admin: {str(e)}")

@@ -55,6 +55,10 @@ class UsersCatalog:
         self.session.commit()
         return instructor
     
+    def register_client(self, name: str, phone_number: str, password: str, is_legal_guardian: bool):
+        client = Client(name=name, phone_number=phone_number, password=password, is_legal_guardian=is_legal_guardian)
+        return client  # Now we just return the created client object
+    
     def login(self, name: str, password: str, phone_number: str=None):
         user = self.session.query(User).filter(User.name == name).first()
 
@@ -109,10 +113,6 @@ class UsersCatalog:
             raise ValueError(f"User with id '{id}' does not exist")
         
         return user
-    
-    def register_client(self, name: str, phone_number: str, password: str, is_legal_guardian: bool):
-        client = Client(name=name, phone_number=phone_number, password=password, is_legal_guardian=is_legal_guardian)
-        return client  # Now we just return the created client object
 
     def add_and_commit(self, client: "Client"):
         self.session.add(client)
@@ -122,7 +122,6 @@ class UsersCatalog:
         minor = Minor(guardian=guardian, name=name, age=age)
         self.session.add(minor)
         self.session.commit()
-
 
     def get_client_by_id(self, client_id: int):
         return self.session.query(Client).filter(Client.id == client_id).first()
