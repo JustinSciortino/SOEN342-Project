@@ -83,6 +83,8 @@ class Client(Base):
                     continue
 
             if choice == 1:
+                #! Do we want to give the user the ability to quit and return back to the client menu as is done in the admin menu?
+                #! Ie give them the ability to stop what theyre doing at any point in time
                 print("\n--------View Offerings--------")
                 
                 offerings = offerings_catalog.get_offerings_with_instructor()
@@ -153,7 +155,6 @@ class Client(Base):
 
             if choice == 3:
                 print("\n--------View My Bookings--------")
-                bookings_catalog = BookingsCatalog.get_instance(db)
 
                 client_bookings = bookings_catalog.get_client_bookings(self)    
                 if not client_bookings:
@@ -183,7 +184,7 @@ class Client(Base):
                 if not selected_booking:
                     print("Invalid booking ID.")
                     break
-                
+
                 minor_id = None
                 if self.is_legal_guardian:
                     if selected_booking.minor_id:  
@@ -203,8 +204,6 @@ class Client(Base):
                 if not minor:
                     print("No minor associated with this account.")
                     break
-
-                #just have to get minor bookings by using client.minor.id
 
                 minor_bookings = bookings_catalog.get_minor_bookings(minor.get_id())
 

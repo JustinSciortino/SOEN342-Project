@@ -72,7 +72,7 @@ class Instructor(User):
                 else:
                     print("\nAvailable Offerings:")
                     for offering in offerings:
-                        print(offering.repr_instructor())  #
+                        print(offering.repr_instructor())  
 
                     selected_offering_id = None
                     while True:
@@ -85,16 +85,10 @@ class Instructor(User):
                             if selected_offering:
                                 if offerings_catalog.has_time_conflict(self.offerings, selected_offering):
                                     print("You cannot book this offering because it conflicts with an existing offering.")
+                                    break
                                 else:
-                                    selected_offering.instructor_id = self.id
-                                    self.offerings.append(selected_offering)
-                                    try:
-                                        db.commit()  
-                                        print(f"Successfully selected offering with ID {selected_offering.id} and assigned it to you.")
-                                    except Exception as e:
-                                        db.rollback()  
-                                        print(f"Error: {e}. Could not update offering.")
-                                break
+                                    offerings_catalog.assign_instructor_to_offering(self, selected_offering)  
+                                    print(f"Successfully selected offering with ID {selected_offering.id} and assigned it to you.")
                             else:
                                 print("Invalid offering ID. Please select a valid offering from the list.")
                         except ValueError:
@@ -137,24 +131,9 @@ class Instructor(User):
                         except ValueError:
                             print("Invalid input. Please enter a valid offering ID.")
 
-                    for booking in selected_offering.bookings:
-                        if booking.minor_id:
-                            print(f"Removing booking for minor with ID {booking.minor_id}.")
-                        if booking.client_id:
-                            print(f"Removing booking for client with ID {booking.client_id}.")
-                        
-                        selected_offering.bookings.remove(booking)
-                        db.delete(booking)  
+                    offerings_catalog.remove_instructor_from_offering(self, selected_offering)
+                    print(f"You have successfully removed yourself from offering with ID {selected_offering.id}.")
 
-                    selected_offering.instructor_id = None
-                    self.offerings.remove(selected_offering)  
-
-                    try:
-                        db.commit()  
-                        print(f"You have successfully removed yourself from offering with ID {selected_offering.id}.")
-                    except Exception as e:
-                        db.rollback()  
-                        print(f"Error: {e}. Could not update the offering.")
 
             if choice == 4:
                 print("\n--------Modify my Account--------")
@@ -181,36 +160,36 @@ class Instructor(User):
                 if not _quit:
                     new_password = input("Enter new password or 'q' to quit: ")
                     if new_password.lower() != 'q' and new_password:
-                        self.password = new_password 
+                        self.password = new_password
 
-                if not _quit:
+                if not _quit:  # Adding new specializations without removing the old ones
                     new_specializations_input = input(
-                        f"Enter new specializations separated by commas (current: {', '.join(self.specialization)}) or 'q' to quit: "
+                        f"Enter new specializations to add (current: {', '.join(self.specialization)}) or 'q' to quit: "
                     ).strip()
 
                     if new_specializations_input.lower() == 'q':
                         _quit = True
                     elif new_specializations_input:
                         try:
-                            # Assuming SpecializationType enums are case-insensitive or matching input format
                             new_specializations = [
-                                SpecializationType(spec.strip().capitalize()) for spec in new_specializations_input.split(",")
+                                SpecializationType(spec.strip().lower()) for spec in new_specializations_input.split(",")
                             ]
-                            # Assigning enum members directly, adjust if you need their .value instead
-                            self.specialization = [spec.value for spec in new_specializations]
+                            # Add new specializations to the current ones, ensuring no duplicates
+                            for spec in new_specializations:
+                                if spec.value not in self.specialization:
+                                    self.specialization.append(spec.value)
+
                         except ValueError as e:
                             print("Invalid specialization input. No changes made to specialization.")
 
                 if not _quit:
                     try:
-                        db.commit() 
+                        users_catalog.update_instructor(self) 
                         print("Account details have been successfully updated.")
                     except Exception as e:
-                        db.rollback()  
                         print(f"Error: {e}. Could not update the account details.")
                 else:
                     print("No changes were made to the account.")
-
 
             if choice == 5:
                 print("\nLogging out...")

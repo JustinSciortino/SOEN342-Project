@@ -126,3 +126,11 @@ class UsersCatalog:
 
     def get_client_by_id(self, client_id: int):
         return self.session.query(Client).filter(Client.id == client_id).first()
+    
+    def update_instructor(self, instructor: Instructor):
+        try:
+            self.session.commit()  # Save the changes to the instructor
+            print(f"Instructor {instructor.id} has been updated successfully.")
+        except Exception as e:
+            self.session.rollback()  # Rollback if there's an error
+            raise ValueError(f"Failed to update instructor: {str(e)}")

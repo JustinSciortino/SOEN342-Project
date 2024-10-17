@@ -31,6 +31,7 @@ class BookingsCatalog:
 
     def create_booking(self, client: "Client", offering: "Offering", minor_id: int = None):
         try:
+            #! When you create the Booking, you set minor_id = None in the constructor, so minor_id will never be linked to the booking
             new_booking = Booking(client=client, status="Booked", active=True, is_cancelled=False, offering=offering, minor_id=minor_id)
 
             self.session.add(new_booking)
@@ -67,13 +68,15 @@ class BookingsCatalog:
                 if minor:
                     minor.bookings.remove(booking)
 
-            booking.offering.bookings.remove(booking)
+            booking.offering.bookings.remove(booking) #! Can also optionally call the cancel() method in Booking class
 
-            self.session.delete(booking)
+            self.session.delete(booking) #! Do we want to delete the booking from the database or mark it as cancelled? 
+                                    #!Something to ask CC or TA because if an Offering is cancelled, the associated bookings are marked as cancelled but neither offering nor bookings are deleted
+                                    #! Idea is that the user should have some idea that the booking was cancelled and that it just didnt disappear like that
 
             self.session.commit()
 
-            print(f"Booking {booking.id} has been successfully canceled.")
+            print(f"Booking {booking.id} has been successfully canceled.") #!Booking will be deleted so we cant get the id
 
         except ValueError:
             self.session.rollback()
