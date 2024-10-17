@@ -19,7 +19,8 @@ class Client(Base):
         "polymorphic_identity": "client",
     }
 
-    def __init__(self, phone_number: str, is_legal_guardian: bool, minor_name: str = None, minor_age: int = None):
+    def __init__(self, name: str, password: str, phone_number: str, is_legal_guardian: bool, minor_name: str = None, minor_age: int = None):
+        super().__init__(name=name, password=password, type="client")
         self.phone_number = phone_number
         self.is_legal_guardian = is_legal_guardian
         if is_legal_guardian:
