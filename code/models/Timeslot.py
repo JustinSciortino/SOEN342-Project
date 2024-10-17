@@ -2,8 +2,6 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, E
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database import Base
 from datetime import datetime
-from models import Offering, Schedule
-
 
 class Timeslot(Base):
     __tablename__ = "timeslots"

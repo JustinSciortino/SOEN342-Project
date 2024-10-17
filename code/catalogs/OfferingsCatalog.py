@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
-from models import Offering, OfferingType, Location, Timeslot, SpecializationType
+from models import Offering, OfferingType, Location, Timeslot, SpecializationType, Instructor
 
 class OfferingsCatalog:
     _instance = None
@@ -81,3 +81,31 @@ class OfferingsCatalog:
 
     def get_offerings_with_instructor(self):
         return self.session.query(Offering).filter(Offering.instructor_id.isnot(None)).all()
+
+    def assign_instructor_to_offering(self, instructor, offering: Offering):
+        try:
+            offering.instructor_id = instructor.id
+            instructor.offerings.append(offering)
+            self.session.commit()  # Commit the transaction in the catalog class
+        except Exception as e:
+            self.session.rollback()  # Rollback in case of an error
+            raise ValueError(f"Error assigning instructor to offering: {e}")
+
+
+    def remove_instructor_from_offering(self, instructor, offering: Offering):
+        try:
+            offering.instructor_id = None
+            instructor.offerings.remove(offering)
+            
+            for booking in offering.bookings:
+                if booking.minor_id:
+                    print(f"Removing booking for minor with ID {booking.minor_id}.")
+                if booking.client_id:
+                    print(f"Removing booking for client with ID {booking.client_id}.")
+                self.session.delete(booking)
+
+            self.session.commit()  
+        except Exception as e:
+            self.session.rollback()  
+            raise ValueError(f"Error removing instructor from offering: {e}")
+

@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time, ARRAY
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database import Base
-from models import Booking
 
 class Minor(Base):
     __tablename__ = "minors"
