@@ -3,7 +3,8 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database import Base
 from .OfferingType import OfferingType
 from .SpecializationType import SpecializationType
-from models import Client, Timeslot, Booking, Location, Instructor
+from .Timeslot import Timeslot
+
 
 
 class Offering(Base):
@@ -76,7 +77,7 @@ class Offering(Base):
             f"Status: {self.status}"  
         )
 
-    def update_status(self, client : Client):
+    def update_status(self, client : "Client"):
         client_has_booked = any(booking.client_id == client.get_id() for booking in self.bookings)
         
         no_spots_left = self.capacity - len(self.bookings) == 0

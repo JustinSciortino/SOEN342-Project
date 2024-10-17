@@ -114,7 +114,7 @@ class Client(Base):
                     chosen_specialization = SpecializationType(specializations[specialization_choice - 1])
                 except ValueError:
                     print("Invalid selection. Please enter a valid number corresponding to a specialization.")
-                    return
+                    break
                 
                 offerings = offerings_catalog.get_offerings_with_instructor()
                 for offering in offerings:
@@ -145,7 +145,7 @@ class Client(Base):
                                 minor_id = self.minor.get_id()  
                             else:
                                 print("No minor found for this legal guardian.")
-                                return
+                                break
 
                         bookings_catalog.create_booking(self, selected_offering, minor_id=minor_id)
                     else:
@@ -170,7 +170,7 @@ class Client(Base):
 
                 if not client_bookings:
                     print("You have no bookings to cancel.")
-                    return
+                    break
 
                 print("\nYour Current Bookings:")
                 for booking in client_bookings:
@@ -182,7 +182,7 @@ class Client(Base):
 
                 if not selected_booking:
                     print("Invalid booking ID.")
-                    return
+                    break
                 
                 minor_id = None
                 if self.is_legal_guardian:
@@ -197,14 +197,14 @@ class Client(Base):
 
                 if not self.is_legal_guardian:
                     print("You are not a legal guardian. This option is not available.")
-                    return
-
-                bookings_catalog = BookingsCatalog.get_instance(db)
+                    break
 
                 minor = self.get_minor()
                 if not minor:
                     print("No minor associated with this account.")
-                    return
+                    break
+
+                #just have to get minor bookings by using client.minor.id
 
                 minor_bookings = bookings_catalog.get_minor_bookings(minor.get_id())
 
