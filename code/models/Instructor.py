@@ -202,7 +202,7 @@ class Instructor(User):
                     for city in new_cities:
                         if city not in self.available_cities:
                             self.available_cities.append(city)
-                    flag_modified(self, "specialization")
+                    flag_modified(self, "available_cities")
 
                 if not _quit:
                     try:
