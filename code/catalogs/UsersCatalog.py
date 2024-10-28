@@ -96,7 +96,8 @@ class UsersCatalog:
     
     def has_admin(self):
         return self.session.query(Admin).first() is not None
-    
+    #! Needs to be modified, needs to cancel all bookings associated with the Instructor Offering
+    #! Needs to be modified, needs to cancel all bookings associated with the Client
     def delete_user(self, name: str=None, id: int=None):
         if not name and not id:
             raise ValueError("Name or id must be provided")

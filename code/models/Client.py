@@ -13,7 +13,8 @@ class Client(Base):
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
     is_legal_guardian: Mapped[bool] = mapped_column(Boolean, nullable=False)
     minor: Mapped["Minor"] = relationship("Minor", back_populates="guardian")  # For underage clients
-    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client")
+    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client", cascade="all, delete-orphan") #! Test to make sure they actually get deleted if Client is deleted
+
 
     __mapper_args__ = {
         "polymorphic_identity": "client",
@@ -131,6 +132,8 @@ class Client(Base):
                 if not available_offerings:
                     print(f"No available offerings for {chosen_specialization.value} at this time.")
                 else:
+
+                    #! Need to double check a new booking doesnt conflict with an existing booking they have
                     print(f"\nAvailable Offerings for {chosen_specialization.value}:")
                     for offering in available_offerings:
                         print(offering.repr_client(self)) 
