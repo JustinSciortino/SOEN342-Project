@@ -1,12 +1,12 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time, ARRAY
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database import Base
-from models import Minor, Booking   
+from models import Minor, User, Booking   
 from .SpecializationType import SpecializationType
 
 
 
-class Client(Base):
+class Client(User):
     __tablename__ = "clients"
 
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
@@ -20,19 +20,15 @@ class Client(Base):
         "polymorphic_identity": "client",
     }
 
-    def __init__(self, name: str, password: str, phone_number: str, is_legal_guardian: bool, minor_name: str = None, minor_age: int = None):
+    def __init__(self, name: str, password: str, phone_number: str, is_legal_guardian: bool):
         super().__init__(name=name, password=password, type="client")
         self.phone_number = phone_number
         self.is_legal_guardian = is_legal_guardian
-        if is_legal_guardian:
-            self.minor = Minor(self, minor_name, minor_age)
-        else:
-            self.minor = None
         self.bookings = []
 
     def __repr__(self) -> str:
         if self.is_legal_guardian:
-            return f"Client {self.id} ({self.phone_number}) is a legal guardian of {self.minor}"
+            return f"Client {self.id}, {self.name}, ({self.phone_number}) is a legal guardian of {self.minor}"
         return f"Client {self.id} ({self.phone_number}) is a client"
     
     def get_id(self) -> int:

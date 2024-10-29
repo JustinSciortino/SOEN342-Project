@@ -152,16 +152,22 @@ class Instructor(User):
                 print("\nPlease enter the new information for your account. Press 'enter' to keep the current information.")
 
                 new_name = input(f"\nEnter new name (current: {self.name}) or 'q' to quit: ")
+                if new_name.lower() == 'q':
+                    _quit = True
                 if new_name.lower() != 'q' and new_name:
                     self.name = new_name
 
                 if not _quit:
                     new_phone = input(f"Enter new phone number (current: {self.phone_number}) or 'q' to quit: ")
+                    if new_phone.lower() == 'q':
+                        _quit = True
                     if new_phone.lower() != 'q' and new_phone:
                         self.phone_number = new_phone
 
                 if not _quit:
                     new_password = input("Enter new password or 'q' to quit: ")
+                    if new_password.lower() == 'q':
+                        _quit = True
                     if new_password.lower() != 'q' and new_password:
                         self.password = new_password
 

@@ -127,7 +127,7 @@ def main():
 
             if _quit == False:
 
-                if user_type == "instructor":
+                if user_type == "instructor" or user_type == "client":
 
                     while True:
                         user_phone_number = str(input("Enter your phone number (or 'q' to quit): "))
@@ -159,7 +159,7 @@ def main():
 
             if _quit == False:
                 try:
-                    if user_phone_number:
+                    if user_type == "instructor" or user_type == "client":
                         user = user_catalog.login(user_name, user_password, user_phone_number)
                     else:
                         user = user_catalog.login(user_name, user_password)
@@ -174,7 +174,7 @@ def main():
 
                 if user.get_type() == "client":
                     print(f"\nWelcome {user.get_name()}! You have successfully logged in as a client.")
-                    user.client_menu(client=user, db=db)
+                    user.client_menu(db=db)
 
                 if user.get_type() == "instructor":
                     print(f"\nWelcome {user.get_name()}! You have successfully logged in as an instructor.")
@@ -271,11 +271,17 @@ def main():
 
                     if _quit == False:
                         try:
-                            user_catalog.register_client(client_name, client_phone_number, client_password, is_legal_guardian=False)
+                            client = user_catalog.register_client(client_name, client_phone_number, client_password, is_legal_guardian=False)
                             
                         except ValueError as e:
                             print(f"Error registering client: {e}")
                             return
+                        
+                        print(f"Welcome {client_name}! You have successfully registered as an admin.")
+                        client.client_menu(db)
+                        
+
+                
 
 
 

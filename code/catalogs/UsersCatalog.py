@@ -59,12 +59,12 @@ class UsersCatalog:
         existing_user = self.session.query(User).filter(User.name == name).first()
 
         if existing_user:
-            raise ValueError(f"Client with name '{name}' already exists")
+            raise ValueError(f"User with name '{name}' already exists")
         
         existing_client = self.session.query(Client).filter(Client.phone_number == phone_number).first()
 
         if existing_client:
-            raise ValueError(f"Client with phone number '{phone_number}' already exists")
+            raise ValueError(f"User with phone number '{phone_number}' already exists")
         
         client = Client(name=name, phone_number=phone_number, password=password, is_legal_guardian=is_legal_guardian)
 
