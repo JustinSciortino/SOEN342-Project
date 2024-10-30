@@ -205,7 +205,8 @@ class Client(User):
                     print("No minor associated with this account.")
                     break
 
-                minor_bookings = bookings_catalog.get_minor_bookings(minor.get_id())
+                my_minor_id = minor.get_id()
+                minor_bookings = bookings_catalog.get_minor_bookings(my_minor_id)
 
                 if not minor_bookings:
                     print(f"No bookings found for minor: {minor.get_name()}.")
