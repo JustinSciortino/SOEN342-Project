@@ -414,6 +414,10 @@ class Admin(User):
 
                     client_bookings = client.get_bookings()
 
+                    if not client_bookings:
+                        print(f"\nClient {client.get_name()} has no bookings.")
+                        continue
+
                     print(f"\nClient {client.get_name()} bookings:")
                     for booking in client_bookings:
                         print(booking)

@@ -83,6 +83,7 @@ class Client(User):
             if choice == 1:
                 #! Do we want to give the user the ability to quit and return back to the client menu as is done in the admin menu?
                 #! Ie give them the ability to stop what theyre doing at any point in time
+                #! Do we want to add the ability to search for an offering based on location or specialization type or offering type like is done in Admin get Offerings
                 print("\n--------View Offerings--------")
                 
                 offerings = offerings_catalog.get_offerings_with_instructor()
