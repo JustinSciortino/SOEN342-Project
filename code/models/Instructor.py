@@ -38,6 +38,7 @@ class Instructor(User):
         offerings_catalog = OfferingsCatalog.get_instance(db)
         users_catalog = UsersCatalog.get_instance(db)
 
+        #!Should also be a view offerings option (all offerings)
         instructor_menu_options = """
         Instructor Options:
         1. Select Offering
