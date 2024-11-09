@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Database connection URL
 DATABASE_URL = "postgresql://postgres:<<ENTERPASSWORDHERE>>@localhost:5432/lesson_management"
-DATABASE_URL_DOCKER = 'postgresql://user:password@localhost:5433/lesson_management'
+DATABASE_URL_DOCKER = 'postgresql://user:password@localhost:5432/lesson_management'
 
 # Create engine and session
 engine = create_engine(DATABASE_URL_DOCKER)
@@ -19,6 +19,8 @@ def create_tables():
         inspector = inspect(engine)
         for table_name in inspector.get_table_names():
             engine.execute(f"DROP TABLE IF EXISTS {table_name} CASCADE;")
+        Base.metadata.drop_all(bind=engine)
+        #print("Tables dropped successfully!")
         Base.metadata.create_all(bind=engine)
         #print("Tables created successfully!")
     except Exception as e:

@@ -245,10 +245,11 @@ def main():
                         except ValueError as e:
                             print(f"Error registering legal guardian: {e}")
                             break
-                        
+
+                        relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
                         minor_name = client_name
                         minor_age = int(input(f"{minor_name}, enter your age: "))
-                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age)
+                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
                         print(f"Minor, {minor_name}, has been created.")
 
                     elif guardian_option == '2':
@@ -261,9 +262,10 @@ def main():
                             break
                         
                         existing_guardian.is_legal_guardian = True
+                        relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
                         minor_name = client_name
                         minor_age = int(input("Enter your age: "))
-                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age)
+                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
                         print(f"Minor, {minor_name}, has been created and has successfully been linked to the guardian.")
 
                 elif client_is_minor == 'no':
