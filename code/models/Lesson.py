@@ -12,7 +12,7 @@ class Lesson(Base):
     type = mapped_column(Enum(LessonType), nullable=False)
     specialization = mapped_column(Enum(SpecializationType), nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=True)
-    offerings = relationship("Offering", back_populates="lesson", cascade="all, delete-orphan", uselist=False)
+    offering = relationship("Offering", back_populates="lesson", cascade="all, delete-orphan", uselist=False)
     location = relationship("Location", back_populates="lessons")
     location_id = mapped_column(Integer, ForeignKey('locations.id'), nullable=False)
     timeslot = relationship("Timeslot", back_populates="lesson", cascade="all, delete-orphan", uselist=False)

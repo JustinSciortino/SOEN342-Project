@@ -14,9 +14,6 @@ class BookingsCatalog:
             cls._instance = cls(session)
         return cls._instance
     
-    def create_booking(self):
-        pass
-
     def get_booking(self, booking_id: int) -> Booking:
         booking = self.session.query(Booking).filter_by(id=booking_id).first()
         return booking
@@ -29,21 +26,18 @@ class BookingsCatalog:
         self.session.commit()
         return booking
 
-    def create_booking(self, client: "Client", offering: "Offering", minor_id: int = None):
+    def create_booking(self, client: "Client", offering: "Offering", minor: "Minor" = None):
         try:
             #! When you create the Booking, you set minor_id = None in the constructor, so minor_id will never be linked to the booking
-            new_booking = Booking(client=client, status="Booked", active=True, is_cancelled=False, offering=offering, minor_id=minor_id)
+            new_booking = Booking(client=client, offering=offering, minor=minor)
+
+            if offering.get_lesson().get_type().value == 'private':
+                offering.set_status("Not-Availiable")
+            else:
+                if len(offering.get_bookings()) == offering.get_lesson().get_capacity():
+                    offering.set_status("Not-Available")
 
             self.session.add(new_booking)
-
-            offering.add_booking(new_booking)
-
-            client.bookings.append(new_booking)
-
-            if minor_id:
-                minor = self.session.query(Minor).filter(Minor.id == minor_id).first()
-                if minor:
-                    minor.bookings.append(new_booking)
 
             self.session.commit()
 

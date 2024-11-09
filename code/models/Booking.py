@@ -9,25 +9,24 @@ class Booking(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     client: Mapped["Client"] = relationship("Client", back_populates="bookings")
-    client_id: Mapped[int] = mapped_column(Integer, ForeignKey('clients.id'))
+    client_id: Mapped[int] = mapped_column(Integer, ForeignKey('clients.id'), nullable=False)
     minor_id: Mapped[int] = mapped_column(Integer, ForeignKey('minors.id'), nullable=True)
-    status: Mapped[str] = mapped_column(String, default="Available")
-    active: Mapped[str] = mapped_column(String, default=True)
-    is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
-    offering_id: Mapped[int] = mapped_column(Integer, ForeignKey('offerings.id'))
-    offering: Mapped["Offering"] = relationship("Offering", back_populates="bookings")
-    client: Mapped["Client"] = relationship("Client", back_populates="bookings")
     minor: Mapped["Minor"] = relationship("Minor", back_populates="bookings")
+    is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
+    offering_id: Mapped[int] = mapped_column(Integer, ForeignKey('offerings.id'), nullable=False)
+    offering: Mapped["Offering"] = relationship("Offering", back_populates="bookings")
 
-    def __init__(self, client: "Client", status: str, active: str, is_cancelled: bool, offering: "Offering"):
+    def __init__(self, client: "Client", offering: "Offering", minor:"Minor"=None):
         self.client = client
-        self.status = status
-        self.active = active
-        self.is_cancelled = is_cancelled
+        self.is_cancelled = False
         self.offering = offering
         self.offering_id = offering.get_id()
         self.client_id = client.get_id()    
-        self.minor_id = None
+        self.minor = minor
+        if minor:
+            self.minor_id = minor.get_id()
+        else:
+            self.minor_id = None
 
     def __repr__(self) -> str:
         if self.is_cancelled:

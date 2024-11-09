@@ -13,11 +13,10 @@ class Offering(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
     lesson_id: Mapped[int]=mapped_column(Integer, ForeignKey('lessons.id'), nullable=False)
-    lesson = relationship("Lesson", back_populates="offerings")
+    lesson = relationship("Lesson", back_populates="offering")
     instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=False)
     instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
-    status: Mapped[str] = mapped_column(String, default="Available")  #? Only made not available to the client if they already booked the offering
-    #! Status needs to be refactored
+    status: Mapped[str] = mapped_column(String, default="Available")  
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering")
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -43,11 +42,16 @@ class Offering(Base):
           
     def repr_instructor(self):
         lesson = self.get_lesson()
+        capacity_info = (
+            f"Capacity: {lesson.get_capacity()}\n"
+            if lesson.get_type().value != 'private'
+            else "Capacity: Private Lesson\n"
+        )
         return (
             f"\nOffering ID: {self.get_id()}\n"
             f"Location ID: {lesson.get_location().get_id()}\n"
             f"Location: {lesson.get_location().name}, {lesson.get_location().get_city()}\n"
-            f"Capacity: {lesson.get_capacity()}\n"
+            f"{capacity_info}"
             f"Timeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
             f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}"
             f"Offering Type: {lesson.get_type().value}\n"
@@ -55,16 +59,40 @@ class Offering(Base):
     
     def repr_client(self):
         lesson = self.get_lesson()
+        capacity_info = (
+            f"Capacity: {lesson.get_capacity()}\n"
+            if lesson.get_type().value != 'private' 
+            else "Capacity: Private Lesson\n"
+        )
         return (
             f"\nOffering ID: {self.get_id()}\n"
             f"Location: {lesson.get_location().get_name()}, {lesson.get_location().get_city()}\n"
-            f"Capacity: {lesson.get_capacity()}\n"
+            f"{capacity_info}"
             f"Timeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
             f"Offering Type: {lesson.get_type().value}\n"
             f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}\n"
             f"Specialization: {lesson.get_specialization().value}\n"
             f"Instructor: {self.instructor.get_name()}\n"
             f"Status: {self.get_status()}"  
+        )
+    
+    def repr_client_booked(self):
+        lesson = self.get_lesson()
+        capacity_info = (
+            f"Capacity: {lesson.get_capacity()}\n"
+            if lesson.get_type().value != 'private'
+            else "Capacity: Private Lesson\n"
+        )
+        return (
+            f"\nOffering ID: {self.get_id()}\n"
+            f"Location: {lesson.get_location().get_name()}, {lesson.get_location().get_city()}\n"
+            f"{capacity_info}"
+            f"Timeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
+            f"Offering Type: {lesson.get_type().value}\n"
+            f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}\n"
+            f"Specialization: {lesson.get_specialization().value}\n"
+            f"Instructor: {self.instructor.get_name()}\n"
+            f"Status: Non-Availble"  
         )
 
     def update_status(self, client : "Client"):

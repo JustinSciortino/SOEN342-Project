@@ -83,10 +83,10 @@ class Admin(User):
 
                     from models import SpecializationType
                     print(f"Available specialization types: {[spec.value for spec in SpecializationType]}")
-                    offering_specialization = input("Enter offering specialization ()(or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
+                    offering_specialization = input("Enter offering specialization (or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
                     if offering_specialization is not None and offering_specialization.lower() == 'q':
-
                         _quit = True
+
                     if _quit == False and offering_specialization:
                         offering_specialization = SpecializationType(offering_specialization)
                 

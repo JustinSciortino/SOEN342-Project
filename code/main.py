@@ -19,10 +19,10 @@ def createSampleObjects(db: Session):
         instructor2 = user_catalog.register_instructor("instructor2", "pass", "1234567891", [SpecializationType.swim, SpecializationType.yoga], ["Terrebonne", "Laval"])
         instructor3 = user_catalog.register_instructor("instructor3", "pass", "1234567892", [SpecializationType.dance, SpecializationType.soccer], ["Montreal", "Dorval"])
 
-        client1 = user_catalog.register_client(name="Alice Smith", password="password123", phone_number="123-456-7890", is_legal_guardian=False),
-        #client2 = user_catalog.register_client(name="Bob Johnson", password="securePass456", phone_number="987-654-3210", is_legal_guardian=True, minor_name="Tom Johnson", minor_age=15),
-        #client3 = user_catalog.register_client(name="Charlie Davis", password="charlie123", phone_number="555-555-5555", is_legal_guardian=True, minor_name="Emily Davis", minor_age=12),
-        client4 = user_catalog.register_client(name="Diana Adams", password="dianaSecure", phone_number="444-444-4444", is_legal_guardian=False)
+        client1 = user_catalog.register_client(name="a", password="pass", phone_number="1234567890", is_legal_guardian=False),
+        #client2 = user_catalog.register_client(name="Bob Johnson", password="securePass456", phone_number="9876543210", is_legal_guardian=True, minor_name="Tom Johnson", minor_age=15),
+        #client3 = user_catalog.register_client(name="Charlie Davis", password="charlie123", phone_number="5555555555", is_legal_guardian=True, minor_name="Emily Davis", minor_age=12),
+        client4 = user_catalog.register_client(name="d", password="pass", phone_number="4444444444", is_legal_guardian=False)
 
         location1 = location_catalog.create_location(name="TD Bank", address="1234 Street", capacity=50, city="Montreal", space_type=[SpaceType.rink, SpaceType.field])
         location2 = location_catalog.create_location(name="FB Dungeon", address="5678 Street", capacity=20, city="Laval", space_type=[SpaceType.field, SpaceType.pool])
@@ -39,7 +39,7 @@ def createSampleObjects(db: Session):
         lesson2 = lessons_catalog.create_lesson(capacity=30, location=location2, timeslot=timeslot2, lesson_type=LessonType.group, specialization=SpecializationType.soccer)
         lesson3 = lessons_catalog.create_lesson(capacity=100, location=location3, timeslot=timeslot3, lesson_type=LessonType.private, specialization=SpecializationType.swim)
         lesson4 = lessons_catalog.create_lesson(capacity=50, location=location4, timeslot=timeslot4, lesson_type=LessonType.group, specialization=SpecializationType.yoga)
-        lesson5 = lessons_catalog.create_lesson(capacity=50, location=location1, timeslot=timeslot2, lesson_type=LessonType.group, specialization=SpecializationType.soccer)
+        #lesson5 = lessons_catalog.create_lesson(capacity=50, location=location1, timeslot=timeslot2, lesson_type=LessonType.group, specialization=SpecializationType.soccer)
 
         offering1 = offerings_catalog.create_offering(lesson=lesson1, instructor=instructor1)
         offering2 = offerings_catalog.create_offering(lesson=lesson2, instructor=instructor2)
@@ -68,7 +68,7 @@ def main():
 
         choice = None
         while True:
-            print("----------Main Menu----------")
+            print("\n----------Main Menu----------")
             print(main_menu_options)
             choice = input("\nSelect an option: ")
             if choice.strip() == "":
@@ -200,7 +200,7 @@ def main():
                     continue
                 break
             
-            if _quit == False:
+            if _quit == False: 
                 client_is_minor = str(input("Are you under 18? (yes/no): ")).lower()
 
                 if client_is_minor == 'yes':
@@ -245,15 +245,14 @@ def main():
                         print(f"Minor, {minor_name}, has been created.")
 
                     elif guardian_option == '2':
-                        guardian_client_id = str(input("Enter the ID of the existing guardian: "))
+                        guardian_client_id = int(input("Enter the ID of the existing guardian: "))
                         
                         existing_guardian = user_catalog.get_client_by_id(guardian_client_id)
 
-                        if existing_guardian is None or not existing_guardian.is_legal_guardian:
-                            print("Invalid guardian ID or the client is not a legal guardian. You will be redirected to the main menu.")
+                        if existing_guardian is None:
+                            print("Invalid guardian ID. You will be redirected to the main menu.")
                             break
                         
-                        existing_guardian.is_legal_guardian = True
                         relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
                         minor_name = client_name
                         minor_age = int(input("Enter your age: "))
@@ -286,7 +285,7 @@ def main():
 
                     if _quit == False:
                         try:
-                            client = user_catalog.register_client(client_name, client_phone_number, client_password, is_legal_guardian=False)
+                            client = user_catalog.register_client(client_name, client_phone_number, client_password, is_legal_guardian=True)
                             
                         except ValueError as e:
                             print(f"Error registering client: {e}")

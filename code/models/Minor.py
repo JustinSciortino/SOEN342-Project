@@ -8,12 +8,12 @@ class Minor(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     age: Mapped[int] = mapped_column(Integer, nullable=False)
-    guardian = relationship("Client", back_populates="minor")
+    guardian = relationship("Client", back_populates="minors")
     guardian_id: Mapped[int] = mapped_column(Integer, ForeignKey('clients.id'), nullable=False)
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="minor")
     relationship_with_guardian: Mapped[str] = mapped_column(String, nullable=False)
 
-    def __init__(self, guardian, name: str, age: int, relationship_with_guardian: str = "Child"):
+    def __init__(self, guardian, name: str, age: int, relationship_with_guardian: str):
         self.name = name
         self.age = age
         self.guardian = guardian
@@ -21,7 +21,7 @@ class Minor(Base):
         self.relationship_with_guardian = relationship_with_guardian
 
     def __repr__(self) -> str:
-        return f"Minor {self.name} is {self.age} years old"
+        return f"Minor {self.name}, {self.age} years old, Relationship: {self.relationship_with_guardian}"
     
     def get_id(self) -> int:
         return self.id

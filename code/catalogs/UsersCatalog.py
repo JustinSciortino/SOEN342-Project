@@ -147,3 +147,9 @@ class UsersCatalog:
         except Exception as e:
             self.session.rollback()  # Rollback if there's an error
             raise ValueError(f"Failed to update instructor: {str(e)}")
+        
+    def create_minor(self, guardian: "Client", name: str, age: int, relationship_with_guardian: str):
+        minor = Minor(guardian=guardian, name=name, age=age, relationship_with_guardian=relationship_with_guardian)
+        self.session.add(minor)
+        self.session.commit()
+        return minor

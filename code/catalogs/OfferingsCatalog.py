@@ -38,6 +38,32 @@ class OfferingsCatalog:
             )
             .all()
         )
+    
+    def get_offerings(self, city: str = None, specialization: "SpecializationType" = None, _type: LessonType = None):
+        query = self.session.query(Offering).join(Offering.lesson).join(Lesson.location)
+
+        if city is not None:
+            query = query.filter(Location.city == city)
+
+        if specialization is not None:
+            query = query.filter(Lesson.specialization == specialization.value)
+
+        if _type is not None:
+            query = query.filter(Lesson.type == _type)
+
+        return query.all()
+    
+    def get_available_offerings(self, specialization:"SpecializationType"):
+        return (
+            self.session.query(Offering)
+            .join(Offering.lesson)
+            .filter(
+                Lesson.specialization == specialization.value,
+                Offering.instructor_id.isnot(None),
+                Offering.status == "Available"
+            )
+            .all()
+        )
 
 
     def get_offerings_by_instructor_id(self, instructor_id: int):
