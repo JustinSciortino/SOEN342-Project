@@ -12,12 +12,12 @@ class Location(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     address: Mapped[str] = mapped_column(String, nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
-    city: Mapped[str] = mapped_column(String, nullable=False) #! Needs to map city ID object
+    city: Mapped[str] = mapped_column(String, nullable=False) 
     space_type: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     #city: Mapped['City'] = relationship("City", backref="location")
     #city_id: Mapped[int] = mapped_column(Integer, ForeignKey('cities.id'), nullable=False)
     schedule: Mapped["Schedule"] = relationship("Schedule", back_populates="location", uselist=False, cascade="all, delete-orphan")
-    offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="location")
+    lessons: Mapped[list["Lesson"]] = relationship("Lesson", back_populates="location")
 
     def __init__(self, name: str, address: str, capacity: int, city: str, space_type: list[SpaceType]):
         self.name = name

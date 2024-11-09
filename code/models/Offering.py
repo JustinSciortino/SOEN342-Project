@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time, ARRAY
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from database import Base
-from .OfferingType import OfferingType
+from .LessonType import LessonType
 from .SpecializationType import SpecializationType
 from .Timeslot import Timeslot
+from .Lesson import Lesson
 
 
 
@@ -11,45 +12,29 @@ class Offering(Base):
     __tablename__ = "offerings"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
-    type = mapped_column(Enum(OfferingType), nullable=False)
-    instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=True)
+    lesson_id: Mapped[int]=mapped_column(Integer, ForeignKey('lessons.id'), nullable=False)
+    lesson = relationship("Lesson", back_populates="offerings")
+    instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=False)
     instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
-    is_available: Mapped[bool] = mapped_column(Boolean, default=False) #? Only available once instructor is assigned
-    status: Mapped[str] = mapped_column(String, default="Available")  #? Only made not available to the client if they already booked the offering
+    status: Mapped[str] = mapped_column(String, default="Not-Available")  #? Only made not available to the client if they already booked the offering
+    #! Status needs to be refactored
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering")
-    specialization = mapped_column(Enum(SpecializationType), nullable=False)
-    #bookings_id: Mapped[list[int]]=mapped_column(ARRAY(Integer), default=[])
-    timeslot: Mapped["Timeslot"] = relationship(back_populates="offering", cascade="all, delete-orphan")
-    #timeslot_id: Mapped[int] = mapped_column(Integer, ForeignKey('timeslots.id'), nullable=False)
-    location: Mapped["Location"] = relationship("Location", back_populates="offerings")
-    location_id: Mapped[int] = mapped_column(Integer, ForeignKey('locations.id'), nullable=True)
-    capacity: Mapped[int] = mapped_column(Integer, nullable=True)
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    def __init__(self, 
-                 offering_type: OfferingType, 
-                 specialization: SpecializationType, 
-                 location: "Location", 
-                 capacity: int, 
-                 timeslot: "Timeslot"):
-        self.type = offering_type
+    def __init__(self, instructor: "Instructor", lesson: "Lesson"):
         self.is_cancelled = False
-        self.timeslot = timeslot
-        self.specialization = specialization
-        self.instructor = None
-        self.instructor_id = None
-        self.location = location
-        self.location_id = location.get_id()
-        self.is_available = False
+        self.instructor = instructor
+        self.instructor_id = instructor.get_id()
+        self.lesson = lesson
+        self.lesson_id = lesson.get_id()
         self.status = "Not-Available"
-        self.capacity = capacity
         self.bookings = []
 
     def repr_user(self):
         return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and {self.capacity-len(self.bookings)} spots available at {self.location}"
     
     def repr_admin(self):
-        if self.type == OfferingType.group:
+        if self.type == LessonType.group:
             return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and the course is {self.specialization.name}, {len(self.bookings)} number of bookings and {self.capacity-len(self.bookings)} spots available at {self.location} and is {self.status}"
         else:
             return f"\nOffering {self.id} is a {self.type.name} class and the course is {self.specialization.name}, at {self.location} and is {self.status}"
@@ -97,7 +82,7 @@ class Offering(Base):
     def get_id(self) -> int:
         return self.id
     
-    def get_type(self) -> OfferingType:
+    def get_type(self) -> LessonType:
         return self.type
 
     def get_instructor(self):

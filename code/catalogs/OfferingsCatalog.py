@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
-from models import Offering, OfferingType, Location, Timeslot, SpecializationType, Instructor
+from models import Offering, LessonType, Location, Timeslot, SpecializationType, Instructor
 
 class OfferingsCatalog:
     _instance = None
@@ -16,8 +16,8 @@ class OfferingsCatalog:
             cls._instance = cls(session)
         return cls._instance
     
-    def create_offering(self, location: "Location", capacity: int, timeslot: "Timeslot", offering_type: OfferingType, specialization: "SpecializationType"):
-        offering = Offering(location=location, capacity=capacity, timeslot=timeslot, offering_type=offering_type, specialization=specialization)
+    def create_offering(self, lesson: "Lesson", instructor: "Instructor"):
+        offering = Offering(instructor=instructor, lesson=lesson)
 
         if not offering:
             raise ValueError("Offering not created")
@@ -37,7 +37,7 @@ class OfferingsCatalog:
     def get_offerings_by_instructor_id(self, instructor_id: int):
         return self.session.query(Offering).filter(Offering.instructor_id == instructor_id).all()
       
-    def get_all_offerings(self, city: str = None, specialization: "SpecializationType" = None, _type: OfferingType = None, is_admin: bool = False):
+    def get_all_offerings(self, city: str = None, specialization: "SpecializationType" = None, _type: LessonType = None, is_admin: bool = False):
         query = self.session.query(Offering).join(Offering.location)
 
         if is_admin:

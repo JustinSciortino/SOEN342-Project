@@ -12,8 +12,8 @@ class Timeslot(Base):
     start_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
     end_time: Mapped[Time] = mapped_column(Time, nullable=False)
     end_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
-    offering: Mapped["Offering"] = relationship(back_populates="timeslot")
-    offering_id: Mapped[int] = mapped_column(Integer, ForeignKey("offerings.id"), nullable=True) 
+    lesson: Mapped["Lesson"] = relationship(back_populates="timeslot")
+    lesson_id: Mapped[int] = mapped_column(Integer, ForeignKey("lessons.id"), nullable=True) 
     schedule_id: Mapped[int] = mapped_column(Integer, ForeignKey("schedules.id"), nullable=False)
     schedule: Mapped["Schedule"] = relationship("Schedule", back_populates="timeslots")
 

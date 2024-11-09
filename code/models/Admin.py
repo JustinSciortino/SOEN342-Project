@@ -31,16 +31,18 @@ class Admin(User):
         admin_menu_options = """
         Admin Options:
         1. View Offerings
-        2. Create Offering
-        3. Cancel Offering
-        4. Delete Client/Instructor Account
-        5. View Client Bookings (Optionally Cancel Client Booking)
-        6. Add Location
-        7. View Location Schedule
-        8. Delete Location
+        2. View Lessons
+        3. Create Lesson
+        4. Cancel Offering or Lesson 
+        5. Delete Client/Instructor Account
+        6. View Client Bookings (Optionally Cancel Client Booking)
+        7. Add Location
+        8. View Location Schedule
         9. Get All Locations
         10. Get Location from ID or City (and optionally Name and Address)
         11. Logout and return to main menu"""
+
+        #* For cancel offering and lesson, delete the corresponding 
 
         while True:
             choice = None
@@ -72,7 +74,7 @@ class Admin(User):
                 _quit = False
 
 
-                offering_city = input("Enter offering city (or 'q' to quit or 'enter' to not add a city): ").strip() or None
+                offering_city = input("Enter offering city (or 'q' to quit or click 'enter' to not add a city): ").strip() or None
                 if offering_city is not None and offering_city.lower() == 'q':
                     _quit = True
 
@@ -88,8 +90,8 @@ class Admin(User):
                         offering_specialization = SpecializationType(offering_specialization)
                 
                 if _quit == False:
-                    from models import OfferingType
-                    print(f"Available offering types: {[offering_type.value for offering_type in OfferingType]}")
+                    from models import LessonType
+                    print(f"Available offering types: {[offering_type.value for offering_type in LessonType]}")
                     offering_type = input("Enter offering type (or 'q' to quit or 'enter' to not add an offering type): ").strip() or None
                     if offering_type is not None and offering_type.lower() == 'q':
                         _quit = True
@@ -110,8 +112,8 @@ class Admin(User):
                     continue
 
 
-            if choice == 2:
-                print("\n--------Create Offering--------")
+            if choice == 3:
+                print("\n--------Create Lesson--------")
                 location_id = None
                 _quit=False
 
@@ -236,8 +238,8 @@ class Admin(User):
                         specialization = None
 
                         while True:
-                            from models import OfferingType
-                            valid_offering_types = [offering_type.value.lower() for offering_type in OfferingType]
+                            from models import LessonType
+                            valid_offering_types = [offering_type.value.lower() for offering_type in LessonType]
                             print(f"Available offering types: {valid_offering_types}")
                             offering_type_input = input("Enter offering type (e.g. private or group)(or 'q' to quit): ").lower()
                             if offering_type_input == 'q':
@@ -252,7 +254,7 @@ class Admin(User):
                                 print(f"Invalid offering type. Please enter one of: {', '.join(valid_offering_types)}")
                                 continue
 
-                            offering_type = OfferingType(offering_type_input)
+                            offering_type = LessonType(offering_type_input)
                             break
 
 
@@ -287,7 +289,7 @@ class Admin(User):
                                     continue
 
 
-                        if _quit == False and offering_type == OfferingType.group:
+                        if _quit == False and offering_type == LessonType.group:
                             while True:
                                 offering_capacity = str(input("Enter offering capacity (or 'q' to quit): "))
                                 if offering_capacity.lower() == 'q':
@@ -317,8 +319,8 @@ class Admin(User):
                         continue
             
             #! Needs to be tested after integrating client menu
-            if choice == 3:
-                print("\n--------Cancel Offering--------")
+            if choice == 4:
+                print("\n--------Cancel Offering or Lesson--------")
                 offering_id = None
                 offering = None
                 _quit = False
@@ -351,7 +353,7 @@ class Admin(User):
                     continue
             
             
-            if choice == 4:
+            if choice == 5:
                 print("\n--------Delete Client/Instructor Account--------")
                 account_name = None
                 account_id = None
@@ -380,7 +382,7 @@ class Admin(User):
                     print("\nYou will be redirected back to the admin menu.")
             
             #! Needs to be tested after client menu is integrated
-            if choice == 5:
+            if choice == 6:
                 client_id = None
                 client_name = None
                 _quit = False
@@ -465,7 +467,7 @@ class Admin(User):
                     print("\nYou will be redirected back to the admin menu.")
                     continue
 
-            if choice == 6:
+            if choice == 7:
                 print("\n--------Add Location--------")
                 location_name = None
                 location_address = None
@@ -544,7 +546,7 @@ class Admin(User):
                 else:
                     print("\nYou will be redirected back to the admin menu.")
 
-            if choice == 7:
+            if choice == 8:
                 print("\n--------View Location Schedule--------")
                 location_id = None
                 location = None
@@ -580,59 +582,6 @@ class Admin(User):
                     print("\nYou will be redirected back to the admin menu.")
                     continue
 
-            if choice == 8:
-                print("\n--------Delete Location--------")
-                location_city = None
-                location_name = None
-                location_address = None
-                location_id = None
-                _quit = False
-
-                while True:
-                    location_city = str(input("Enter location city or ID (or 'q' to quit): "))
-                    if location_city.lower() == 'q':
-                        _quit = True
-                        break
-                    if not location_city:
-                        print("City cannot be empty. Please try again.")
-                        continue
-
-                    if location_city.isdigit():
-                        location_id = int(location_city)
-                        break
-                    break
-
-                if _quit == False and not location_id:
-                    while True:
-                        location_name = str(input("Enter location name (or 'q' to quit): "))
-                        if location_name.lower() == 'q':
-                            _quit = True
-                            break
-                        if not location_name:
-                            print("Name cannot be empty. Please try again.")
-                            continue
-                        break
-
-                if _quit == False and not location_id:
-                    while True:
-                        location_address = str(input("Enter location address (or 'q' to quit): "))
-                        if location_address.lower() == 'q':
-                            _quit = True
-                            break
-                        if not location_address:
-                            print("Address cannot be empty. Please try again.")
-                            continue
-                        break
-
-                if _quit == False:
-                    try:
-                        locations_catalog.delete_location(location_city, location_name, location_address, location_id)  
-                    except ValueError as e:
-                        print(f"{e} - The location was not deleted.")
-                        continue
-                    print(f"Location has been successfully deleted.")
-                else:
-                    print("\nYou will be redirected back to the admin menu.")
 
             if choice == 9:
                 print("\n--------Get All Locations--------")

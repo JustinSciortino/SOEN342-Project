@@ -32,6 +32,8 @@ class Instructor(User):
     def __repr__(self) -> str:
         return f"Instructor {self.id} {self.name} ({self.phone_number}), has the following specilizations: {self.specialization} and the following cities: {self.available_cities}"
     
+    def get_id(self) -> int:
+        return self.id
 
     def instructor_menu(self, db: Session):
         from catalogs import OfferingsCatalog, UsersCatalog
