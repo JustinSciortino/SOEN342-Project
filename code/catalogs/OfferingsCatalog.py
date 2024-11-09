@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 
-from models import Offering, LessonType, Location, Timeslot, SpecializationType, Instructor
+from models import Offering, LessonType, Location, Timeslot, SpecializationType, Instructor, Lesson
 
 class OfferingsCatalog:
     _instance = None
@@ -27,34 +27,33 @@ class OfferingsCatalog:
         return offering
     
     def get_available_offerings_for_instructor(self, cities, specializations):
-        return self.session.query(Offering).join(Offering.location).filter(
-            Location.city.in_(cities),  
-            Offering.specialization.in_(specializations),
-            Offering.instructor_id == None
-        ).all()
+        return (
+            self.session.query(Offering)
+            .join(Offering.lesson)
+            .join(Lesson.location)
+            .filter(
+                Location.city.in_(cities),
+                Lesson.specialization.in_(specializations),
+                Offering.instructor_id.is_(None)
+            )
+            .all()
+        )
 
 
     def get_offerings_by_instructor_id(self, instructor_id: int):
         return self.session.query(Offering).filter(Offering.instructor_id == instructor_id).all()
       
-    def get_all_offerings(self, city: str = None, specialization: "SpecializationType" = None, _type: LessonType = None, is_admin: bool = False):
-        query = self.session.query(Offering).join(Offering.location)
+    def admin_get_all_offerings(self, city: str = None, specialization: "SpecializationType" = None, _type: LessonType = None):
+        query = self.session.query(Offering).join(Offering.lesson).join(Lesson.location)
 
-        if is_admin:
-            if city is not None:
-                query = query.filter(Location.city == city)
-            if specialization is not None:
-                query = query.filter(Offering.specialization == specialization.value)
-            if _type is not None:
-                query = query.filter(Offering.type == _type)
-        else:
-            query = query.filter(Offering.is_available == True)
-            if city is not None:
-                query = query.filter(Location.city == city)
-            if specialization is not None:
-                query = query.filter(Offering.specialization == specialization.value)
-            if _type is not None:
-                query = query.filter(Offering.type == _type)
+        if city is not None:
+            query = query.filter(Location.city == city)
+
+        if specialization is not None:
+            query = query.filter(Lesson.specialization == specialization.value)
+
+        if _type is not None:
+            query = query.filter(Lesson.type == _type)
 
         return query.all()
 
@@ -109,4 +108,9 @@ class OfferingsCatalog:
         except Exception as e:
             self.session.rollback()  
             raise ValueError(f"Error removing instructor from offering: {e}")
+        
+    def delete_offering(self, offering: Offering):
+        self.session.delete(offering)
+        self.session.commit()
+        return offering
 

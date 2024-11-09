@@ -54,6 +54,9 @@ class Booking(Base):
     def get_client(self):
         return self.client
     
+    def get_client_id(self) -> int:
+        return self.client_id
+    
     def get_status(self) -> str:
         return self.status  
     

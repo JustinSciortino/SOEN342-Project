@@ -43,6 +43,12 @@ class Location(Base):
     def get_name(self) -> str:
         return self.name
     
+    def get_address(self) -> str:
+        return self.address
+    
+    def get_city(self) -> str:
+        return self.city
+    
     def delete(self):
         if self.schedule:
             for offering in self.offerings:
@@ -52,3 +58,6 @@ class Location(Base):
 
     def __repr__(self):
         return f"Location {self.id} {self.name} ({self.address}), has a capacity of {self.capacity} and is located in {self.city} and has {self.space_type} space type(s)"
+    
+    def offering_repr(self):
+        return f"Location {self.id} {self.name} ({self.address}), located in {self.city}"

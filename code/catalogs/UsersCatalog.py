@@ -15,7 +15,6 @@ class UsersCatalog:
             cls._instance = cls(session)
         return cls._instance
     
-    #TODO Register a client
     
     def register_admin(self, name: str, password: str):
         #existing_user = self.session.query(User).join(Admin).filter(User.name == name).first() # Checks for users who are also admins

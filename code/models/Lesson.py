@@ -11,14 +11,11 @@ class Lesson(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     type = mapped_column(Enum(LessonType), nullable=False)
     specialization = mapped_column(Enum(SpecializationType), nullable=False)
-    timeslot: Mapped["Timeslot"] = relationship(back_populates="offering", cascade="all, delete-orphan")
-    location: Mapped["Location"] = relationship("Location", back_populates="offerings")
-    location_id: Mapped[int] = mapped_column(Integer, ForeignKey('locations.id'), nullable=True)
     capacity: Mapped[int] = mapped_column(Integer, nullable=True)
-    offerings = relationship("Offering", back_populates="lesson")
+    offerings = relationship("Offering", back_populates="lesson", cascade="all, delete-orphan")
     location = relationship("Location", back_populates="lessons")
     location_id = mapped_column(Integer, ForeignKey('locations.id'), nullable=False)
-    timeslot = relationship("Timeslot", back_populates="lesson", cascade="all, delete-orphan")
+    timeslot = relationship("Timeslot", back_populates="lesson", cascade="all, delete-orphan", uselist=False)
 
     def __init__(self, type: LessonType, specialization: SpecializationType, location: "Location", timeslot: "Timeslot", capacity: int = None):    
         self.type = type
@@ -37,6 +34,16 @@ class Lesson(Base):
     def get_location(self):
         return self.location
     
+    def get_location_id(self):
+        return self.location_id
+    
+    def set_location(self, location):
+        self.location = location
+        if not location:
+            self.location_id = location.get_id
+        else:
+            self.location_id = None
+    
     def get_specialization(self):
         return self.specialization
     
@@ -46,3 +53,8 @@ class Lesson(Base):
     def get_timeslot(self):
         return self.timeslot
     
+    def get_offerings(self):
+        return self.offerings
+    
+    def repr_admin(self):
+        return f"\n\tLesson {self.id} is a {self.get_type().name} class with a capacity of {self.get_capacity()} at {self.get_location().get_name()}, {self.get_location().get_city()} on {self.get_timeslot().get_day_of_week()} from {self.get_timeslot().get_start_time()} {self.get_timeslot().get_start_date()} to {self.get_timeslot().get_end_time()} {self.get_timeslot().get_end_date()} doing {self.get_specialization().name}"

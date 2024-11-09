@@ -22,11 +22,12 @@ class Admin(User):
         return f"Admin {self.id} {self.name}"
     
     def admin_menu(self, db: Session):
-        from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog, BookingsCatalog
+        from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog, BookingsCatalog, LessonsCatalog
         locations_catalog = LocationsCatalog.get_instance(db)
         users_catalog = UsersCatalog.get_instance(db)  
         offerings_catalog = OfferingsCatalog.get_instance(db)
         bookings_catalog = BookingsCatalog.get_instance(db)
+        lessons_catalog = LessonsCatalog.get_instance(db)
 
         admin_menu_options = """
         Admin Options:
@@ -98,7 +99,7 @@ class Admin(User):
 
                 if _quit == False:
 
-                    offerings = offerings_catalog.get_all_offerings(city=offering_city, specialization=offering_specialization, _type=offering_type, is_admin=True)
+                    offerings = offerings_catalog.admin_get_all_offerings(city=offering_city, specialization=offering_specialization, _type=offering_type)
 
 
                     if not offerings:
@@ -111,14 +112,66 @@ class Admin(User):
                     print("\nYou will be redirected back to the admin menu.")
                     continue
 
+            if choice == 2:
+                lesson_city = None
+                lesson_specialization = None
+                lesson_type = None
+                _quit = False
+
+
+                lesson_city = input("Enter lesson city (or 'q' to quit or click 'enter' to not add a city): ").strip() or None
+                if lesson_city is not None and lesson_city.lower() == 'q':
+                    _quit = True
+
+                if _quit == False:
+
+                    from models import SpecializationType
+                    print(f"Available specialization types: {[spec.value for spec in SpecializationType]}")
+                    lesson_specialization = input("Enter lesson specialization ()(or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
+                    if lesson_specialization is not None and lesson_specialization.lower() == 'q':
+                        _quit = True
+                    if _quit == False and lesson_specialization:
+                        lesson_specialization = SpecializationType(lesson_specialization)
+                
+                if _quit == False:
+                    from models import LessonType
+                    print(f"Available offering types: {[lesson_type.value for lesson_type in LessonType]}")
+                    lesson_type = input("Enter lesson type (or 'q' to quit or 'enter' to not add an offering type): ").strip() or None
+                    if lesson_type is not None and lesson_type.lower() == 'q':
+                        _quit = True
+
+                if _quit == False:
+
+                    lessons = lessons_catalog.admin_get_all_lessons(city=lesson_city, specialization=lesson_specialization, _type=lesson_type)
+
+
+                    if not lessons:
+                        print("\nNo offerings found.")
+
+                    for lesson in lessons:
+                        print(lesson.repr_admin())
+
+                else:
+                    print("\nYou will be redirected back to the admin menu.")
+                    continue
 
             if choice == 3:
                 print("\n--------Create Lesson--------")
                 location_id = None
                 _quit=False
 
+                available_locations = locations_catalog.get_all_locations()
+
+                if not available_locations:
+                    print("No locations found. Please add a location before creating a lesson.")
+                    continue
+                else:
+                    print("\n","Available locations:")
+                    for location in available_locations:
+                        print("\n",location)
+
                 while True:
-                    location_id = str(input("Enter location id (or 'q' to quit): "))
+                    location_id = str(input("\nEnter location id from one of locations above (or 'q' to quit): "))
                     if location_id.lower() == 'q':
                         _quit = True
                         break
@@ -230,31 +283,31 @@ class Admin(User):
                         is_conflicting = location.get_schedule().is_conflicting(timeslot)
 
                         if is_conflicting:
-                            print("Timeslot conflicts with existing timeslots. Offering cannot be created.")
+                            print("Timeslot conflicts with existing timeslots. Lesson cannot be created.")
                             continue
 
-                        offering_type = None
-                        offering_capacity = None
+                        lesson_type = None
+                        lesson_capacity = None
                         specialization = None
 
                         while True:
                             from models import LessonType
-                            valid_offering_types = [offering_type.value.lower() for offering_type in LessonType]
-                            print(f"Available offering types: {valid_offering_types}")
-                            offering_type_input = input("Enter offering type (e.g. private or group)(or 'q' to quit): ").lower()
-                            if offering_type_input == 'q':
+                            valid_lesson_types = [lesson_type.value.lower() for lesson_type in LessonType]
+                            print(f"Available lesson types: {valid_lesson_types}")
+                            lesson_type_input = input("Enter lesson type (e.g. private or group)(or 'q' to quit): ").lower()
+                            if lesson_type_input == 'q':
                                 _quit = True
                                 break
 
-                            if not offering_type_input:
-                                print("Offering type cannot be empty. Please try again.")
+                            if not lesson_type_input:
+                                print("Lesson type cannot be empty. Please try again.")
                                 continue
 
-                            if offering_type_input not in valid_offering_types:
-                                print(f"Invalid offering type. Please enter one of: {', '.join(valid_offering_types)}")
+                            if lesson_type_input not in valid_lesson_types:
+                                print(f"Invalid lesson type. Please enter one of: {', '.join(valid_lesson_types)}")
                                 continue
 
-                            offering_type = LessonType(offering_type_input)
+                            lesson_type = LessonType(lesson_type_input)
                             break
 
 
@@ -268,7 +321,7 @@ class Admin(User):
                                     available_specs.update(SPACE_SPECIALIZATION_MAP[space_type_enum])
                                 
                                 print(f"Available specializations: {[spec.value for spec in available_specs]}")
-                                specialization_input = input("Enter offering specialization (or 'q' to quit): ").strip().lower()
+                                specialization_input = input("Enter lesson specialization (or 'q' to quit): ").strip().lower()
                                 
                                 if specialization_input == 'q':
                                     _quit = True
@@ -289,68 +342,118 @@ class Admin(User):
                                     continue
 
 
-                        if _quit == False and offering_type == LessonType.group:
+                        if _quit == False and lesson_type == LessonType.group:
                             while True:
-                                offering_capacity = str(input("Enter offering capacity (or 'q' to quit): "))
-                                if offering_capacity.lower() == 'q':
+                                lesson_capacity = str(input("Enter lesson capacity (or 'q' to quit): "))
+                                if lesson_capacity.lower() == 'q':
                                     _quit = True
                                     break
-                                if not offering_capacity:
+                                if not lesson_capacity:
                                     print("Capacity cannot be empty. Please try again.")
                                     continue
-                                offering_capacity = int(offering_capacity)
-                                if offering_capacity <= location.get_capacity() and offering_capacity > 0:
+                                lesson_capacity = int(lesson_capacity)
+                                if lesson_capacity > location.get_capacity() or lesson_capacity <= 0:
                                     print(f"Capacity must be greater than 0 and less than or equal to the location capacity of {location.get_capacity()}. Please try again.")
                                     continue
                                 break
 
                         if _quit == False:
                             try:
-                                offering = offerings_catalog.create_offering(location=location, timeslot=timeslot, capacity=offering_capacity, offering_type=offering_type, specialization=specialization)
+                                lesson = lessons_catalog.create_lesson(location=location, timeslot=timeslot, capacity=lesson_capacity, lesson_type=lesson_type, specialization=specialization)
                                 locations_catalog.add_timeslot(location, timeslot)
                                 
                             except ValueError as e:
-                                print(f"{e} - The offering was not created and you will be redirected to the main menu")
+                                print(f"{e} - The lesson was not created and you will be redirected to the main menu")
                                 continue
-                            print(f"Offering {offering.get_id()} has been successfully created.")
+                            print(f"Lesson {lesson.get_id()} has been successfully created.")
                 
                     else:
                         print("\nYou will be redirected back to the admin menu.")
                         continue
             
-            #! Needs to be tested after integrating client menu
+            #! Needs to be tested after integrating client and instructor menu
             if choice == 4:
                 print("\n--------Cancel Offering or Lesson--------")
-                offering_id = None
-                offering = None
-                _quit = False
-
+                cancel_choice = None
+                option_str = """
+                Do you want to cancel an offering or delete a lesson? Enter offering or lesson (or 'q' to quit) 
+                (Note that if an offering is cancelled, the associated lesson will not be deleted. If a lesson is deleted, the associated offering will be deleted and cancelled): """
                 while True:
-                    offering_id = str(input("Enter offering ID (or 'q' to quit): "))
-                    if offering_id.lower() == 'q':
-                        _quit = True
+                    print(option_str)
+                    cancel_choice = input().strip().lower()
+                    if cancel_choice == 'q':
                         break
-                    if not offering_id:
-                        print("Id cannot be empty. Please try again.")
-                        continue
-                    if not offering_id.isdigit():
-                        print("Id must be a number. Please try again.")
+                    if cancel_choice not in ['offering', 'lesson']:
+                        print("Invalid choice. Please enter 'offering' or 'lesson'.")
                         continue
                     break
+                if cancel_choice == 'offering':
+                    offering_id = None
+                    offering = None
+                    _quit = False
 
-                if _quit == False:
-                    offering_id = int(offering_id)
-                    try:
-                        offering = offerings_catalog.get_offering_by_id(offering_id)
-                        #offering.cancel_offering()
-                        offerings_catalog.cancel_offering(offering=offering)
-                        print(f"Offering {offering.get_id()} has been successfully cancelled.")
-                    except ValueError as e:
-                        print(f"\n{e} - The offering was not found.")
+                    while True:
+                        offering_id = str(input("Enter offering ID (or 'q' to quit): "))
+                        if offering_id.lower() == 'q':
+                            _quit = True
+                            break
+                        if not offering_id:
+                            print("Id cannot be empty. Please try again.")
+                            continue
+                        if not offering_id.isdigit():
+                            print("Id must be a number. Please try again.")
+                            continue
+                        break
+
+                    if _quit == False:
+                        offering_id = int(offering_id)
+                        try:
+                            offering = offerings_catalog.get_offering_by_id(offering_id)
+                            offerings_catalog.cancel_offering(offering=offering)
+                            offerings_catalog.delete_offering(offering=offering)
+                            print(f"Offering {offering.get_id()} has been successfully cancelled.")
+                        except ValueError as e:
+                            print(f"\n{e} - The offering was not found.")
+                            continue
+                    else:
+                        print("\nYou will be redirected back to the admin menu.")
                         continue
-                else:
-                    print("\nYou will be redirected back to the admin menu.")
-                    continue
+
+                if cancel_choice == "lesson":
+                    lesson_id = None
+                    lesson = None
+                    _quit = False
+
+                    while True:
+                        lesson_id = str(input("Enter lesson ID (or 'q' to quit): "))
+                        if lesson_id.lower() == 'q':
+                            _quit = True
+                            break
+                        if not lesson_id:
+                            print("Id cannot be empty. Please try again.")
+                            continue
+                        if not lesson_id.isdigit():
+                            print("Id must be a number. Please try again.")
+                            continue
+                        break
+
+                    if _quit == False:
+                        lesson_id = int(lesson_id)
+                        try:
+                            lesson = lessons_catalog.get_lesson_by_id(lesson_id)
+                            lesson_offering = lesson.get_offerings()[0]
+                            if lesson_offering:
+                                offerings_catalog.cancel_offering(lesson_offering)
+                                offerings_catalog.delete_offering(lesson_offering)
+                                print(f"Associated offering has been successfully cancelled.")
+                            lessons_catalog.cancel_lesson(lesson)
+                            print(f"Lesson {lesson_id} has been successfully cancelled.")
+                        except ValueError as e:
+                            print(f"\n{e} - The lesson was not found.")
+                            continue
+                    else:
+                        print("\nYou will be redirected back to the admin menu.")
+                        continue
             
             
             if choice == 5:
@@ -383,6 +486,7 @@ class Admin(User):
             
             #! Needs to be tested after client menu is integrated
             if choice == 6:
+                print("\n--------View Client Bookings (Optionally Cancel Client Booking)--------")
                 client_id = None
                 client_name = None
                 _quit = False
@@ -581,7 +685,6 @@ class Admin(User):
                 else:
                     print("\nYou will be redirected back to the admin menu.")
                     continue
-
 
             if choice == 9:
                 print("\n--------Get All Locations--------")

@@ -16,7 +16,7 @@ class Offering(Base):
     lesson = relationship("Lesson", back_populates="offerings")
     instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=False)
     instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
-    status: Mapped[str] = mapped_column(String, default="Not-Available")  #? Only made not available to the client if they already booked the offering
+    status: Mapped[str] = mapped_column(String, default="Available")  #? Only made not available to the client if they already booked the offering
     #! Status needs to be refactored
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering")
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -27,124 +27,106 @@ class Offering(Base):
         self.instructor_id = instructor.get_id()
         self.lesson = lesson
         self.lesson_id = lesson.get_id()
-        self.status = "Not-Available"
+        self.status = "Available"
         self.bookings = []
 
     def repr_user(self):
-        return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and {self.capacity-len(self.bookings)} spots available at {self.location}"
+        lesson = self.get_lesson()
+        return f"\n\tOffering {self.get_id()} is a {lesson.get_type().name} class with a capacity of {lesson.get_capacity()} and {lesson.get_capacity()-len(self.bookings)} spots available at {lesson.get_location().offering_repr()}"
     
     def repr_admin(self):
-        if self.type == LessonType.group:
-            return f"\nOffering {self.id} is a {self.type.name} class with a capacity of {self.capacity} and the course is {self.specialization.name}, {len(self.bookings)} number of bookings and {self.capacity-len(self.bookings)} spots available at {self.location} and is {self.status}"
+        lesson = self.get_lesson()
+        if lesson.get_type() == LessonType.group:
+            return f"\n\tOffering {self.get_id()} is a {lesson.get_type().name} class with a capacity of {lesson.get_capacity()} and the course is {lesson.get_specialization().name}, {len(self.bookings)} number of bookings and {lesson.get_capacity()-len(self.bookings)} spots available at {lesson.get_location().offering_repr()} and is {self.get_status()}"
         else:
-            return f"\nOffering {self.id} is a {self.type.name} class and the course is {self.specialization.name}, at {self.location} and is {self.status}"
+            return f"\n\tOffering {self.get_id()} is a {lesson.get_type().name} class and the course is {lesson.get_specialization().name}, at {lesson.get_location().offering_repr()} and is {self.get_status()}"
           
     def repr_instructor(self):
+        lesson = self.get_lesson()
         return (
-            f"Offering ID: {self.id}\n"
-            f"Location: {self.location.name}, {self.location.city}\n"
-            f"Capacity: {self.capacity}\n"
-            f"Timeslot: {self.timeslot.day_of_week}, {self.timeslot.start_time} - {self.timeslot.end_time}\n"
-            f"Offering Type: {self.type.value}\n"
-            f"Available from {self.timeslot.start_date} to {self.timeslot.end_date}"
+            f"\tOffering ID: {self.get_id()}\n"
+            f"\tLocation: {lesson.get_location().name}, {lesson.get_location().get_city()}\n"
+            f"\tCapacity: {lesson.get_capacity()}\n"
+            f"\tTimeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
+            f"\tOffering Type: {lesson.get_type().value}\n"
+            f"\tAvailable from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}"
         )
     
     def repr_client(self):
+        lesson = self.get_lesson()
         return (
-            f"Offering ID: {self.id}\n"
-            f"Location: {self.location.name}, {self.location.city}\n"
-            f"Capacity: {self.capacity}\n"
-            f"Timeslot: {self.timeslot.day_of_week}, {self.timeslot.start_time} - {self.timeslot.end_time}\n"
-            f"Offering Type: {self.type.value}\n"
-            f"Available from {self.timeslot.start_date} to {self.timeslot.end_date}\n"
-            f"Specialization: {self.specialization.value}\n"
-            f"Instructor: {self.instructor.name}\n"
-            f"Status: {self.status}"  
+            f"\tOffering ID: {self.get_id()}\n"
+            f"\tLocation: {lesson.get_location().get_name()}, {lesson.get_location.get_city()}\n"
+            f"\tCapacity: {lesson.get_capacity()}\n"
+            f"\tTimeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
+            f"\tOffering Type: {lesson.get_type().value}\n"
+            f"\tAvailable from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}\n"
+            f"\tSpecialization: {lesson.get_specialization().value}\n"
+            f"\tInstructor: {self.instructor.get_name()}\n"
+            f"\tStatus: {self.get_status()}"  
         )
 
     def update_status(self, client : "Client"):
-        client_has_booked = any(booking.client_id == client.get_id() for booking in self.bookings)
+        client_has_booked = any(booking.get_client_id() == client.get_id() for booking in self.bookings)
         
-        no_spots_left = self.capacity - len(self.bookings) == 0
+        no_spots_left = self.get_lesson().get_capacity() - len(self.bookings) == 0
 
-        booked_timeslots = [booking.offering.timeslot for booking in client.get_bookings()]
+        booked_timeslots = [booking.get_offering().get_lesson().get_timeslot() for booking in client.get_bookings()]
 
-        time_conflict = Timeslot.is_conflicting(self.timeslot, booked_timeslots)
+        time_conflict = Timeslot.is_conflicting(self.get_lesson().get_timeslot(), booked_timeslots)
 
         if client_has_booked:
-            self.status = "Not Available (Already Booked)"
+            self.set_status("Not Available (Already Booked)")
+
         elif no_spots_left:
-            self.status = "Not Available (No Spots Left)"
+            self.set_status("Not Available (No Spots Left)")
+
         elif time_conflict:
-            self.status = "Not Available (Time Conflict)"
+            self.set_status("Not Available (Time Conflict)")
         
 
     def get_id(self) -> int:
         return self.id
-    
-    def get_type(self) -> LessonType:
-        return self.type
 
     def get_instructor(self):
         return self.instructor
-    
-    def set_instructor(self, instructor: "Instructor"):
-        self.instructor = instructor
-        return self
-    
-    def get_is_available(self) -> bool:
-        return self.is_available
-    
-    def set_is_available(self, is_available: bool):
-        self.is_available = is_available
-        return self
     
     def get_status(self) -> str:
         return self.status
     
     def set_status(self, status: str):
         self.status = status
-        return self
     
     def get_bookings(self):
         return self.bookings
     
-    def get_timeslot(self):
-        return self.timeslot
+    def get_is_cancelled(self) -> bool:
+        return self.is_cancelled
     
-    def get_location(self):
-        return self.location
+    def set_is_cancelled(self, is_cancelled: bool):
+        self.is_cancelled = is_cancelled
     
-    def get_capacity(self) -> int:
-        return self.capacity
-    
-    def get_specialization(self) -> SpecializationType:
-        return self.specialization
     
     def cancel(self):
         self.is_cancelled = True
-        self.location= None
-        self.location_id = None
-        self.status = "Not-Available"
+        self.get_lesson().set_location(None)
+        self.set_status("Not-Available") 
         for booking in self.bookings:
             booking.cancel()
 
     def cancel_offering(self):
-        self.status = "Not-Available"
-        self.is_available = False
-        self.is_cancelled = True
+        self.set_status("Not-Available") 
+        self.set_is_cancelled(True)
         for booking in self.bookings:
             booking.cancel()
     
-    def set_capacity(self, capacity: int):
-        if capacity < len(self.bookings):
-            raise ValueError("Capacity cannot be less than the number of bookings")
-        self.capacity = capacity
-        return self
     
     def add_booking(self, booking: "Booking"):
-        if self.status == "Not-Available":
+        if self.get_status() == "Not-Available":
             raise ValueError("Offering is not available for booking")
         self.bookings.append(booking)
         return self
+    
+    def get_lesson(self):
+        return self.lesson
     

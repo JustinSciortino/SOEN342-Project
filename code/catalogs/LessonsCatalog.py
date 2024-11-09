@@ -23,3 +23,28 @@ class LessonsCatalog:
         self.session.add(lesson)
         self.session.commit()
         return lesson
+    
+    def admin_get_all_lessons(self, city: str = None, specialization: "SpecializationType" = None, _type: LessonType = None):
+        query = self.session.query(Lesson).join(Lesson.location)
+
+        if city is not None:
+            query = query.filter(Location.city == city)
+
+        if specialization is not None:
+            query = query.filter(Lesson.specialization == specialization.value)
+
+        if _type is not None:
+            query = query.filter(Lesson.type == _type)
+        
+        return query.all()
+    
+    def get_lesson_by_id(self, _id: int):
+        lesson = self.session.query(Lesson).filter(Lesson.id == _id).first()
+        if not lesson:
+            raise ValueError(f"Lesson with id '{_id}' does not exist")
+        
+        return lesson
+    
+    def cancel_lesson(self, lesson):
+        self.session.delete(lesson)
+        self.session.commit()

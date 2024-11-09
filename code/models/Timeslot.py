@@ -26,8 +26,9 @@ class Timeslot(Base):
         self.schedule_id = schedule_id
 
     def __repr__(self):
-        return f"Timeslot {self.id} is on {self.day_of_week} from {self.start_time} to {self.end_time} starting on {self.start_date} and ending on {self.end_date} for Offering {self.offering_id}"
+        return f"Timeslot {self.id} is on {self.day_of_week} from {self.start_time} to {self.end_time} starting on {self.start_date} and ending on {self.end_date} for Lesson {self.lesson_id}"
 
+    @classmethod
     def is_conflicting(self, booked_timeslots: list["Timeslot"]):
         new_start_datetime = datetime.combine(self.start_date, self.start_time)
         new_end_datetime = datetime.combine(self.end_date, self.end_time)
@@ -43,3 +44,17 @@ class Timeslot(Base):
                         (self.start_time <= booked_timeslot.start_time and booked_timeslot.end_time <= self.end_time):
                         return True
         return False
+    
+    def get_id(self) -> int:   
+        return self.id
+    def get_start_time(self):
+        return self.start_time
+    def get_start_date(self):
+        return self.start_date
+    def get_end_time(self):
+        return self.end_time
+    def get_end_date(self):
+        return self.end_date
+    def get_day_of_week(self) -> str:
+        return self.day_of_week
+    
