@@ -48,3 +48,16 @@ class LessonsCatalog:
     def cancel_lesson(self, lesson):
         self.session.delete(lesson)
         self.session.commit()
+
+    def get_available_lessons_without_offering(self, cities, specializations):
+        return (
+            self.session.query(Lesson)
+            .join(Lesson.location)
+            .outerjoin(Lesson.offerings)
+            .filter(
+                Location.city.in_(cities),
+                Lesson.specialization.in_(specializations),
+                Lesson.offerings == None
+            )
+            .all()
+        )

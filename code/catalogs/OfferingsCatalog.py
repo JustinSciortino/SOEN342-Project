@@ -114,3 +114,4 @@ class OfferingsCatalog:
         self.session.commit()
         return offering
 
+

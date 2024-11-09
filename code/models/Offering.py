@@ -44,26 +44,27 @@ class Offering(Base):
     def repr_instructor(self):
         lesson = self.get_lesson()
         return (
-            f"\tOffering ID: {self.get_id()}\n"
-            f"\tLocation: {lesson.get_location().name}, {lesson.get_location().get_city()}\n"
-            f"\tCapacity: {lesson.get_capacity()}\n"
-            f"\tTimeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
-            f"\tOffering Type: {lesson.get_type().value}\n"
-            f"\tAvailable from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}"
+            f"\nOffering ID: {self.get_id()}\n"
+            f"Location ID: {lesson.get_location().get_id()}\n"
+            f"Location: {lesson.get_location().name}, {lesson.get_location().get_city()}\n"
+            f"Capacity: {lesson.get_capacity()}\n"
+            f"Timeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
+            f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}"
+            f"Offering Type: {lesson.get_type().value}\n"
         )
     
     def repr_client(self):
         lesson = self.get_lesson()
         return (
-            f"\tOffering ID: {self.get_id()}\n"
-            f"\tLocation: {lesson.get_location().get_name()}, {lesson.get_location.get_city()}\n"
-            f"\tCapacity: {lesson.get_capacity()}\n"
-            f"\tTimeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
-            f"\tOffering Type: {lesson.get_type().value}\n"
-            f"\tAvailable from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}\n"
-            f"\tSpecialization: {lesson.get_specialization().value}\n"
-            f"\tInstructor: {self.instructor.get_name()}\n"
-            f"\tStatus: {self.get_status()}"  
+            f"\nOffering ID: {self.get_id()}\n"
+            f"Location: {lesson.get_location().get_name()}, {lesson.get_location().get_city()}\n"
+            f"Capacity: {lesson.get_capacity()}\n"
+            f"Timeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
+            f"Offering Type: {lesson.get_type().value}\n"
+            f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}\n"
+            f"Specialization: {lesson.get_specialization().value}\n"
+            f"Instructor: {self.instructor.get_name()}\n"
+            f"Status: {self.get_status()}"  
         )
 
     def update_status(self, client : "Client"):

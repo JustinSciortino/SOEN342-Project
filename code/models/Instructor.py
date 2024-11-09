@@ -14,7 +14,6 @@ class Instructor(User):
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
     specialization: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False) 
-    #specialization = mapped_column(ARRAY(Enum(SpecializationType)), nullable=False)
     available_cities: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="instructor", cascade="all, delete-orphan")
 
@@ -34,16 +33,28 @@ class Instructor(User):
     
     def get_id(self) -> int:
         return self.id
+    
+    def get_offerings(self):
+        return self.offerings
+    
+    def instructor_offering_lesson_conflict(self, timeslot: "Timeslot") -> bool:
+        for offering in self.get_offerings():
+            if (offering.get_lesson().get_timeslot().get_start_date() <= timeslot.get_end_date() and
+                timeslot.get_start_date() <= offering.get_lesson().get_timeslot().get_end_date()):
+                if (offering.get_lesson().get_timeslot().get_start_time() < timeslot.get_end_time() and
+                    timeslot.get_start_time() < offering.get_lesson().get_timeslot().get_end_time()):
+                    return True
+        return False
 
     def instructor_menu(self, db: Session):
-        from catalogs import OfferingsCatalog, UsersCatalog
+        from catalogs import OfferingsCatalog, UsersCatalog, LessonsCatalog
         offerings_catalog = OfferingsCatalog.get_instance(db)
         users_catalog = UsersCatalog.get_instance(db)
+        lessons_catalog = LessonsCatalog.get_instance(db)
 
-        #!Should also be a view offerings option (all offerings)
         instructor_menu_options = """
         Instructor Options:
-        1. Select Offering
+        1. Select Lesson to teach
         2. View my Offerings
         3. Modify my Offering
         4. Modify my Account
@@ -69,36 +80,37 @@ class Instructor(User):
                     print("Invalid choice. Please enter a valid number.")
                     continue
 
-            if choice == 1:
-                print("\n--------Select Offering--------")
-                offerings = offerings_catalog.get_available_offerings_for_instructor(self.available_cities, self.specialization)
+            if choice == 1: 
+                print("\n--------Select Lesson to teach--------")
+                lessons = lessons_catalog.get_available_lessons_without_offering(self.available_cities, self.specialization)
 
-                if not offerings:
+                if not lessons:
                     print("No available offerings found that match your criteria.")
                 else:
                     print("\nAvailable Offerings:")
-                    for offering in offerings:
-                        print("\n" + offering.repr_instructor())  
+                    for lesson in lessons:
+                        print(lesson.repr_instructor())  
 
-                    selected_offering_id = None
+                    selected_lesson_id = None
                     while True:
-                        selected_offering_id = input("\nEnter the ID of the offering you want to select (or 'q' to quit): ")
-                        if selected_offering_id.lower() == 'q':
+                        selected_lesson_id = input("\nEnter the ID of the lesson you want to select (or 'q' to quit): ")
+                        if selected_lesson_id.lower() == 'q':
                             break  
                         try:
-                            selected_offering_id = int(selected_offering_id)
-                            selected_offering = next((off for off in offerings if off.id == selected_offering_id), None)
-                            if selected_offering:
-                                if offerings_catalog.has_time_conflict(self.offerings, selected_offering):
-                                    print("You cannot book this offering because it conflicts with an existing offering.")
+                            selected_lesson_id = int(selected_lesson_id)
+                            selected_lesson = next((lesson for lesson in lessons if lesson.id == selected_lesson_id), None)
+                            if selected_lesson:
+                                if self.instructor_offering_lesson_conflict(selected_lesson.get_timeslot()): 
+                                    print("You cannot book this lesson because it conflicts with an existing offering you are teaching.")
                                     break
                                 else:
-                                    offerings_catalog.assign_instructor_to_offering(self, selected_offering)  
-                                    print(f"Successfully selected offering with ID {selected_offering.id} and assigned it to you.")
+                                    offerings_catalog.create_offering(lesson=selected_lesson, instructor=self)
+                                    print(f"Successfully selected lesson with ID {selected_lesson.id} and assigned it to you.")
+                                    break
                             else:
-                                print("Invalid offering ID. Please select a valid offering from the list.")
+                                print("Invalid lesson ID. Please select a valid lesson ID from the list.")
                         except ValueError:
-                            print("Invalid input. Please enter a valid offering ID.")
+                            print("Invalid input. Please enter a valid lesson ID.")
 
             if choice == 2:
                 print("\n--------View my Offerings--------")
@@ -139,7 +151,6 @@ class Instructor(User):
 
                     offerings_catalog.remove_instructor_from_offering(self, selected_offering)
                     print(f"You have successfully removed yourself from offering with ID {selected_offering.id}.")
-
 
             if choice == 4:
                 print("\n--------Modify my Account--------")

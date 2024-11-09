@@ -12,7 +12,7 @@ class Lesson(Base):
     type = mapped_column(Enum(LessonType), nullable=False)
     specialization = mapped_column(Enum(SpecializationType), nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=True)
-    offerings = relationship("Offering", back_populates="lesson", cascade="all, delete-orphan")
+    offerings = relationship("Offering", back_populates="lesson", cascade="all, delete-orphan", uselist=False)
     location = relationship("Location", back_populates="lessons")
     location_id = mapped_column(Integer, ForeignKey('locations.id'), nullable=False)
     timeslot = relationship("Timeslot", back_populates="lesson", cascade="all, delete-orphan", uselist=False)
@@ -58,3 +58,6 @@ class Lesson(Base):
     
     def repr_admin(self):
         return f"\n\tLesson {self.id} is a {self.get_type().name} class with a capacity of {self.get_capacity()} at {self.get_location().get_name()}, {self.get_location().get_city()} on {self.get_timeslot().get_day_of_week()} from {self.get_timeslot().get_start_time()} {self.get_timeslot().get_start_date()} to {self.get_timeslot().get_end_time()} {self.get_timeslot().get_end_date()} doing {self.get_specialization().name}"
+
+    def repr_instructor(self):
+        return f"\nLesson ID: {self.get_id()}\nType: {self.get_type().name}\nSpecialization: {self.get_specialization().name}\nLocation: {self.get_location().get_name()}, {self.get_location().get_city()}\nTimeslot: {self.get_timeslot().get_day_of_week()}, {self.get_timeslot().get_start_time()} {self.get_timeslot().get_start_date()} - {self.get_timeslot().get_end_time()} {self.get_timeslot().get_end_date()}\nCapacity: {self.get_capacity()}"

@@ -39,6 +39,7 @@ def createSampleObjects(db: Session):
         lesson2 = lessons_catalog.create_lesson(capacity=30, location=location2, timeslot=timeslot2, lesson_type=LessonType.group, specialization=SpecializationType.soccer)
         lesson3 = lessons_catalog.create_lesson(capacity=100, location=location3, timeslot=timeslot3, lesson_type=LessonType.private, specialization=SpecializationType.swim)
         lesson4 = lessons_catalog.create_lesson(capacity=50, location=location4, timeslot=timeslot4, lesson_type=LessonType.group, specialization=SpecializationType.yoga)
+        lesson5 = lessons_catalog.create_lesson(capacity=50, location=location1, timeslot=timeslot2, lesson_type=LessonType.group, specialization=SpecializationType.soccer)
 
         offering1 = offerings_catalog.create_offering(lesson=lesson1, instructor=instructor1)
         offering2 = offerings_catalog.create_offering(lesson=lesson2, instructor=instructor2)
@@ -67,6 +68,7 @@ def main():
 
         choice = None
         while True:
+            print("----------Main Menu----------")
             print(main_menu_options)
             choice = input("\nSelect an option: ")
             if choice.strip() == "":
@@ -400,7 +402,7 @@ def main():
                     print(offering.repr_client())  
 
         if choice == 5:
-            print("\nGoodbye!")
+            print("\nGoodbye!\n")
             break
 
     db.close()

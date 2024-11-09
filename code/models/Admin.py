@@ -379,8 +379,7 @@ class Admin(User):
                 Do you want to cancel an offering or delete a lesson? Enter offering or lesson (or 'q' to quit) 
                 (Note that if an offering is cancelled, the associated lesson will not be deleted. If a lesson is deleted, the associated offering will be deleted and cancelled): """
                 while True:
-                    print(option_str)
-                    cancel_choice = input().strip().lower()
+                    cancel_choice = input(option_str).strip().lower()
                     if cancel_choice == 'q':
                         break
                     if cancel_choice not in ['offering', 'lesson']:
@@ -441,7 +440,7 @@ class Admin(User):
                         lesson_id = int(lesson_id)
                         try:
                             lesson = lessons_catalog.get_lesson_by_id(lesson_id)
-                            lesson_offering = lesson.get_offerings()[0]
+                            lesson_offering = lesson.get_offerings()
                             if lesson_offering:
                                 offerings_catalog.cancel_offering(lesson_offering)
                                 offerings_catalog.delete_offering(lesson_offering)
