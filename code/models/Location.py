@@ -12,12 +12,12 @@ class Location(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     address: Mapped[str] = mapped_column(String, nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
-    city: Mapped[str] = mapped_column(String, nullable=False) #! Needs to map city ID object
+    city: Mapped[str] = mapped_column(String, nullable=False) 
     space_type: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     #city: Mapped['City'] = relationship("City", backref="location")
     #city_id: Mapped[int] = mapped_column(Integer, ForeignKey('cities.id'), nullable=False)
     schedule: Mapped["Schedule"] = relationship("Schedule", back_populates="location", uselist=False, cascade="all, delete-orphan")
-    offerings: Mapped[list["Offering"]] = relationship("Offering", back_populates="location")
+    lessons: Mapped[list["Lesson"]] = relationship("Lesson", back_populates="location")
 
     def __init__(self, name: str, address: str, capacity: int, city: str, space_type: list[SpaceType]):
         self.name = name
@@ -43,6 +43,12 @@ class Location(Base):
     def get_name(self) -> str:
         return self.name
     
+    def get_address(self) -> str:
+        return self.address
+    
+    def get_city(self) -> str:
+        return self.city
+    
     def delete(self):
         if self.schedule:
             for offering in self.offerings:
@@ -52,3 +58,6 @@ class Location(Base):
 
     def __repr__(self):
         return f"Location {self.id} {self.name} ({self.address}), has a capacity of {self.capacity} and is located in {self.city} and has {self.space_type} space type(s)"
+    
+    def offering_repr(self):
+        return f"Location {self.id} {self.name} ({self.address}), located in {self.city}"

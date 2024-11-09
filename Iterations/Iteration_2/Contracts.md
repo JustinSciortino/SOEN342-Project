@@ -108,7 +108,7 @@
 
 # Contract CO6: Create Offering 
 
-**Operation: create_offering(location: Location, capacity: int, timeslot: Timeslot, offering_type: OfferingType, specialization: SpecializationType)**
+**Operation: create_offering(location: Location, capacity: int, timeslot: Timeslot, offering_type: LessonType, specialization: SpecializationType)**
 
 **Cross References: Create Offering**  
 
@@ -119,7 +119,7 @@
 3. The capacity is a valid integer, greater than zero and less than or equal to the Location instance capacity
 4. The timeslot parameter is a valid Timeslot instance
 5. The timeslot instance does not conflict with the Location instance's Schedule instance consisting of a list of Timeslot instances
-6. The offering_type parameter is a non-empty and a valid type of OfferingType
+6. The offering_type parameter is a non-empty and a valid type of LessonType
 7. The specialization parameter is a non-empty and a valid type of SpecializationType
 
 **Post-conditions:**  

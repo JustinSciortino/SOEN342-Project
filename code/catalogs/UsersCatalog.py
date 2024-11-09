@@ -15,7 +15,6 @@ class UsersCatalog:
             cls._instance = cls(session)
         return cls._instance
     
-    #TODO Register a client
     
     def register_admin(self, name: str, password: str):
         #existing_user = self.session.query(User).join(Admin).filter(User.name == name).first() # Checks for users who are also admins
@@ -55,7 +54,7 @@ class UsersCatalog:
         self.session.commit()
         return instructor
     
-    def register_client(self, name: str, phone_number: str, password: str, is_legal_guardian: bool):
+    def register_client(self, name: str, phone_number: str, password: str):
         existing_user = self.session.query(User).filter(User.name == name).first()
 
         if existing_user:
@@ -66,7 +65,7 @@ class UsersCatalog:
         if existing_client:
             raise ValueError(f"User with phone number '{phone_number}' already exists")
         
-        client = Client(name=name, phone_number=phone_number, password=password, is_legal_guardian=is_legal_guardian)
+        client = Client(name=name, phone_number=phone_number, password=password)
 
         if not client:
             raise ValueError("Client not created")
@@ -148,3 +147,9 @@ class UsersCatalog:
         except Exception as e:
             self.session.rollback()  # Rollback if there's an error
             raise ValueError(f"Failed to update instructor: {str(e)}")
+        
+    def create_minor(self, guardian: "Client", name: str, age: int, relationship_with_guardian: str):
+        minor = Minor(guardian=guardian, name=name, age=age, relationship_with_guardian=relationship_with_guardian)
+        self.session.add(minor)
+        self.session.commit()
+        return minor

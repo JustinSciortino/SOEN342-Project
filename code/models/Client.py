@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum, Time, ARRAY
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database import Base
-from models import Minor, User, Booking   
-from .SpecializationType import SpecializationType
+from models import Minor, User, Booking, SpecializationType
+
 
 
 
@@ -11,8 +11,7 @@ class Client(User):
 
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
-    is_legal_guardian: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    minor: Mapped["Minor"] = relationship("Minor", back_populates="guardian")  # For underage clients
+    minors: Mapped["Minor"] = relationship("Minor", back_populates="guardian", cascade="all, delete-orphan")  # list of minors that the client is a guardian of
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client", cascade="all, delete-orphan") #! Test to make sure they actually get deleted if Client is deleted
 
 
@@ -20,14 +19,13 @@ class Client(User):
         "polymorphic_identity": "client",
     }
 
-    def __init__(self, name: str, password: str, phone_number: str, is_legal_guardian: bool):
+    def __init__(self, name: str, password: str, phone_number: str):
         super().__init__(name=name, password=password, type="client")
         self.phone_number = phone_number
-        self.is_legal_guardian = is_legal_guardian
         self.bookings = []
 
     def __repr__(self) -> str:
-        if self.is_legal_guardian:
+        if len(self.minors) != 0:
             return f"Client {self.id}, {self.name}, ({self.phone_number}) is a legal guardian of {self.minor}"
         return f"Client {self.id} ({self.phone_number}) is a client"
     
@@ -36,9 +34,6 @@ class Client(User):
     
     def get_phone_number(self) -> str:
         return self.phone_number
-    
-    def is_legal_guardian(self) -> bool:
-        return self.is_legal_guardian
     
     def get_minor(self) -> Minor:  
         return self.minor
@@ -53,7 +48,7 @@ class Client(User):
 
         client_menu_options = """
         Client Options:
-        1. View Available Offerings 
+        1. View Offerings 
         2. Book an Available Offering
         3. View My Bookings
         4. Cancel a Booking
@@ -81,25 +76,56 @@ class Client(User):
                     continue
 
             if choice == 1:
-                #! Do we want to give the user the ability to quit and return back to the client menu as is done in the admin menu?
-                #! Ie give them the ability to stop what theyre doing at any point in time
-                #! Do we want to add the ability to search for an offering based on location or specialization type or offering type like is done in Admin get Offerings
                 print("\n--------View Offerings--------")
+                _quit = False
+
+                offering_city = input("Enter offering city (or 'q' to quit or click 'enter' to not add a city): ").strip() or None
+                if offering_city is not None and offering_city.lower() == 'q':
+                    _quit = True
+
+                if _quit == False:
+
+                    from models import SpecializationType
+                    print(f"Available specialization types: {[spec.value for spec in SpecializationType]}")
+                    offering_specialization = input("Enter offering specialization (or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
+                    if offering_specialization is not None and offering_specialization.lower() == 'q':
+                        _quit = True
+
+                    if _quit == False and offering_specialization:
+                        offering_specialization = SpecializationType(offering_specialization)
                 
-                offerings = offerings_catalog.get_offerings_with_instructor()
-                for offering in offerings:
-                    offering.update_status(self)
+                if _quit == False:
+                    from models import LessonType
+                    print(f"Available offering types: {[offering_type.value for offering_type in LessonType]}")
+                    offering_type = input("Enter offering type (or 'q' to quit or 'enter' to not add an offering type): ").strip() or None
+                    if offering_type is not None and offering_type.lower() == 'q':
+                        _quit = True
 
+                if _quit == False:
+                    offerings = offerings_catalog.get_offerings(city=offering_city, specialization=offering_specialization, _type=offering_type)
+                    if not offerings:
+                        print("No offerings at the moment")
+                    else:
+                        print("\nOfferings:")
+                        for offering in offerings:
+                            is_booked = False
+                            
+                            #! Needs to be tested to make sure the offering is appearing as non-availble
+                            for booking in self.get_bookings():
+                                if booking.get_offering().get_id() == offering.get_id():
+                                    print(offering.repr_client_booked())
+                                    is_booked = True
+                                    break 
 
-                if not offerings:
-                    print("No available offerings with an instructor at this time.")
+                            if not is_booked:
+                                print(offering.repr_client())
                 else:
-                    print("\nAvailable Offerings:")
-                    for offering in offerings:
-                        print(offering.repr_client())  
-
+                    print("\nYou will be redirected back to the admin menu.")
+                    continue
+                    
             if choice == 2:
                 print("\n--------Book an Available Offering--------")
+                from models import SpecializationType
 
                 specializations = [spec.value for spec in SpecializationType]
                 print("\nSpecializations Offered:")
@@ -117,14 +143,18 @@ class Client(User):
                     print("Invalid selection. Please enter a valid number corresponding to a specialization.")
                     break
                 
-                offerings = offerings_catalog.get_offerings_with_instructor()
-                for offering in offerings:
-                    offering.update_status(self)
+                offerings = offerings_catalog.get_available_offerings(specialization=chosen_specialization)
+                available_offerings = []
 
-                available_offerings = [
-                    offering for offering in offerings
-                    if offering.specialization == chosen_specialization and offering.status == "Available"
-                ]
+                #! Needs to be tested
+                for offering in offerings:
+                    is_booked = False
+                    for booking in self.get_bookings():
+                        if booking.get_offering().get_id() == offering.get_id():
+                            is_booked = True
+                            break
+                    if not is_booked:
+                        available_offerings.append(offering)
 
                 if not available_offerings:
                     print(f"No available offerings for {chosen_specialization.value} at this time.")
@@ -133,7 +163,7 @@ class Client(User):
                     #! Need to double check a new booking doesnt conflict with an existing booking they have
                     print(f"\nAvailable Offerings for {chosen_specialization.value}:")
                     for offering in available_offerings:
-                        print(offering.repr_client(self)) 
+                        print(offering.repr_client()) 
 
                     offering_id = input("\nEnter the ID of the offering you'd like to book: ").strip()
 
@@ -141,18 +171,33 @@ class Client(User):
 
                     if selected_offering:
                         is_booking_for_minor = input("Is this booking for a minor? (yes/no): ").lower().strip()
-                        minor_id = None
 
-                        if is_booking_for_minor == 'yes' and self.is_legal_guardian:
-                            if self.minor:
-                                minor_id = self.minor.get_id()  
-                            else:
-                                print("No minor found for this legal guardian.")
-                                break
+                        if is_booking_for_minor == 'yes':
+                            minor_id = None
+                            if len(self.minors) != 0:
+                                print("\nYour Minors:")
+                                for minor in self.minors:
+                                    print(minor.repr_client())
+                                minor_id = input("\nIf the booking is for one of the above minors, enter their id, if not and you want to create a new minor, enter 'No': ").strip()
+                                if minor_id != 'No':
+                                    selected_minor = next((minor for minor in self.minors if str(minor.id) == minor_id), None)
+                                    if not selected_minor:
+                                        print("Invalid minor ID.")
+                                        break
+                                    bookings_catalog.create_booking(self, selected_offering, minor=selected_minor)
+                                else:
+                                    minor_name = input("Enter minor's name: ").strip()
+                                    minor_age = input("Enter minor's age: ").strip()
+                                    minor_relationship = input("Enter your relationship with the minor (daughter, son, grandchild, sibling, etc): ").strip()
+                                    from catalogs import UsersCatalog
+                                    users_catalog = UsersCatalog.get_instance(db)
+                                    minor = users_catalog.create_minor(self, minor_name, minor_age, minor_relationship)
+                                    bookings_catalog.create_booking(self, selected_offering, minor=minor)
+                        else:
+                            bookings_catalog.create_booking(self, selected_offering)
 
-                        bookings_catalog.create_booking(self, selected_offering, minor_id=minor_id)
                     else:
-                        print("Invalid offering ID.")
+                        print("Invalid offering ID.") #! Loop until they enter a valid offering ID or add a quit option
 
             if choice == 3:
                 print("\n--------View My Bookings--------")
@@ -171,50 +216,50 @@ class Client(User):
                 client_bookings = bookings_catalog.get_client_bookings(self)
 
                 if not client_bookings:
-                    print("You have no bookings to cancel.")
-                    break
+                    print("\nYou have no bookings to cancel.")
 
-                print("\nYour Current Bookings:")
-                for booking in client_bookings:
-                    print(booking.repr_client())  
+                else:
+                    print("\nYour Current Bookings:")
+                    for booking in client_bookings:
+                        print(booking.repr_client())  
 
-                booking_id = input("\nEnter the ID of the booking you'd like to cancel: ").strip()
+                    booking_id = input("\nEnter the ID of the booking you'd like to cancel: ").strip()
 
-                selected_booking = next((booking for booking in client_bookings if str(booking.id) == booking_id), None)
+                    selected_booking = next((booking for booking in client_bookings if str(booking.id) == booking_id), None)
 
-                if not selected_booking:
-                    print("Invalid booking ID.")
-                    break
+                    if not selected_booking:
+                        print("Invalid booking ID.")
+                        continue
 
-                minor_id = None
-                if self.is_legal_guardian:
-                    if selected_booking.minor_id:  
-                        minor_id = selected_booking.minor_id
-                        print(f"Booking is also linked to minor ID: {minor_id}. Canceling booking for minor.")
+                    minor_id = None
+                    if len(self.minors) != 0:
+                        if selected_booking.minor_id:  
+                            minor_id = selected_booking.minor_id
+                            print(f"Booking is also linked to minor ID: {minor_id}. Canceling booking for minor.")
 
-                bookings_catalog.cancel_booking(self, selected_booking, minor_id=minor_id)
+                    bookings_catalog.cancel_booking(self, selected_booking, minor_id=minor_id)
 
             if choice == 5:
                 print("\n--------View Minor's Bookings--------")
 
-                if not self.is_legal_guardian:
+                if len(self.minors) == 0:
                     print("You are not a legal guardian. This option is not available.")
-                    break
+                
+                else:   
+                    minor = self.get_minor()
+                    if not minor:
+                        print("No minor associated with this account.")
+                        break
 
-                minor = self.get_minor()
-                if not minor:
-                    print("No minor associated with this account.")
-                    break
+                    my_minor_id = minor.get_id()
+                    minor_bookings = bookings_catalog.get_minor_bookings(my_minor_id)
 
-                my_minor_id = minor.get_id()
-                minor_bookings = bookings_catalog.get_minor_bookings(my_minor_id)
-
-                if not minor_bookings:
-                    print(f"No bookings found for minor: {minor.get_name()}.")
-                else:
-                    print(f"\nBookings for {minor.name}:")
-                    for booking in minor_bookings:
-                        print(booking.repr_client())
+                    if not minor_bookings:
+                        print(f"No bookings found for minor: {minor.get_name()}.")
+                    else:
+                        print(f"\nBookings for {minor.name}:")
+                        for booking in minor_bookings:
+                            print(booking.repr_client())
 
             if choice == 6:
                 print("\nLogging out...")

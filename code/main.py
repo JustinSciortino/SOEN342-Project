@@ -1,11 +1,16 @@
 from database import get_session, engine, create_tables
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect
-from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog
+from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog, LessonsCatalog
 from models import SpaceType, SpecializationType
 
 def createSampleObjects(db: Session):
+    from models import Timeslot, LessonType, SpecializationType
+    import datetime
+    offerings_catalog = OfferingsCatalog.get_instance(db)
+    location_catalog = LocationsCatalog.get_instance(db)
     user_catalog = UsersCatalog.get_instance(db)
+    lessons_catalog = LessonsCatalog.get_instance(db)
     
     try:
         new_admin = user_catalog.register_admin("admin", "pass")
@@ -14,20 +19,11 @@ def createSampleObjects(db: Session):
         instructor2 = user_catalog.register_instructor("instructor2", "pass", "1234567891", [SpecializationType.swim, SpecializationType.yoga], ["Terrebonne", "Laval"])
         instructor3 = user_catalog.register_instructor("instructor3", "pass", "1234567892", [SpecializationType.dance, SpecializationType.soccer], ["Montreal", "Dorval"])
 
-        #client1 = user_catalog.register_client(name="Alice Smith", password="password123", phone_number="123-456-7890", is_legal_guardian=False),
-        #client2 = user_catalog.register_client(name="Bob Johnson", password="securePass456", phone_number="987-654-3210", is_legal_guardian=True, minor_name="Tom Johnson", minor_age=15),
-        #client3 = user_catalog.register_client(name="Charlie Davis", password="charlie123", phone_number="555-555-5555", is_legal_guardian=True, minor_name="Emily Davis", minor_age=12),
-        #client4 = user_catalog.register_client(name="Diana Adams", password="dianaSecure", phone_number="444-444-4444", is_legal_guardian=False),
+        client1 = user_catalog.register_client(name="a", password="pass", phone_number="1234567890")
+        #client2 = user_catalog.register_client(name="Bob Johnson", password="securePass456", phone_number="9876543210")
+        #client3 = user_catalog.register_client(name="Charlie Davis", password="charlie123", phone_number="5555555555")
+        client4 = user_catalog.register_client(name="d", password="pass", phone_number="4444444444")
 
-    except ValueError as e:
-        print(f"Error creating admin: {str(e)}")
-
-def createLocationsAndOfferings(db: Session):
-    from models import Timeslot, OfferingType, SpecializationType
-    import datetime
-    offerings_catalog = OfferingsCatalog.get_instance(db)
-    location_catalog = LocationsCatalog.get_instance(db)
-    try:
         location1 = location_catalog.create_location(name="TD Bank", address="1234 Street", capacity=50, city="Montreal", space_type=[SpaceType.rink, SpaceType.field])
         location2 = location_catalog.create_location(name="FB Dungeon", address="5678 Street", capacity=20, city="Laval", space_type=[SpaceType.field, SpaceType.pool])
         location3 = location_catalog.create_location(name="Googleplex", address="91011 Street", capacity=100, city="Terrebonne", space_type=[SpaceType.pool, SpaceType.gym])
@@ -39,44 +35,40 @@ def createLocationsAndOfferings(db: Session):
         timeslot3 = Timeslot(start_time=datetime.time(11, 0), end_time=datetime.time(12, 0), day_of_week="Wednesday",start_date=datetime.date(2024, 10, 18), end_date=datetime.date(2024, 10, 18), schedule_id=location3.get_schedule().get_id())
         timeslot4 = Timeslot(start_time=datetime.time(12, 0), end_time=datetime.time(13, 0), day_of_week="Thursday",start_date=datetime.date(2024, 10, 19), end_date=datetime.date(2024, 10, 19), schedule_id=location4.get_schedule().get_id())
 
-        offering1 = offerings_catalog.create_offering(location=location1, capacity=50, timeslot=timeslot1, offering_type=OfferingType.private, specialization=SpecializationType.hockey)
-        offering2 = offerings_catalog.create_offering(location=location2, capacity=20, timeslot=timeslot2, offering_type=OfferingType.group, specialization=SpecializationType.soccer)
-        offering3 = offerings_catalog.create_offering(location=location3, capacity=100, timeslot=timeslot3, offering_type=OfferingType.private, specialization=SpecializationType.swim)
-        offering4 = offerings_catalog.create_offering(location=location4, capacity=50, timeslot=timeslot4, offering_type=OfferingType.group, specialization=SpecializationType.yoga)
+        lesson1 = lessons_catalog.create_lesson(capacity=None, location=location1, timeslot=timeslot1, lesson_type=LessonType.private, specialization=SpecializationType.hockey)
+        lesson2 = lessons_catalog.create_lesson(capacity=30, location=location2, timeslot=timeslot2, lesson_type=LessonType.group, specialization=SpecializationType.soccer)
+        lesson3 = lessons_catalog.create_lesson(capacity=100, location=location3, timeslot=timeslot3, lesson_type=LessonType.private, specialization=SpecializationType.swim)
+        lesson4 = lessons_catalog.create_lesson(capacity=50, location=location4, timeslot=timeslot4, lesson_type=LessonType.group, specialization=SpecializationType.yoga)
+        #lesson5 = lessons_catalog.create_lesson(capacity=50, location=location1, timeslot=timeslot2, lesson_type=LessonType.group, specialization=SpecializationType.soccer)
+
+        offering1 = offerings_catalog.create_offering(lesson=lesson1, instructor=instructor1)
+        offering2 = offerings_catalog.create_offering(lesson=lesson2, instructor=instructor2)
+        offering3 = offerings_catalog.create_offering(lesson=lesson3, instructor=instructor3)
 
 
     except ValueError as e:
-        print(f"Error creating location: {str(e)}")
-
-    
+        print(f"Error creating admin: {str(e)}")    
 
 def main():
     create_tables()
     db: Session = next(get_session())  
     user_catalog = UsersCatalog.get_instance(db)
-    location_catalog = LocationsCatalog.get_instance(db)
-    inspector = inspect(engine)
-    #print("Existing tables:")
-    #print(inspector.get_table_names())
-    
-
 
     print("\n\nWelcome to the Lesson Management System")
     createSampleObjects(db)
-    createLocationsAndOfferings(db)
     main_menu_options = """
     Options:
     1. Login
     2. Register as Client
     3. Register as Instructor
-    4. Register as Admin
-    5. View Offerings (Public)
-    6. Exit"""
+    4. View Offerings (Public)
+    5. Exit"""
 
     while True:
 
         choice = None
         while True:
+            print("\n----------Main Menu----------")
             print(main_menu_options)
             choice = input("\nSelect an option: ")
             if choice.strip() == "":
@@ -191,7 +183,6 @@ def main():
             client_name = None
             client_phone_number = None
             client_password = None
-            client_is_legal_guardian = False
             minor_name = None
             minor_age = None
             guardian_client_id = None
@@ -208,7 +199,7 @@ def main():
                     continue
                 break
             
-            if _quit == False:
+            if _quit == False: 
                 client_is_minor = str(input("Are you under 18? (yes/no): ")).lower()
 
                 if client_is_minor == 'yes':
@@ -239,7 +230,7 @@ def main():
                             break
 
                         try:
-                            existing_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password, is_legal_guardian=True)
+                            existing_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password)
                             print(f"Legal Guardian Client, {legal_guardian_name}, has been created.")
 
                         except ValueError as e:
@@ -253,15 +244,14 @@ def main():
                         print(f"Minor, {minor_name}, has been created.")
 
                     elif guardian_option == '2':
-                        guardian_client_id = str(input("Enter the ID of the existing guardian: "))
+                        guardian_client_id = int(input("Enter the ID of the existing guardian: "))
                         
                         existing_guardian = user_catalog.get_client_by_id(guardian_client_id)
 
-                        if existing_guardian is None or not existing_guardian.is_legal_guardian:
-                            print("Invalid guardian ID or the client is not a legal guardian. You will be redirected to the main menu.")
+                        if existing_guardian is None:
+                            print("Invalid guardian ID. You will be redirected to the main menu.")
                             break
                         
-                        existing_guardian.is_legal_guardian = True
                         relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
                         minor_name = client_name
                         minor_age = int(input("Enter your age: "))
@@ -294,7 +284,7 @@ def main():
 
                     if _quit == False:
                         try:
-                            client = user_catalog.register_client(client_name, client_phone_number, client_password, is_legal_guardian=False)
+                            client = user_catalog.register_client(client_name, client_phone_number, client_password)
                             
                         except ValueError as e:
                             print(f"Error registering client: {e}")
@@ -303,10 +293,6 @@ def main():
                         print(f"Welcome {client_name}! You have successfully registered as an client.")
                         client.client_menu(db)
                         
-
-                
-
-
 
         if choice == 3: 
             from models import SpecializationType
@@ -397,55 +383,13 @@ def main():
                 print(f"Welcome {instructor.get_name()}! You have successfully registered as an instructor.")
                 instructor.instructor_menu(db)
 
-        if choice == 4: 
-            if user_catalog.has_admin():
-                print("\nAn admin already exists for this organization. You will be redirected to the main menu.")
-                continue
-            else:
-                print("\n--------Register as Admin--------")
-                admin_name = None
-                admin_password = None
-                _quit = False
-
-                while True:
-                    admin_name = str(input("Enter your name (or 'q' to quit): "))
-                    if admin_name.lower() == 'q':
-                        _quit = True
-                        print("\nYou will be redirected to the main menu")
-                        break
-                    if not admin_name:
-                        print("Name cannot be empty. Please try again.")
-                        continue
-                    break
-                
-                if _quit == False:
-                    while True:
-                        admin_password = str(input("Enter your password (or 'q' to quit): "))
-                        if admin_password.lower() == 'q':
-                            _quit = True
-                            print("\nYou will be redirected to the main menu")
-                            break
-                        if not admin_password:
-                            print("Password cannot be empty. Please try again.")
-                            continue
-                        break
-
-                if _quit == False:
-                    try:
-                        admin = user_catalog.register_admin(admin_name, admin_password)
-                    except ValueError as e:
-                        print(f"{e} - The account was not created and you will be redirected to the main menu")
-                        continue
-
-                    
-                    print(f"Welcome {admin.get_name()}! You have successfully registered as an admin.")
-                    admin.admin_menu(db)
-                
-        if choice == 5:
+        
+        if choice == 4:
             print("\n--------View Offerings (Public)--------")
             
             offerings_catalog = OfferingsCatalog.get_instance(db)
 
+            #TODO refactor
             offerings_with_instructor = offerings_catalog.get_offerings_with_instructor()
 
             if not offerings_with_instructor:
@@ -455,8 +399,8 @@ def main():
                 for offering in offerings_with_instructor:
                     print(offering.repr_client())  
 
-        if choice == 6:
-            print("\nGoodbye!")
+        if choice == 5:
+            print("\nGoodbye!\n")
             break
 
     db.close()
