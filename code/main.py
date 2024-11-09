@@ -206,20 +206,41 @@ def main():
 
                     if guardian_option == '1':
                         legal_guardian_name = str(input("Enter the legal guardian's name: "))
-                        legal_guardian_phone = str(input("Enter the legal guardian's phone number: "))
-                        legal_guardian_password = str(input("Enter the legal guardian's password: "))
+                        while True:
+                            legal_guardian_phone = str(input("Enter your phone number (or 'q' to quit): "))
+                            if legal_guardian_phone.lower() == 'q':
+                                _quit = True
+                                print("\nYou will be redirected to the main menu.")
+                                break
+                            if len(legal_guardian_phone) != 10:
+                                print("Phone number must be 10 digits long. Please try again.")
+                                continue
+                            break
+
+                        while True:
+                            legal_guardian_password = str(input("Enter your password (or 'q' to quit): "))
+                            if legal_guardian_password.lower() == 'q':
+                                _quit = True
+                                print("\nYou will be redirected to the main menu.")
+                                break
+                            if not legal_guardian_password:
+                                print("Password cannot be empty. Please try again.")
+                                continue
+                            break
 
                         try:
-                            user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password, is_legal_guardian=True)
-                            
+                            existing_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password, is_legal_guardian=True)
+                            print(f"Legal Guardian Client, {legal_guardian_name}, has been created.")
 
                         except ValueError as e:
                             print(f"Error registering legal guardian: {e}")
-                            return
-                        
+                            break
+
+                        relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
                         minor_name = client_name
-                        minor_age = int(input("Enter your age: "))
-                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age)
+                        minor_age = int(input(f"{minor_name}, enter your age: "))
+                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
+                        print(f"Minor, {minor_name}, has been created.")
 
                     elif guardian_option == '2':
                         guardian_client_id = str(input("Enter the ID of the existing guardian: "))
@@ -228,12 +249,14 @@ def main():
 
                         if existing_guardian is None or not existing_guardian.is_legal_guardian:
                             print("Invalid guardian ID or the client is not a legal guardian. You will be redirected to the main menu.")
-                            return
+                            break
                         
                         existing_guardian.is_legal_guardian = True
+                        relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
                         minor_name = client_name
                         minor_age = int(input("Enter your age: "))
-                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age)
+                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
+                        print(f"Minor, {minor_name}, has been created and has successfully been linked to the guardian.")
 
                 elif client_is_minor == 'no':
                    
@@ -267,7 +290,7 @@ def main():
                             print(f"Error registering client: {e}")
                             return
                         
-                        print(f"Welcome {client_name}! You have successfully registered as an admin.")
+                        print(f"Welcome {client_name}! You have successfully registered as an client.")
                         client.client_menu(db)
                         
 
