@@ -11,12 +11,14 @@ class Minor(Base):
     guardian = relationship("Client", back_populates="minor")
     guardian_id: Mapped[int] = mapped_column(Integer, ForeignKey('clients.id'), nullable=False)
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="minor")
+    relationship_with_guardian: Mapped[str] = mapped_column(String, nullable=False)
 
-    def __init__(self, guardian, name: str, age: int):
+    def __init__(self, guardian, name: str, age: int, relationship_with_guardian: str = "Child"):
         self.name = name
         self.age = age
         self.guardian = guardian
         self.guardian_id = guardian.get_id()
+        self.relationship_with_guardian = relationship_with_guardian
 
     def __repr__(self) -> str:
         return f"Minor {self.name} is {self.age} years old"
@@ -32,3 +34,6 @@ class Minor(Base):
     
     def get_guardian(self):
         return self.guardian
+    
+    def get_relationship_with_guardian(self) -> str:
+        return self.relationship_with_guardian
