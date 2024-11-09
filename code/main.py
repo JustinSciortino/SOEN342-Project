@@ -19,10 +19,10 @@ def createSampleObjects(db: Session):
         instructor2 = user_catalog.register_instructor("instructor2", "pass", "1234567891", [SpecializationType.swim, SpecializationType.yoga], ["Terrebonne", "Laval"])
         instructor3 = user_catalog.register_instructor("instructor3", "pass", "1234567892", [SpecializationType.dance, SpecializationType.soccer], ["Montreal", "Dorval"])
 
-        client1 = user_catalog.register_client(name="a", password="pass", phone_number="1234567890", is_legal_guardian=False),
-        #client2 = user_catalog.register_client(name="Bob Johnson", password="securePass456", phone_number="9876543210", is_legal_guardian=True, minor_name="Tom Johnson", minor_age=15),
-        #client3 = user_catalog.register_client(name="Charlie Davis", password="charlie123", phone_number="5555555555", is_legal_guardian=True, minor_name="Emily Davis", minor_age=12),
-        client4 = user_catalog.register_client(name="d", password="pass", phone_number="4444444444", is_legal_guardian=False)
+        client1 = user_catalog.register_client(name="a", password="pass", phone_number="1234567890")
+        #client2 = user_catalog.register_client(name="Bob Johnson", password="securePass456", phone_number="9876543210")
+        #client3 = user_catalog.register_client(name="Charlie Davis", password="charlie123", phone_number="5555555555")
+        client4 = user_catalog.register_client(name="d", password="pass", phone_number="4444444444")
 
         location1 = location_catalog.create_location(name="TD Bank", address="1234 Street", capacity=50, city="Montreal", space_type=[SpaceType.rink, SpaceType.field])
         location2 = location_catalog.create_location(name="FB Dungeon", address="5678 Street", capacity=20, city="Laval", space_type=[SpaceType.field, SpaceType.pool])
@@ -183,7 +183,6 @@ def main():
             client_name = None
             client_phone_number = None
             client_password = None
-            client_is_legal_guardian = False
             minor_name = None
             minor_age = None
             guardian_client_id = None
@@ -231,7 +230,7 @@ def main():
                             break
 
                         try:
-                            existing_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password, is_legal_guardian=True)
+                            existing_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password)
                             print(f"Legal Guardian Client, {legal_guardian_name}, has been created.")
 
                         except ValueError as e:
@@ -285,7 +284,7 @@ def main():
 
                     if _quit == False:
                         try:
-                            client = user_catalog.register_client(client_name, client_phone_number, client_password, is_legal_guardian=True)
+                            client = user_catalog.register_client(client_name, client_phone_number, client_password)
                             
                         except ValueError as e:
                             print(f"Error registering client: {e}")

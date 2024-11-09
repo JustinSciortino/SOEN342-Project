@@ -11,7 +11,6 @@ class Client(User):
 
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
-    is_legal_guardian: Mapped[bool] = mapped_column(Boolean, nullable=False)
     minors: Mapped["Minor"] = relationship("Minor", back_populates="guardian", cascade="all, delete-orphan")  # list of minors that the client is a guardian of
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client", cascade="all, delete-orphan") #! Test to make sure they actually get deleted if Client is deleted
 
@@ -20,14 +19,13 @@ class Client(User):
         "polymorphic_identity": "client",
     }
 
-    def __init__(self, name: str, password: str, phone_number: str, is_legal_guardian: bool):
+    def __init__(self, name: str, password: str, phone_number: str):
         super().__init__(name=name, password=password, type="client")
         self.phone_number = phone_number
-        self.is_legal_guardian = is_legal_guardian
         self.bookings = []
 
     def __repr__(self) -> str:
-        if self.is_legal_guardian:
+        if len(self.minors) != 0:
             return f"Client {self.id}, {self.name}, ({self.phone_number}) is a legal guardian of {self.minor}"
         return f"Client {self.id} ({self.phone_number}) is a client"
     
@@ -36,9 +34,6 @@ class Client(User):
     
     def get_phone_number(self) -> str:
         return self.phone_number
-    
-    def is_legal_guardian(self) -> bool:
-        return self.is_legal_guardian
     
     def get_minor(self) -> Minor:  
         return self.minor
@@ -237,7 +232,7 @@ class Client(User):
                         continue
 
                     minor_id = None
-                    if self.is_legal_guardian:
+                    if len(self.minors) != 0:
                         if selected_booking.minor_id:  
                             minor_id = selected_booking.minor_id
                             print(f"Booking is also linked to minor ID: {minor_id}. Canceling booking for minor.")
@@ -247,7 +242,7 @@ class Client(User):
             if choice == 5:
                 print("\n--------View Minor's Bookings--------")
 
-                if not self.is_legal_guardian:
+                if len(self.minors) == 0:
                     print("You are not a legal guardian. This option is not available.")
                 
                 else:   

@@ -54,7 +54,7 @@ class UsersCatalog:
         self.session.commit()
         return instructor
     
-    def register_client(self, name: str, phone_number: str, password: str, is_legal_guardian: bool):
+    def register_client(self, name: str, phone_number: str, password: str):
         existing_user = self.session.query(User).filter(User.name == name).first()
 
         if existing_user:
@@ -65,7 +65,7 @@ class UsersCatalog:
         if existing_client:
             raise ValueError(f"User with phone number '{phone_number}' already exists")
         
-        client = Client(name=name, phone_number=phone_number, password=password, is_legal_guardian=is_legal_guardian)
+        client = Client(name=name, phone_number=phone_number, password=password)
 
         if not client:
             raise ValueError("Client not created")
