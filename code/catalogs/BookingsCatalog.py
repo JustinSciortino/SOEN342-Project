@@ -23,12 +23,17 @@ class BookingsCatalog:
         if not booking:
             raise ValueError(f"Booking with id '{booking_id}' does not exist")
         booking.cancel()
+        #self.session.delete(booking)
         self.session.commit()
         return booking
 
     def create_booking(self, client: "Client", offering: "Offering", minor: "Minor" = None):
         try:
-            #! When you create the Booking, you set minor_id = None in the constructor, so minor_id will never be linked to the booking
+            if minor:
+                minor = self.session.merge(minor)
+            client = self.session.merge(client)
+            offering = self.session.merge(offering)
+            
             new_booking = Booking(client=client, offering=offering, minor=minor)
 
             if offering.get_lesson().get_type().value == 'private':

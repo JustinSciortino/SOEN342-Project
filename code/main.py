@@ -1,7 +1,7 @@
 from database import get_session, engine, create_tables
 from sqlalchemy.orm import Session
 from sqlalchemy import inspect
-from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog, LessonsCatalog
+from catalogs import UsersCatalog, LocationsCatalog, OfferingsCatalog, LessonsCatalog, BookingsCatalog
 from models import SpaceType, SpecializationType
 
 def createSampleObjects(db: Session):
@@ -11,6 +11,7 @@ def createSampleObjects(db: Session):
     location_catalog = LocationsCatalog.get_instance(db)
     user_catalog = UsersCatalog.get_instance(db)
     lessons_catalog = LessonsCatalog.get_instance(db)
+    bookings_catalog = BookingsCatalog.get_instance(db)
     
     try:
         new_admin = user_catalog.register_admin("admin", "pass")
@@ -20,9 +21,13 @@ def createSampleObjects(db: Session):
         instructor3 = user_catalog.register_instructor("instructor3", "pass", "1234567892", [SpecializationType.dance, SpecializationType.soccer], ["Montreal", "Dorval"])
 
         client1 = user_catalog.register_client(name="a", password="pass", phone_number="1234567890")
-        #client2 = user_catalog.register_client(name="Bob Johnson", password="securePass456", phone_number="9876543210")
-        #client3 = user_catalog.register_client(name="Charlie Davis", password="charlie123", phone_number="5555555555")
+        client2 = user_catalog.register_client(name="B", password="pass", phone_number="9876543210")
+        client3 = user_catalog.register_client(name="c", password="pass", phone_number="5555555555")
         client4 = user_catalog.register_client(name="d", password="pass", phone_number="4444444444")
+
+        minor1 = user_catalog.create_minor(guardian=client1, name="minor1", age=10, relationship_with_guardian="son")
+        minor2 = user_catalog.create_minor(guardian=client2, name="minor2", age=12, relationship_with_guardian="daughter")
+        minor3 = user_catalog.create_minor(guardian=client2, name="minor3", age=8, relationship_with_guardian="grandchild")
 
         location1 = location_catalog.create_location(name="TD Bank", address="1234 Street", capacity=50, city="Montreal", space_type=[SpaceType.rink, SpaceType.field])
         location2 = location_catalog.create_location(name="FB Dungeon", address="5678 Street", capacity=20, city="Laval", space_type=[SpaceType.field, SpaceType.pool])
@@ -39,11 +44,16 @@ def createSampleObjects(db: Session):
         lesson2 = lessons_catalog.create_lesson(capacity=30, location=location2, timeslot=timeslot2, lesson_type=LessonType.group, specialization=SpecializationType.soccer)
         lesson3 = lessons_catalog.create_lesson(capacity=100, location=location3, timeslot=timeslot3, lesson_type=LessonType.private, specialization=SpecializationType.swim)
         lesson4 = lessons_catalog.create_lesson(capacity=50, location=location4, timeslot=timeslot4, lesson_type=LessonType.group, specialization=SpecializationType.yoga)
-        #lesson5 = lessons_catalog.create_lesson(capacity=50, location=location1, timeslot=timeslot2, lesson_type=LessonType.group, specialization=SpecializationType.soccer)
 
         offering1 = offerings_catalog.create_offering(lesson=lesson1, instructor=instructor1)
         offering2 = offerings_catalog.create_offering(lesson=lesson2, instructor=instructor2)
         offering3 = offerings_catalog.create_offering(lesson=lesson3, instructor=instructor3)
+
+        booking1 = bookings_catalog.create_booking(client=client1, offering=offering1, minor=minor1)
+        booking2 = bookings_catalog.create_booking(client=client2, offering=offering2, minor=minor2)
+        booking3 = bookings_catalog.create_booking(client=client2, offering=offering3, minor=minor3)
+        booking4 = bookings_catalog.create_booking(client=client3, offering=offering1)
+        booking5 = bookings_catalog.create_booking(client=client4, offering=offering2)
 
 
     except ValueError as e:
