@@ -36,16 +36,31 @@ class Booking(Base):
     def repr_client(self):
         return (
             f"Booking ID: {self.id}\n"
-            f"Offering: {self.offering.type.value}\n"
-            f"Location: {self.offering.location.name}, {self.offering.location.city}\n"
-            f"Timeslot: {self.offering.timeslot.day_of_week}, {self.offering.timeslot.start_time} - {self.offering.timeslot.end_time}\n"
-            f"Instructor: {self.offering.instructor.name}\n"
+            f"Offering: {self.offering.get_lesson().get_type().value}\n"
+            f"Location: {self.offering.get_lesson().get_location().get_name()}, {self.offering.get_lesson().get_location().get_city()}\n"
+            f"Timeslot: {self.offering.get_lesson().get_timeslot().get_day_of_week()}, {self.offering.get_lesson().get_timeslot().get_start_time()} - {self.offering.get_lesson().get_timeslot().get_end_time()}\n"
+            f"Instructor: {self.offering.get_instructor().get_name()}\n"
+            f"Client: {self.client.get_name()}\n"
+            f"Activity: {self.offering.get_lesson().get_specialization().value}\n"
+        )
+    
+    def repr_minor(self):
+        return (
+            f"Booking ID: {self.id}\n"
+            f"Offering: {self.offering.get_id()}\n"
+            f"Location: {self.offering.get_lesson().get_location().get_name()}, {self.offering.get_lesson().get_location().get_city()}\n"
+            f"Timeslot: {self.offering.get_lesson().get_timeslot().get_day_of_week()}, {self.offering.get_lesson().get_timeslot().get_start_time()} - {self.offering.get_lesson().get_timeslot().get_end_time()}\n"
+            f"Instructor: {self.offering.get_instructor().get_name()}\n"
+            f"Guardian: {self.client.get_name()}\n"
+            f"Minor: {self.minor.get_name()}\n"
+            f"Activity: {self.offering.get_lesson().get_specialization().value}\n"
+
         )
 
     def cancel(self):
         self.is_cancelled = True  
         if self.offering:
-            self.offering.bookings.remove(self) #? Remove booking from offering
+            self.offering.bookings.remove(self) 
     
     def get_id(self) -> int:
         return self.id
@@ -62,12 +77,11 @@ class Booking(Base):
     def get_active(self) -> str:
         return self.active
     
-    def cancel(self):
-        self.is_cancelled = True
-    
     def get_is_cancelled(self) -> bool:
         return self.is_cancelled
     
     def get_offering(self):
         return self.offering
 
+    def get_minor_id(self):
+        return self.minor_id

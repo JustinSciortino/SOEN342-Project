@@ -221,7 +221,10 @@ class Client(User):
                 else:
                     print("\nYour Current Bookings:")
                     for booking in client_bookings:
-                        print(booking.repr_client())  
+                        if booking.get_minor_id() is not None:
+                            print(booking.repr_minor())
+                        else:
+                            print(booking.repr_client())  
 
                     booking_id = input("\nEnter the ID of the booking you'd like to cancel: ").strip()
 
@@ -231,35 +234,29 @@ class Client(User):
                         print("Invalid booking ID.")
                         continue
 
-                    minor_id = None
-                    if len(self.minors) != 0:
-                        if selected_booking.minor_id:  
-                            minor_id = selected_booking.minor_id
-                            print(f"Booking is also linked to minor ID: {minor_id}. Canceling booking for minor.")
-
-                    bookings_catalog.cancel_booking(self, selected_booking, minor_id=minor_id)
+                    bookings_catalog.cancel_booking(self, selected_booking.get_id())
 
             if choice == 5:
                 print("\n--------View Minor's Bookings--------")
 
                 if len(self.minors) == 0:
-                    print("You are not a legal guardian. This option is not available.")
+                    print("You do not have any minors associated with your account. Redirecting back to the client menu.")
                 
                 else:   
                     minor = self.get_minor()
                     if not minor:
-                        print("No minor associated with this account.")
+                        print("You do not have any minors associated with your account. Redirecting back to the client menu.")
                         break
 
-                    my_minor_id = minor.get_id()
-                    minor_bookings = bookings_catalog.get_minor_bookings(my_minor_id)
-
-                    if not minor_bookings:
-                        print(f"No bookings found for minor: {minor.get_name()}.")
-                    else:
-                        print(f"\nBookings for {minor.name}:")
-                        for booking in minor_bookings:
-                            print(booking.repr_client())
+                    guardian_bookings = bookings_catalog.get_client_bookings(self)
+                    
+                    has_minor_bookings = False
+                    for booking in guardian_bookings:
+                        if booking.get_minor_id() is not None:
+                            print(booking.repr_minor())
+                            has_minor_bookings = True
+                    if has_minor_bookings == False:
+                        print("You have no bookings for your minors.")
 
             if choice == 6:
                 print("\nLogging out...")
