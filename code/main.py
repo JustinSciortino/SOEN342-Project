@@ -34,7 +34,6 @@ def createSampleObjects(db: Session):
         location3 = location_catalog.create_location(name="Googleplex", address="91011 Street", capacity=100, city="Terrebonne", space_type=[SpaceType.pool, SpaceType.gym])
         location4 = location_catalog.create_location(name="Amazon", address="121314 Street", capacity=50, city="Dorval", space_type=[SpaceType.studio, SpaceType.gym])
 
-
         timeslot1 = Timeslot(start_time=datetime.time(9, 0), end_time=datetime.time(10, 0), day_of_week="Monday",start_date=datetime.date(2024, 10, 16), end_date=datetime.date(2024, 10, 16), schedule_id=location1.get_schedule().get_id())
         timeslot2 = Timeslot(start_time=datetime.time(10, 0), end_time=datetime.time(11, 0), day_of_week="Tuesday",start_date=datetime.date(2024, 10, 17), end_date=datetime.date(2024, 10, 17), schedule_id=location2.get_schedule().get_id())
         timeslot3 = Timeslot(start_time=datetime.time(11, 0), end_time=datetime.time(12, 0), day_of_week="Wednesday",start_date=datetime.date(2024, 10, 18), end_date=datetime.date(2024, 10, 18), schedule_id=location3.get_schedule().get_id())
@@ -241,18 +240,6 @@ def main():
 
                         
 
-                        relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
-                        minor_name = client_name
-                        minor_age = int(input(f"{minor_name}, enter your age: "))
-
-                        try:
-                            existing_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password)
-                            print(f"\nLegal Guardian Client, {legal_guardian_name}, has been created.")
-
-                        except ValueError as e:
-                            print(f"Error registering legal guardian: {e}")
-                            break
-
                         while True:
                             relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
                             if relationship_with_guardian.lower() == 'q':
@@ -271,6 +258,14 @@ def main():
                             if not minor_age or minor_age < 1 or minor_age >= 18:
                                 print("Age cannot be empty, less than 1, or larger than and including 18. Please try again.")
                                 continue
+                            break
+
+                        try:
+                            existing_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password)
+                            print(f"\nLegal Guardian Client, {legal_guardian_name}, has been created.")
+
+                        except ValueError as e:
+                            print(f"Error registering legal guardian: {e}")
                             break
 
                         user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)

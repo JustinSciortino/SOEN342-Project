@@ -17,7 +17,7 @@ class Offering(Base):
     instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=False)
     instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
     status: Mapped[str] = mapped_column(String, default="Available")  
-    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering")
+    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering", cascade="all, delete")
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
 
     def __init__(self, instructor: "Instructor", lesson: "Lesson"):

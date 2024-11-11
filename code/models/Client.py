@@ -207,9 +207,14 @@ class Client(User):
                 if not client_bookings:
                     print("You have no bookings.")
                 else:
+                    has_bookings = False
                     print("\nYour Bookings:")
                     for booking in client_bookings:
-                        print(booking.repr_client())
+                        if booking.get_minor_id() is None:
+                            has_bookings = True
+                            print(booking.repr_client())
+                    if has_bookings == False:
+                        print("You have personally have no bookings. Check to see if you have bookings for your minors.")
 
             if choice == 4:
                 print("\n--------Cancel a Booking--------")
@@ -258,7 +263,7 @@ class Client(User):
                         has_minor_bookings = True
                 
                 if not has_minor_bookings:
-                    print("You have no bookings for your minors.")
+                    print("\nYou have no bookings for your minors.")
 
 
             if choice == 6:

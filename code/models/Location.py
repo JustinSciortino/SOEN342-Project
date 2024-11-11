@@ -57,7 +57,12 @@ class Location(Base):
         self.schedule = None  
 
     def __repr__(self):
-        return f"Location {self.id} {self.name} ({self.address}), has a capacity of {self.capacity} and is located in {self.city} and has {self.space_type} space type(s)"
+        return (
+            f"\nLocation ID: {self.id}\n"
+            f"Location: {self.name}, {self.address} {self.city}\n"
+            f"Capacity: {self.capacity}\n"
+            f"Space Type: {self.space_type}\n"
+        )
     
     def offering_repr(self):
         return f"Location {self.id} {self.name} ({self.address}), located in {self.city}"
