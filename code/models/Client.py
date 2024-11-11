@@ -11,7 +11,7 @@ class Client(User):
 
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
-    minors: Mapped["Minor"] = relationship("Minor", back_populates="guardian", cascade="all, delete-orphan")  # list of minors that the client is a guardian of
+    minors: Mapped[list["Minor"]] = relationship("Minor", back_populates="guardian", cascade="all, delete-orphan")
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client", cascade="all, delete-orphan") #! Test to make sure they actually get deleted if Client is deleted
 
 
@@ -239,24 +239,26 @@ class Client(User):
             if choice == 5:
                 print("\n--------View Minor's Bookings--------")
 
-                if len(self.minors) == 0:
+                if not self.minors:  # Check if the list of minors is empty
                     print("You do not have any minors associated with your account. Redirecting back to the client menu.")
+                    continue
                 
-                else:   
-                    minor = self.get_minor()
-                    if not minor:
-                        print("You do not have any minors associated with your account. Redirecting back to the client menu.")
-                        break
+                # Display the user's minors
+                print("\nYour Minors:")
+                for minor in self.minors:
+                    print(minor.__repr__())
 
-                    guardian_bookings = bookings_catalog.get_client_bookings(self)
-                    
-                    has_minor_bookings = False
-                    for booking in guardian_bookings:
-                        if booking.get_minor_id() is not None:
-                            print(booking.repr_minor())
-                            has_minor_bookings = True
-                    if has_minor_bookings == False:
-                        print("You have no bookings for your minors.")
+                guardian_bookings = bookings_catalog.get_client_bookings(self)
+                
+                has_minor_bookings = False
+                for booking in guardian_bookings:
+                    if booking.get_minor_id() is not None:
+                        print(booking.repr_minor())
+                        has_minor_bookings = True
+                
+                if not has_minor_bookings:
+                    print("You have no bookings for your minors.")
+
 
             if choice == 6:
                 print("\nLogging out...")
