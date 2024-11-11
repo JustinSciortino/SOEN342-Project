@@ -14,10 +14,6 @@ class BookingsCatalog:
             cls._instance = cls(session)
         return cls._instance
     
-    def get_booking(self, booking_id: int) -> Booking:
-        booking = self.session.query(Booking).filter_by(id=booking_id).first()
-        return booking
-    
     def cancel_booking(self, booking_id: int):
         booking = self.session.query(Booking).filter_by(id=booking_id).first()
         if not booking:
@@ -57,7 +53,7 @@ class BookingsCatalog:
     def get_client_bookings(self, client: "Client"):
         return self.session.query(Booking).filter(Booking.client_id == client.get_id()).all()
     
-    def cancel_booking(self, client: "Client", booking: "Booking", minor_id: int = None):
+    """def cancel_booking(self, client: "Client", booking: "Booking", minor_id: int = None):
 
         try:
             client.bookings.remove(booking)
@@ -79,7 +75,4 @@ class BookingsCatalog:
 
         except ValueError:
             self.session.rollback()
-            print(f"An error occurred while trying to cancel the booking.")
-
-    def get_minor_bookings(self, minor_id: int):
-        return self.session.query(Booking).filter_by(minor_id=minor_id).all()
+            print(f"An error occurred while trying to cancel the booking.")"""

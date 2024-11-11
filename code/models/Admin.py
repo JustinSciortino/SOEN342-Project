@@ -380,7 +380,6 @@ class Admin(User):
                         print("\nYou will be redirected back to the admin menu.")
                         continue
             
-            #! Needs to be tested after integrating client and instructor menu
             if choice == 4:
                 print("\n--------Cancel Offering or Lesson--------")
                 cancel_choice = None

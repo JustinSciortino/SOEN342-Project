@@ -58,11 +58,6 @@ class Booking(Base):
             f"Activity: {self.offering.get_lesson().get_specialization().value}\n"
 
         )
-
-    def cancel(self):
-        self.is_cancelled = True  
-        if self.offering:
-            self.offering.bookings.remove(self) 
     
     def get_id(self) -> int:
         return self.id
@@ -72,12 +67,6 @@ class Booking(Base):
     
     def get_client_id(self) -> int:
         return self.client_id
-    
-    def get_status(self) -> str:
-        return self.status  
-    
-    def get_active(self) -> str:
-        return self.active
     
     def get_is_cancelled(self) -> bool:
         return self.is_cancelled

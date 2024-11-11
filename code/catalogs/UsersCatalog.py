@@ -15,7 +15,6 @@ class UsersCatalog:
             cls._instance = cls(session)
         return cls._instance
     
-    
     def register_admin(self, name: str, password: str):
         #existing_user = self.session.query(User).join(Admin).filter(User.name == name).first() # Checks for users who are also admins
         existing_user = self.session.query(User).filter(User.name == name).first() #Checks for all users regardless of thei roles
@@ -74,7 +73,6 @@ class UsersCatalog:
         self.session.commit()
         return client
 
-    
     def login(self, name: str, password: str, phone_number: str=None):
         user = self.session.query(User).filter(User.name == name).first()
 
@@ -93,10 +91,6 @@ class UsersCatalog:
                 return admin if admin else None
         return None
     
-    def has_admin(self):
-        return self.session.query(Admin).first() is not None
-    #! Needs to be modified, needs to cancel all bookings associated with the Instructor Offering
-    #! Needs to be modified, needs to cancel all bookings associated with the Client
     def delete_user(self, name: str=None, id: int=None):
         user = None
         if not name and not id:
@@ -115,13 +109,9 @@ class UsersCatalog:
             for booking in user.get_bookings():
                     booking.get_offering().set_status("Available")
 
-        
         self.session.delete(user)
         self.session.commit()
         return user
-    
-    def get_all_users(self):
-        return self.session.query(User).all()
     
     def get_user(self, name: str):
         user = self.session.query(User).filter(User.name == name).first()
