@@ -53,11 +53,11 @@ class LessonsCatalog:
         return (
             self.session.query(Lesson)
             .join(Lesson.location)
-            .outerjoin(Lesson.offerings)
+            .outerjoin(Lesson.offering)
             .filter(
                 Location.city.in_(cities),
                 Lesson.specialization.in_(specializations),
-                Lesson.offerings == None
+                Lesson.offering == None
             )
             .all()
         )
