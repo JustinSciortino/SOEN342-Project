@@ -21,7 +21,7 @@ class Minor(Base):
         self.relationship_with_guardian = relationship_with_guardian
 
     def __repr__(self) -> str:
-        return f"Minor {self.name}, {self.age} years old, Relationship: {self.relationship_with_guardian}, MinorId: {self.id}, GuardianId: {self.guardian_id}"
+        return f"\nMinor {self.name}, {self.age} years old, Relationship: {self.relationship_with_guardian}"
     
     def get_id(self) -> int:
         return self.id

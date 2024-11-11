@@ -17,7 +17,7 @@ class Offering(Base):
     instructor_id : Mapped[int] = mapped_column(Integer, ForeignKey('instructors.id'), nullable=False)
     instructor: Mapped["Instructor"] = relationship("Instructor", back_populates="offerings")
     status: Mapped[str] = mapped_column(String, default="Available")  
-    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering")
+    bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="offering", cascade="all, delete")
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
 
     def __init__(self, instructor: "Instructor", lesson: "Lesson"):
@@ -36,10 +36,32 @@ class Offering(Base):
     def repr_admin(self):
         lesson = self.get_lesson()
         if lesson.get_type() == LessonType.group:
-            return f"\n\tOffering {self.get_id()} is a {lesson.get_type().name} class with a capacity of {lesson.get_capacity()} and the course is {lesson.get_specialization().name}, {len(self.bookings)} number of bookings and {lesson.get_capacity()-len(self.bookings)} spots available at {lesson.get_location().offering_repr()} and is {self.get_status()}"
+            return(
+                f"\nOffering ID: {self.get_id()}\n"
+                f"Location: {lesson.get_location().get_name()}, {lesson.get_location().get_address()} {lesson.get_location().get_city()}\n"
+                f"Capacity: {lesson.get_capacity()}\n"
+                f"Number of bookings: {len(self.bookings)}\n"
+                f"Timeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
+                f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}\n"
+                f"Offering Type: {lesson.get_type().value}\n"
+                f"Specialization: {lesson.get_specialization().value}\n"
+                f"Instructor: {self.instructor.get_name()}\n"
+                f"Status: {self.get_status()}"
+            )
+            
         else:
-            return f"\n\tOffering {self.get_id()} is a {lesson.get_type().name} class and the course is {lesson.get_specialization().name}, at {lesson.get_location().offering_repr()} and is {self.get_status()}"
-          
+            return (
+                f"\nOffering ID: {self.get_id()}\n"
+                f"Location: {lesson.get_location().get_name()}, {lesson.get_location().get_address()} {lesson.get_location().get_city()}\n"
+                f"Capacity: Private Lesson\n"
+                f"Timeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
+                f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}\n"
+                f"Offering Type: {lesson.get_type().value}\n"
+                f"Specialization: {lesson.get_specialization().value}\n"
+                f"Instructor: {self.instructor.get_name()}\n"
+                f"Status: {self.get_status()}"
+            )
+            
     def repr_instructor(self):
         lesson = self.get_lesson()
         capacity_info = (

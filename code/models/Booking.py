@@ -30,15 +30,16 @@ class Booking(Base):
 
     def __repr__(self) -> str:
         if self.is_cancelled:
-            return f"Booking {self.id} is {self.status} for {self.client} in {self.offering} and is cancelled"
+            return f"Booking {self.id} for {self.client.get_name()} in {self.offering} and is cancelled"
         return f"Booking {self.id} is {self.status} for {self.client} in {self.offering} and is not cancelled"
     
     def repr_client(self):
         return (
-            f"Booking ID: {self.id}\n"
+            f"\nBooking ID: {self.id}\n"
             f"Offering: {self.offering.get_lesson().get_type().value}\n"
             f"Location: {self.offering.get_lesson().get_location().get_name()}, {self.offering.get_lesson().get_location().get_city()}\n"
             f"Timeslot: {self.offering.get_lesson().get_timeslot().get_day_of_week()}, {self.offering.get_lesson().get_timeslot().get_start_time()} - {self.offering.get_lesson().get_timeslot().get_end_time()}\n"
+            f"Availble from {self.offering.get_lesson().get_timeslot().get_start_date()} to {self.offering.get_lesson().get_timeslot().get_end_date()}\n"
             f"Instructor: {self.offering.get_instructor().get_name()}\n"
             f"Client: {self.client.get_name()}\n"
             f"Activity: {self.offering.get_lesson().get_specialization().value}\n"
@@ -46,10 +47,11 @@ class Booking(Base):
     
     def repr_minor(self):
         return (
-            f"Booking ID: {self.id}\n"
+            f"\nBooking ID: {self.id}\n"
             f"Offering: {self.offering.get_id()}\n"
             f"Location: {self.offering.get_lesson().get_location().get_name()}, {self.offering.get_lesson().get_location().get_city()}\n"
             f"Timeslot: {self.offering.get_lesson().get_timeslot().get_day_of_week()}, {self.offering.get_lesson().get_timeslot().get_start_time()} - {self.offering.get_lesson().get_timeslot().get_end_time()}\n"
+            f"Availble from {self.offering.get_lesson().get_timeslot().get_start_date()} to {self.offering.get_lesson().get_timeslot().get_end_date()}\n"
             f"Instructor: {self.offering.get_instructor().get_name()}\n"
             f"Guardian: {self.client.get_name()}\n"
             f"Minor: {self.minor.get_name()}\n"

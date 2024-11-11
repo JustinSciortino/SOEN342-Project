@@ -98,6 +98,7 @@ class UsersCatalog:
     #! Needs to be modified, needs to cancel all bookings associated with the Instructor Offering
     #! Needs to be modified, needs to cancel all bookings associated with the Client
     def delete_user(self, name: str=None, id: int=None):
+        user = None
         if not name and not id:
             raise ValueError("Name or id must be provided")
         if id:
@@ -109,6 +110,11 @@ class UsersCatalog:
         
         if user.get_type() == "admin":
             raise ValueError("Cannot delete admin")
+        
+        if user.get_type() == "client":
+            for booking in user.get_bookings():
+                    booking.get_offering().set_status("Available")
+
         
         self.session.delete(user)
         self.session.commit()

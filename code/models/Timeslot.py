@@ -26,7 +26,16 @@ class Timeslot(Base):
         self.schedule_id = schedule_id
 
     def __repr__(self):
-        return f"Timeslot {self.id} is on {self.day_of_week} from {self.start_time} to {self.end_time} starting on {self.start_date} and ending on {self.end_date} for Lesson {self.lesson_id}"
+        return (
+            f"\nTimeslot ID: {self.id}\n"
+            f"Day of the week: {self.day_of_week}\n"
+            f"Start time: {self.start_time}\n"
+            f"Start date: {self.start_date}\n"
+            f"End time: {self.end_time}\n"
+            f"End date: {self.end_date}\n"
+            f"Lesson ID: {self.lesson_id}\n"
+        )
+        
 
     @classmethod
     def is_conflicting(self, booked_timeslots: list["Timeslot"]):

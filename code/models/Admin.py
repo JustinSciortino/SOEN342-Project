@@ -168,7 +168,7 @@ class Admin(User):
                 else:
                     print("\n","Available locations:")
                     for location in available_locations:
-                        print("\n",location)
+                        print(location)
 
                 while True:
                     location_id = str(input("\nEnter location id from one of locations above (or 'q' to quit): "))
@@ -236,6 +236,11 @@ class Admin(User):
 
                             try:
                                 start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d").date()
+                                today = datetime.date.today()
+                                if start_date < today:
+                                    print("Start date must be after today's date. Please try again.")
+                                    continue
+
                                 break
                             except ValueError:
                                 print("Invalid date format. Please use YYYY-MM-DD format.")
@@ -270,6 +275,10 @@ class Admin(User):
 
                             try:
                                 end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date()
+                                today = datetime.date.today()
+                                if end_date < today:
+                                    print("End date must be after today's date. Please try again.")
+                                    continue
                                 if end_date < start_date:
                                     print("End date must be after start date. Please try again.")
                                     continue
@@ -408,7 +417,6 @@ class Admin(User):
                         offering_id = int(offering_id)
                         try:
                             offering = offerings_catalog.get_offering_by_id(offering_id)
-                            offerings_catalog.cancel_offering(offering=offering)
                             offerings_catalog.delete_offering(offering=offering)
                             print(f"Offering {offering.get_id()} has been successfully cancelled.")
                         except ValueError as e:
@@ -442,7 +450,6 @@ class Admin(User):
                             lesson = lessons_catalog.get_lesson_by_id(lesson_id)
                             lesson_offering = lesson.get_offerings()
                             if lesson_offering:
-                                offerings_catalog.cancel_offering(lesson_offering)
                                 offerings_catalog.delete_offering(lesson_offering)
                                 print(f"Associated offering has been successfully cancelled.")
                             lessons_catalog.cancel_lesson(lesson)
@@ -483,7 +490,6 @@ class Admin(User):
                 else:
                     print("\nYou will be redirected back to the admin menu.")
             
-            #! Needs to be tested after client menu is integrated
             if choice == 6:
                 print("\n--------View Client Bookings (Optionally Cancel Client Booking)--------")
                 client_id = None
@@ -525,7 +531,11 @@ class Admin(User):
 
                     print(f"\nClient {client.get_name()} bookings:")
                     for booking in client_bookings:
-                        print(booking)
+                        if booking.get_minor_id():
+                            print(booking.repr_minor())
+                        else:
+                            print(booking.repr_client())
+                        
 
                     cancel_booking_id = None
 
@@ -536,7 +546,7 @@ class Admin(User):
                         if not cancel_booking_resp:
                             print("Response cannot be empty. Please try again.")
                             continue
-                        if cancel_booking_resp.lower() != 'y' or cancel_booking_resp.lower() != 'n':
+                        if cancel_booking_resp.lower() != 'y' and cancel_booking_resp.lower() != 'n':
                             print("Invalid response. Please enter 'y' or 'n'.")
                             continue
                         if cancel_booking_resp.lower() == 'y':
@@ -555,7 +565,7 @@ class Admin(User):
                             if _quit == False:
                                 cancel_booking_id = int(cancel_booking_id)
                                 try:
-                                    bookings_catalog.cancel_booking(cancel_booking_id)
+                                    bookings_catalog.cancel_booking_(cancel_booking_id)
                                     print(f"Booking {cancel_booking_id} has been successfully cancelled.")
                                     break
                                 except ValueError as e:
@@ -679,8 +689,11 @@ class Admin(User):
                 if location and _quit == False:
                     timeslots = location.get_schedule().get_timeslots()
                     print(f"\nLocation {location.get_name()} schedule:")
-                    for timeslot in timeslots:
-                        print('\n',timeslot)
+                    if not timeslots:
+                        print("\nNo timeslots yet in the location schedule.")
+                    else:
+                        for timeslot in timeslots:
+                            print(timeslot)
                 else:
                     print("\nYou will be redirected back to the admin menu.")
                     continue
@@ -691,7 +704,7 @@ class Admin(User):
                 if not locations:
                     print("\nNo locations found.")
                 for location in locations:
-                    print("\n",location)
+                    print(location)
             
             if choice == 10:
                 print("\n--------Get Location from ID or City (and optionally Name and Address)--------")
@@ -728,7 +741,7 @@ class Admin(User):
                     if location_name and location_address:
                         try:
                             location = locations_catalog.get_location(city=location_city, name=location_name, address=location_address)
-                            print('\n',location)
+                            print(location)
                         except ValueError as e:
                             print(f"{e} - The location was not found.")
                             break  
