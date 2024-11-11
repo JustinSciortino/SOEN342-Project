@@ -84,25 +84,41 @@ class Client(User):
                 if offering_city is not None and offering_city.lower() == 'q':
                     _quit = True
 
-                if _quit == False:
-
+                if not _quit:
                     from models import SpecializationType
-                    print(f"Available specialization types: {[spec.value for spec in SpecializationType]}")
-                    offering_specialization = input("Enter offering specialization (or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
-                    if offering_specialization is not None and offering_specialization.lower() == 'q':
-                        _quit = True
+                    valid_specializations = [spec.value for spec in SpecializationType]
+                    print(f"Available specialization types: {valid_specializations}")
+                    
+                    while True:
+                        offering_specialization = input("Enter offering specialization (or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
+                        if offering_specialization is None or offering_specialization.lower() == 'q':
+                            _quit = True
+                            break
+                        elif offering_specialization not in valid_specializations:
+                            print("Invalid specialization. Please enter a valid specialization from the list.")
+                            continue
+                        else:
+                            offering_specialization = SpecializationType(offering_specialization)
+                            break
 
-                    if _quit == False and offering_specialization:
-                        offering_specialization = SpecializationType(offering_specialization)
-                
-                if _quit == False:
+                if not _quit:
                     from models import LessonType
-                    print(f"Available offering types: {[offering_type.value for offering_type in LessonType]}")
-                    offering_type = input("Enter offering type (or 'q' to quit or 'enter' to not add an offering type): ").strip() or None
-                    if offering_type is not None and offering_type.lower() == 'q':
-                        _quit = True
+                    valid_types = [offering_type.value for offering_type in LessonType]
+                    print(f"Available offering types: {valid_types}")
+                    
+                    while True:
+                        offering_type = input("Enter offering type (or 'q' to quit or 'enter' to not add an offering type): ").strip() or None
+                        if offering_type is None or offering_type.lower() == 'q':
+                            _quit = True
+                            break
+                        elif offering_type not in valid_types:
+                            print("Invalid offering type. Please enter a valid type from the list.")
+                            continue
+                        else:
+                            offering_type = LessonType(offering_type)
+                            break
 
-                if _quit == False:
+                if not _quit:
                     offerings = offerings_catalog.get_offerings(city=offering_city, specialization=offering_specialization, _type=offering_type)
                     if not offerings:
                         print("No offerings at the moment")
@@ -110,8 +126,6 @@ class Client(User):
                         print("\nOfferings:")
                         for offering in offerings:
                             is_booked = False
-                            
-                            #! Needs to be tested to make sure the offering is appearing as non-availble
                             for booking in self.get_bookings():
                                 if booking.get_offering().get_id() == offering.get_id():
                                     print(offering.repr_client_booked())
@@ -121,8 +135,9 @@ class Client(User):
                             if not is_booked:
                                 print(offering.repr_client())
                 else:
-                    print("\nYou will be redirected back to the admin menu.")
+                    print("\nYou will be redirected back to the client menu.")
                     continue
+
                     
             if choice == 2:
                 print("\n--------Book an Available Offering--------")
@@ -133,17 +148,19 @@ class Client(User):
                 for idx, spec in enumerate(specializations, start=1):
                     print(f"{idx}. {spec}")
 
-                specialization_choice = input("\nSelect the number corresponding to the specialization you'd like to search for: ").strip()
+                while True:
+                    specialization_choice = input("\nSelect the number corresponding to the specialization you'd like to search for: ").strip()
+                    
+                    try:
+                        specialization_choice = int(specialization_choice)
+                        if 1 <= specialization_choice <= len(specializations):
+                            chosen_specialization = SpecializationType(specializations[specialization_choice - 1])
+                            break  # Exit loop if the selection is valid
+                        else:
+                            print(f"Invalid selection. Please enter a number between 1 and {len(specializations)}.")
+                    except ValueError:
+                        print("Invalid input. Please enter a valid number corresponding to a specialization.")
 
-                try:
-                    specialization_choice = int(specialization_choice)
-                    if specialization_choice < 1 or specialization_choice > len(specializations):
-                        raise ValueError
-                    chosen_specialization = SpecializationType(specializations[specialization_choice - 1])
-                except ValueError:
-                    print("Invalid selection. Please enter a valid number corresponding to a specialization.")
-                    break
-                
                 offerings = offerings_catalog.get_available_offerings(specialization=chosen_specialization)
                 available_offerings = []
 
@@ -178,7 +195,7 @@ class Client(User):
                             if self.minors is not None:
                                 print("\nYour Minors:")
                                 for minor in self.minors:
-                                    print(minor.repr_client())
+                                    print(minor.__repr__())
                                 minor_id = input("\nIf the booking is for one of the above minors, enter their id, if not and you want to create a new minor, enter 'No': ").strip()
                                 if minor_id != 'No':
                                     selected_minor = next((minor for minor in self.minors if str(minor.id) == minor_id), None)
@@ -223,7 +240,6 @@ class Client(User):
 
                 if not client_bookings:
                     print("\nYou have no bookings to cancel.")
-
                 else:
                     print("\nYour Current Bookings:")
                     for booking in client_bookings:
@@ -240,7 +256,8 @@ class Client(User):
                         print("Invalid booking ID.")
                         continue
 
-                    bookings_catalog.cancel_booking(self, selected_booking.get_id())
+                    bookings_catalog.cancel_booking(self, selected_booking)
+
 
             if choice == 5:
                 print("\n--------View Minor's Bookings--------")
