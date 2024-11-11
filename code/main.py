@@ -239,19 +239,26 @@ def main():
                                 continue
                             break
 
+                        
+
+                        relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
+                        minor_name = client_name
+                        minor_age = int(input(f"{minor_name}, enter your age: "))
+
                         try:
                             existing_guardian = user_catalog.register_client(legal_guardian_name, legal_guardian_phone, legal_guardian_password)
-                            print(f"Legal Guardian Client, {legal_guardian_name}, has been created.")
+                            print(f"\nLegal Guardian Client, {legal_guardian_name}, has been created.")
 
                         except ValueError as e:
                             print(f"Error registering legal guardian: {e}")
                             break
 
-                        relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
-                        minor_name = client_name
-                        minor_age = int(input(f"{minor_name}, enter your age: "))
-                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
-                        print(f"Minor, {minor_name}, has been created.")
+                        if existing_guardian is not None:
+                            user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
+                            print(f"Minor, {minor_name}, has been created.")
+                        else:
+                            print("Error creating minor. You will be redirected to the main menu.")
+                            break
 
                     elif guardian_option == '2':
                         guardian_client_id = int(input("Enter the ID of the existing guardian: "))
@@ -297,8 +304,8 @@ def main():
                             client = user_catalog.register_client(client_name, client_phone_number, client_password)
                             
                         except ValueError as e:
-                            print(f"Error registering client: {e}")
-                            return
+                            print(f"Error registering client: {e}. Please try again.")
+                            continue
                         
                         print(f"Welcome {client_name}! You have successfully registered as an client.")
                         client.client_menu(db)
@@ -353,6 +360,7 @@ def main():
             
             if _quit == False: 
                 while True:
+                    is_valid = True
                     print(f"Available specialization types: {[spec.value for spec in SpecializationType]}")
                     instructor_specialization = input("Enter instructor specialization as a list seperated by commas (or 'q' to quit): ")
                     if instructor_specialization.lower() == 'q':
@@ -367,8 +375,11 @@ def main():
                                 valid_specializations.append(SpecializationType(spec))
                             except ValueError:
                                 print(f"'{spec}' is not a valid specialization type. Please try again.")
+                                is_valid = False
                                 break
-                    break
+                    if is_valid:
+                        break
+
             
             if _quit == False:
                 while True:

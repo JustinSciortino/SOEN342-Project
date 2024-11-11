@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, E
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database import Base
 from models import Minor, User, Booking, SpecializationType
+from typing import List
 
 
 
@@ -11,7 +12,7 @@ class Client(User):
 
     id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True, autoincrement=True)
     phone_number: Mapped[str] = mapped_column(String, nullable=False)
-    minors: Mapped["Minor"] = relationship("Minor", back_populates="guardian", cascade="all, delete-orphan")  # list of minors that the client is a guardian of
+    minors: Mapped[List["Minor"]] = relationship("Minor", back_populates="guardian", cascade="all, delete-orphan")  # list of minors that the client is a guardian of
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="client", cascade="all, delete-orphan") #! Test to make sure they actually get deleted if Client is deleted
 
 
@@ -25,7 +26,7 @@ class Client(User):
         self.bookings = []
 
     def __repr__(self) -> str:
-        if len(self.minors) != 0:
+        if self.minors is not None:
             return f"Client {self.id}, {self.name}, ({self.phone_number}) is a legal guardian of {self.minor}"
         return f"Client {self.id} ({self.phone_number}) is a client"
     
@@ -174,7 +175,7 @@ class Client(User):
 
                         if is_booking_for_minor == 'yes':
                             minor_id = None
-                            if len(self.minors) != 0:
+                            if self.minors is not None:
                                 print("\nYour Minors:")
                                 for minor in self.minors:
                                     print(minor.repr_client())
@@ -239,7 +240,7 @@ class Client(User):
             if choice == 5:
                 print("\n--------View Minor's Bookings--------")
 
-                if len(self.minors) == 0:
+                if self.minors is None:
                     print("You do not have any minors associated with your account. Redirecting back to the client menu.")
                 
                 else:   
