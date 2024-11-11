@@ -44,26 +44,6 @@
 2. Instructor instance is added to the User and Instructor database tables
 
 
-# Contract CO3: Register Admin
-
-**Operation: register_admin(name: String, password: String)**
-
-**Cross References: Use case Login/Register/Logout**  
-
-**Pre-conditions:**  
-
-1. A session with the database exists and is active
-2. The User, Client, Instructor and Admin tables has been created in the database
-3. The name parameter is a non-empty string
-4. The password parameter is a non-empty string
-5. There does not exists another administrator for the organization
-
-**Post-conditions:**  
-
-1. An Admin instance admin was created. (instance creation)
-2. Admin instance is added to the User and Admin database tables
-
-
 # Contract CO4: Register Client INCOMPLETE
 
 **Operation: register_client(name: String, password: String)**
@@ -130,43 +110,6 @@
 4. offering.type was set to offering_type (attribute modification)
 5. offering.specialization was set to specialization (attribute modification)
 6. timeslot is added to the Location instance's Schedule.timeslots (attribute modification)
-
-
-## Contract CO7: Assign Instructor to Offering
-
-**Operation**: `assign_instructor_to_offering(self, instructor, offering: Offering)`
-
-**Cross References**: Assigning Instructor to Teach Offering
-
-### Pre-conditions:
-- A session with the database exists and is active.
-- The `offering` parameter is a valid Offering instance.
-- The `instructor` parameter is a valid Instructor instance.
-- The `offering` does not already have an assigned instructor.
-
-### Post-conditions:
-- The `instructor_id` attribute of the `offering` is updated to reference the `instructor`.
-- The `instructor.offerings` list is updated to include the `offering`.
-- Changes are committed to the database.
-- If an error occurs, the transaction is rolled back, and a `ValueError` is raised.
-
----
-
-## Contract CO8: Get Available Offerings for Instructor
-
-**Operation**: `get_available_offerings_for_instructor(self, cities, specializations)`
-
-**Cross References**: Instructor Viewing Available Offerings
-
-### Pre-conditions:
-- A session with the database exists and is active.
-- The `cities` parameter is a non-empty list of valid city names.
-- The `specializations` parameter is a non-empty list of valid SpecializationType values.
-- The Offering table has at least one offering that matches the `cities` and `specializations` criteria.
-- The `offering.instructor_id` is set to `None` (i.e., the offering is not yet assigned to any instructor).
-
-### Post-conditions:
-- A list of available `Offering` instances is returned that match the given `cities` and `specializations` and are not yet assigned to any instructor.
 
 ---
 
