@@ -24,7 +24,7 @@ class Location(Base):
         self.space_type = [space.value for space in space_type]
         self.address = address
         self.capacity = capacity
-        self.city = city
+        self.city = city #! May want to do .lower() and search for all cities in lowercase
         self.offerings = []
         self.schedule = Schedule(self, self.id)
 

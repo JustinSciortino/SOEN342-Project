@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, E
 from sqlalchemy.orm import relationship, Mapped, mapped_column, Session
 from database import Base
 from models import Minor, User, Booking, SpecializationType
+from typing import List
 
 
 
@@ -25,7 +26,7 @@ class Client(User):
         self.bookings = []
 
     def __repr__(self) -> str:
-        if len(self.minors) != 0:
+        if self.minors is not None:
             return f"Client {self.id}, {self.name}, ({self.phone_number}) is a legal guardian of {self.minor}"
         return f"Client {self.id} ({self.phone_number}) is a client"
     
@@ -174,7 +175,7 @@ class Client(User):
 
                         if is_booking_for_minor == 'yes':
                             minor_id = None
-                            if len(self.minors) != 0:
+                            if self.minors is not None:
                                 print("\nYour Minors:")
                                 for minor in self.minors:
                                     print(minor.repr_client())
