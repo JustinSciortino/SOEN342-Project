@@ -253,25 +253,65 @@ def main():
                             print(f"Error registering legal guardian: {e}")
                             break
 
-                        if existing_guardian is not None:
-                            user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
-                            print(f"Minor, {minor_name}, has been created.")
-                        else:
-                            print("Error creating minor. You will be redirected to the main menu.")
+                        while True:
+                            relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
+                            if relationship_with_guardian.lower() == 'q':
+                                _quit = True
+                                print("\nYou will be redirected to the main menu.")
+                                break
+                            if not relationship_with_guardian:
+                                print("Relationship cannot be empty. Please try again.")
+                                continue
                             break
+
+                        minor_name = client_name
+
+                        while True:
+                            minor_age = int(input(f"{minor_name}, enter your age: "))
+                            if not minor_age or minor_age < 1 or minor_age >= 18:
+                                print("Age cannot be empty, less than 1, or larger than and including 18. Please try again.")
+                                continue
+                            break
+
+                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
+                        print(f"Minor, {minor_name}, has been created.")
 
                     elif guardian_option == '2':
-                        guardian_client_id = int(input("Enter the ID of the existing guardian: "))
                         
-                        existing_guardian = user_catalog.get_client_by_id(guardian_client_id)
+                        while True:
+                            guardian_client_id = int(input("Enter the ID of the existing guardian: "))
+                            if not guardian_client_id:
+                                print("Client id cannot be empty. Please try again.")
+                                continue
+                            
+                            existing_guardian = user_catalog.get_client_by_id(guardian_client_id)
 
-                        if existing_guardian is None:
-                            print("Invalid guardian ID. You will be redirected to the main menu.")
+                            if existing_guardian is None:
+                                print("Client does not exist. Please try again.")
+                                continue
+
                             break
-                        
-                        relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
+
+                        while True:
+                            relationship_with_guardian = str(input("Enter your relationship with the guardian (ex: son, daughter...): "))
+                            if relationship_with_guardian.lower() == 'q':
+                                _quit = True
+                                print("\nYou will be redirected to the main menu.")
+                                break
+                            if not relationship_with_guardian:
+                                print("Relationship cannot be empty. Please try again.")
+                                continue
+                            break
+
                         minor_name = client_name
-                        minor_age = int(input("Enter your age: "))
+                        
+                        while True:
+                            minor_age = int(input(f"{minor_name}, enter your age: "))
+                            if (not minor_age) or minor_age < 1 or minor_age >= 18:
+                                print("Age cannot be empty, less than 1, or larger than and including 18. Please try again.")
+                                continue
+                            break
+
                         user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
                         print(f"Minor, {minor_name}, has been created and has successfully been linked to the guardian.")
 

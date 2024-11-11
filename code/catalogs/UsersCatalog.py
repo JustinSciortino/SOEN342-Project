@@ -133,7 +133,6 @@ class UsersCatalog:
 
     def create_and_add_minor(self, guardian: "Client", name: str, age: int, relationship_with_guardian: str = "Child"):
         minor = Minor(guardian=guardian, name=name, age=age, relationship_with_guardian=relationship_with_guardian)
-        guardian.minors.append(minor)
         self.session.add(minor)
         self.session.commit()
 
@@ -151,7 +150,6 @@ class UsersCatalog:
         
     def create_minor(self, guardian: "Client", name: str, age: int, relationship_with_guardian: str):
         minor = Minor(guardian=guardian, name=name, age=age, relationship_with_guardian=relationship_with_guardian)
-        guardian.minors.append(minor)
         self.session.add(minor)
         self.session.commit()
         return minor
