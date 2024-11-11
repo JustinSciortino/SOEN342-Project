@@ -18,14 +18,15 @@ class BookingsCatalog:
         booking = self.session.query(Booking).filter_by(id=booking_id).first()
         return booking
     
-    def cancel_booking(self, booking_id: int):
-        booking = self.session.query(Booking).filter_by(id=booking_id).first()
-        if not booking:
-            raise ValueError(f"Booking with id '{booking_id}' does not exist")
-        booking.cancel()
-        #self.session.delete(booking)
+    def cancel_booking(self, client, booking):
+        if booking not in client.bookings:
+            raise ValueError("Booking not associated with this client.")
+
+        client.bookings.remove(booking)  
+        booking.cancel()  
         self.session.commit()
         return booking
+
 
     def create_booking(self, client: "Client", offering: "Offering", minor: "Minor" = None):
         try:
