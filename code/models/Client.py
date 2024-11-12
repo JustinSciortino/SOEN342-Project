@@ -98,15 +98,16 @@ class Client(User):
                     
                     while True:
                         offering_specialization = input("Enter offering specialization (or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
-                        if offering_specialization is None or offering_specialization.lower() == 'q':
-                            _quit = True
-                            break
-                        elif offering_specialization not in valid_specializations:
-                            print("Invalid specialization. Please enter a valid specialization from the list.")
-                            continue
-                        else:
-                            offering_specialization = SpecializationType(offering_specialization)
-                            break
+                        if offering_city is not None:
+                            if offering_specialization.lower() == 'q':
+                                _quit = True
+                                break
+                            elif offering_specialization not in valid_specializations:
+                                print("Invalid specialization. Please enter a valid specialization from the list.")
+                                continue
+                            else:
+                                offering_specialization = SpecializationType(offering_specialization)
+                                break
 
                 if not _quit:
                     from models import LessonType
@@ -115,15 +116,16 @@ class Client(User):
                     
                     while True:
                         offering_type = input("Enter offering type (or 'q' to quit or 'enter' to not add an offering type): ").strip() or None
-                        if offering_type is None or offering_type.lower() == 'q':
-                            _quit = True
-                            break
-                        elif offering_type not in valid_types:
-                            print("Invalid offering type. Please enter a valid type from the list.")
-                            continue
-                        else:
-                            offering_type = LessonType(offering_type)
-                            break
+                        if offering_type is not None:
+                            if offering_type.lower() == 'q':
+                                _quit = True
+                                break
+                            elif offering_type not in valid_types:
+                                print("Invalid offering type. Please enter a valid type from the list.")
+                                continue
+                            else:
+                                offering_type = LessonType(offering_type)
+                                break
 
                 if not _quit:
                     offerings = offerings_catalog.get_offerings(city=offering_city, specialization=offering_specialization, _type=offering_type)
