@@ -268,7 +268,7 @@ def main():
                             print(f"Error registering legal guardian: {e}")
                             break
 
-                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
+                        user_catalog.create_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
                         print(f"Minor, {minor_name}, has been created.")
 
                     elif guardian_option == '2':
@@ -307,7 +307,7 @@ def main():
                                 continue
                             break
 
-                        user_catalog.create_and_add_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
+                        user_catalog.create_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
                         print(f"Minor, {minor_name}, has been created and has successfully been linked to the guardian.")
 
                 elif client_is_minor == 'no':

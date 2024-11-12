@@ -36,7 +36,6 @@ class Timeslot(Base):
             f"Lesson ID: {self.lesson_id}\n"
         )
         
-
     @classmethod
     def is_conflicting(self, booked_timeslots: list["Timeslot"]):
         new_start_datetime = datetime.combine(self.start_date, self.start_time)

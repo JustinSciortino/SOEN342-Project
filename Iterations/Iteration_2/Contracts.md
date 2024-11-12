@@ -46,7 +46,7 @@
 
 # Contract CO4: Register Client INCOMPLETE
 
-**Operation: register_client(name: String, password: String)**
+**Operation: register_client(name: String, password: String, phone_number: String)**
 
 **Cross References: Use case Login/Register/Logout**  
 
@@ -56,6 +56,7 @@
 2. The User, Client, Instructor and Admin tables has been created in the database
 3. The name parameter is a non-empty string
 4. The password parameter is a non-empty string
+5. The phone_number parameter is non-empty string
 
 **Post-conditions:**  
 
@@ -81,39 +82,33 @@
 
 1. Client/Instructor instance is deleted from the system. (instance deletion)
 2. Client/Instructor instance is deleted from the database
-3. Association between Client/Instructor and Booking/Offering broken. (association broken)
-4. Offering instance associated with the Instructor is cancelled and all bookings instance associated with the Offering instance are cancelled (association broken)
-5. All Booking instances associated with the Client are broken (association broken) and deleted (instance deletion)
+3. Client association with minor broken (association broken)
+4. Client minors deleted (instance deletion)
+3. If a Client is deleted, delete all client (and associated minors) bookings and make Offering availble if it was previously Not-Available (instance modification)
+5. Client (and associated minors) bookings are deleted (instance deletion and association broken)
+4. If a Instructor was deleted, break all associated Offerings (association broken), delete all associated Offerings (instance deletion), delete client bookings associated with any deleted Offering
 
 
 # Contract CO6: Create Offering 
 
-**Operation: create_offering(location: Location, capacity: int, timeslot: Timeslot, offering_type: LessonType, specialization: SpecializationType)**
+**Operation: create_offering(lesson: Lesson, instructor: Instructor)**
 
 **Cross References: Create Offering**  
 
 **Pre-conditions:**  
 
 1. A session with the database exists and is active
-2. The location parameter is a valid existing Location instance
-3. The capacity is a valid integer, greater than zero and less than or equal to the Location instance capacity
-4. The timeslot parameter is a valid Timeslot instance
-5. The timeslot instance does not conflict with the Location instance's Schedule instance consisting of a list of Timeslot instances
-6. The offering_type parameter is a non-empty and a valid type of LessonType
-7. The specialization parameter is a non-empty and a valid type of SpecializationType
+2. The lesson and instructor parameters are non-empty and are of valid type
+3. No time conflicts exists between the Lesson's timeslot and the instructors schedule of offerings they will teach
 
 **Post-conditions:**  
 
 1. Offering instance offering is created (instance creation)
-2. Association formed between offering and timeslot (association formed)
-3. Association formed between offering and location (association formed)
-4. offering.type was set to offering_type (attribute modification)
-5. offering.specialization was set to specialization (attribute modification)
-6. timeslot is added to the Location instance's Schedule.timeslots (attribute modification)
+2. Association formed between Offering and Lesson as well as Offering and Instructor (association formed)
 
 ---
 
-## Contract CO9: Remove Instructor from Offering
+## Contract CO7: Remove Instructor from Offering
 
 **Operation**: `remove_instructor_from_offering(self, instructor, offering: Offering)`
 
@@ -134,7 +129,7 @@
 
 ---
 
-## Contract CO10: Create Booking for Client
+## Contract CO8: Create Booking for Client
 
 **Operation**: `create_booking(self, client: Client, offering: Offering, minor_id: int = None)`
 
@@ -153,55 +148,48 @@
 - The new booking is committed to the database.
 - If an error occurs, the transaction is rolled back, and no booking is created.
 
----
-
-## Contract CO11: Get Client Bookings
-
-**Operation**: `get_client_bookings(self, client: Client)`
-
-**Cross References**: View Bookings
-
-### Pre-conditions:
-- A session with the database exists and is active.
-- The `client` parameter is a valid Client instance.
-
-### Post-conditions:
-- Returns a list of all `Booking` instances associated with the `client`.
 
 ---
 
-## Contract CO12: Cancel Client Booking
+## Contract CO9: Cancel Client Booking
 
-**Operation**: `cancel_booking(self, client: Client, booking: Booking, minor_id: int = None)`
+**Operation**: `cancel_booking(self, booking_id: int)`
 
 **Cross References**: Cancel Booking
 
 ### Pre-conditions:
 - A session with the database exists and is active.
-- The `client` parameter is a valid Client instance.
-- The `booking` parameter is a valid Booking instance.
-- If provided, the `minor_id` corresponds to a valid Minor instance linked to the booking.
+- The `booking_id` parameter is a non-empty parameter.
 
 ### Post-conditions:
-- The `Booking` instance is removed from the `client` and `offering`.
-- If a `minor_id` is provided, the booking is also removed from the Minor instance.
-- The `Booking` instance is either deleted or marked as canceled based on business rules.
-- The changes are committed to the database.
-- If an error occurs, the transaction is rolled back, and the booking remains active.
+- The Booking association with Client is broken (association broken)
+- The Booking association with Offering is broken and the Booking is removed from the Offering (assoication broken) 
+- The `Booking` instance is deleted
 
 ---
 
-## Contract CO13: Get Minor Bookings
+# Contract C010: Create Lesson
 
-**Operation**: `get_minor_bookings(self, minor_id: int)`
+**Operation: create_lesson(location: Location, capacity: int, timeslot: Timeslot, lesson_type: LessonType, specialization: SpecializationType)**
 
-**Cross References**: View Minor Bookings
+**Cross References: Create Lesson**  
 
-### Pre-conditions:
-- A session with the database exists and is active.
-- The `minor_id` is a valid ID corresponding to a Minor instance.
+**Pre-conditions:**  
 
-### Post-conditions:
-- Returns a list of all `Booking` instances associated with the `minor_id`.
+1. A session with the database exists and is active
+2. The location parameter is a valid existing Location instance
+3. The capacity is a valid integer, greater than zero and less than or equal to the Location instance capacity
+4. The timeslot parameter is a valid Timeslot instance
+5. The timeslot instance does not conflict with the Location instance's Schedule instance consisting of a list of Timeslot instances
+6. The offering_type parameter is a non-empty and a valid type of LessonType
+7. The specialization parameter is a non-empty and a valid type of SpecializationType 
 
+**Post-conditions:**  
+
+1. Offering instance offering is created (instance creation)
+2. Association formed between offering and timeslot (association formed)
+3. Association formed between offering and location (association formed)
+4. offering.type was set to offering_type (attribute modification)
+5. offering.specialization was set to specialization (attribute modification)
+6. timeslot is added to the Location instance's Schedule.timeslots (attribute modification)
 
