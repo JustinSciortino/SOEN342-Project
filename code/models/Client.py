@@ -26,9 +26,12 @@ class Client(User):
         self.bookings = []
 
     def __repr__(self) -> str:
-        if self.minors is not None:
-            return f"Client {self.id}, {self.name}, ({self.phone_number}) is a legal guardian of {self.minor}"
-        return f"Client {self.id} ({self.phone_number}) is a client"
+        if self.minors:
+            minors_names = ", ".join(minor.name for minor in self.minors)
+            return f"Client {self.id}, {self.name}, ({self.phone_number}), legal guardian of: {minors_names}"
+        else:
+            return f"Client {self.id}, {self.name}, ({self.phone_number}), no minors associated"
+
     
     def get_id(self) -> int:
         return self.id
@@ -260,7 +263,8 @@ class Client(User):
                         print("Invalid booking ID.")
                         continue
 
-                    bookings_catalog.cancel_booking(self, selected_booking)
+                    bookings_catalog.cancel_booking(selected_booking)
+                    print("Booking successfully cancelled.")
 
 
             if choice == 5:

@@ -14,16 +14,18 @@ class BookingsCatalog:
             cls._instance = cls(session)
         return cls._instance
     
-    def cancel_booking(self, booking_id: int):
-        booking = self.session.query(Booking).filter_by(id=booking_id).first()
+    def cancel_booking(self, booking):
         if not booking:
-            raise ValueError(f"Booking with id '{booking_id}' does not exist")
+            raise ValueError("Booking does not exist")
+        
         offering = booking.get_offering() 
+        print(f"\nOffering {offering.get_id()} is now available.")
         if offering.get_lesson().get_type().value == 'private':
             offering.set_status("Available") 
         else:
             if len(offering.get_bookings()) < offering.get_lesson().get_capacity():
                 offering.set_status("Available")
+        
         self.session.delete(booking)
         self.session.commit()
         return booking
