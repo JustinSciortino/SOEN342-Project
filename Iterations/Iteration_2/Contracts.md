@@ -44,7 +44,7 @@
 2. Instructor instance is added to the User and Instructor database tables
 
 
-# Contract CO4: Register Client INCOMPLETE
+# Contract CO4: Register Client
 
 **Operation: register_client(name: String, password: String, phone_number: String)**
 

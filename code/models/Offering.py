@@ -75,8 +75,8 @@ class Offering(Base):
             f"Location: {lesson.get_location().name}, {lesson.get_location().get_city()}\n"
             f"{capacity_info}"
             f"Timeslot: {lesson.get_timeslot().get_day_of_week()}, {lesson.get_timeslot().get_start_time()} - {lesson.get_timeslot().get_end_time()}\n"
-            f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}"
-            f"Offering Type: {lesson.get_type().value}\n"
+            f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}\n"
+            f"Offering Type: {lesson.get_type().value}"
         )
     
     def repr_client(self):
