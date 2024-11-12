@@ -15,6 +15,8 @@ class Booking(Base):
     is_cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
     offering_id: Mapped[int] = mapped_column(Integer, ForeignKey('offerings.id'), nullable=False)
     offering: Mapped["Offering"] = relationship("Offering", back_populates="bookings")
+    
+
 
     def __init__(self, client: "Client", offering: "Offering", minor:"Minor"=None):
         self.client = client
@@ -31,7 +33,7 @@ class Booking(Base):
     def __repr__(self) -> str:
         if self.is_cancelled:
             return f"Booking {self.id} for {self.client.get_name()} in {self.offering} and is cancelled"
-        return f"Booking {self.id} is {self.status} for {self.client} in {self.offering} and is not cancelled"
+        return f"Booking {self.id} is {self.offering.status} for {self.client} in {self.offering} and is not cancelled"
     
     def repr_client(self):
         return (

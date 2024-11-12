@@ -114,7 +114,7 @@ class Offering(Base):
             f"Available from {lesson.get_timeslot().get_start_date()} to {lesson.get_timeslot().get_end_date()}\n"
             f"Specialization: {lesson.get_specialization().value}\n"
             f"Instructor: {self.instructor.get_name()}\n"
-            f"Status: Non-Availble"  
+            f"Status: {self.get_status()}"
         )
 
     def get_id(self) -> int:

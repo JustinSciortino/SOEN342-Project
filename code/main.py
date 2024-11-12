@@ -418,7 +418,7 @@ def main():
             
             if _quit == False:
                 while True:
-                    instructor_available_cities = str(input("Enter available cities (comma separated) (or 'q' to quit): "))
+                    instructor_available_cities = str(input("Enter available cities (comma separated), (or 'q' to quit): "))
                     if instructor_available_cities.lower() == 'q':
                         _quit = True
                         print("\nYou will be redirected to the main menu")
@@ -426,6 +426,7 @@ def main():
                     if not instructor_available_cities:
                         print("Available cities cannot be empty. Please try again.")
                         continue
+                    instructor_available_cities = ', '.join(city.strip().title() for city in instructor_available_cities.split(","))
                     break
 
             if _quit == False:
