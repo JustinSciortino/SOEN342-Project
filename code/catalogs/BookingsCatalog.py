@@ -18,21 +18,26 @@ class BookingsCatalog:
         if not booking:
             raise ValueError("Booking does not exist")
 
-        offering = self.session.query(Offering).filter(Offering.id == booking.offering_id).first()
+        offering = self.session.merge(booking.get_offering())
         if not offering:
             raise ValueError("Offering does not exist")
-        
-        if offering.get_lesson().get_type().value == 'private':
-            offering.set_status("Available") 
-            print("Offering is now available")
+
+        lesson = self.session.merge(offering.get_lesson())
+        if not lesson:
+            raise ValueError("Lesson does not exist for this offering")
+
+        if lesson.get_type().value == 'private':
+            offering.set_status("Available")
+            print("Offering is now available (Private Lesson)")
         else:
-            if len(offering.get_bookings()) < offering.get_lesson().get_capacity():
+            if len(offering.get_bookings()) < lesson.get_capacity():
                 offering.set_status("Available")
-                print("Offering is now available")
-        
+                print("Offering is now available (Group Lesson)")
+
         self.session.delete(booking)
         self.session.commit()
         return booking
+
 
     def create_booking(self, client: "Client", offering: "Offering", minor: "Minor" = None):
         try:
