@@ -22,7 +22,6 @@ class BookingsCatalog:
         self.session.commit()
         return booking
 
-
     def create_booking(self, client: "Client", offering: "Offering", minor: "Minor" = None):
         try:
             if minor:
@@ -52,27 +51,3 @@ class BookingsCatalog:
 
     def get_client_bookings(self, client: "Client"):
         return self.session.query(Booking).filter(Booking.client_id == client.get_id()).all()
-    
-    """def cancel_booking(self, client: "Client", booking: "Booking", minor_id: int = None):
-
-        try:
-            client.bookings.remove(booking)
-
-            if minor_id:
-                minor = self.session.query(Minor).filter(Minor.id == minor_id).first()
-                if minor:
-                    minor.bookings.remove(booking)
-
-            booking.offering.bookings.remove(booking) #! Can also optionally call the cancel() method in Booking class
-
-            self.session.delete(booking) #! Do we want to delete the booking from the database or mark it as cancelled? 
-                                    #!Something to ask CC or TA because if an Offering is cancelled, the associated bookings are marked as cancelled but neither offering nor bookings are deleted
-                                    #! Idea is that the user should have some idea that the booking was cancelled and that it just didnt disappear like that
-
-            self.session.commit()
-
-            print(f"Booking {booking.id} has been successfully canceled.") #!Booking will be deleted so we cant get the id
-
-        except ValueError:
-            self.session.rollback()
-            print(f"An error occurred while trying to cancel the booking.")"""

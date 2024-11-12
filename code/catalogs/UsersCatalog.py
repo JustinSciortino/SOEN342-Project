@@ -127,11 +127,6 @@ class UsersCatalog:
         
         return user
 
-    def create_and_add_minor(self, guardian: "Client", name: str, age: int, relationship_with_guardian: str = "Child"):
-        minor = Minor(guardian=guardian, name=name, age=age, relationship_with_guardian=relationship_with_guardian)
-        self.session.add(minor)
-        self.session.commit()
-
     def get_client_by_id(self, client_id: int):
         return self.session.query(Client).filter(Client.id == client_id).first()
     
