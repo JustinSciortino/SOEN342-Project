@@ -132,25 +132,29 @@ class Instructor(User):
                 else:
                     print("\nYour Offerings:")
                     for offering in my_offerings:
-                        print(offering.repr_instructor())  
+                        print(offering.repr_instructor())
 
-                    selected_offering_id = None
+                    selected_offering = None
                     while True:
-                        selected_offering_id = input("\nEnter the ID of the offering you want to remove yourself from (or 'q' to quit): ")
+                        selected_offering_id = input("\nEnter the ID of the offering you want to remove yourself from (or 'q' to quit): ").strip()
                         if selected_offering_id.lower() == 'q':
                             break  
                         try:
                             selected_offering_id = int(selected_offering_id)
                             selected_offering = next((off for off in my_offerings if off.id == selected_offering_id), None)
                             if selected_offering:
-                                break
+                                break  
                             else:
                                 print("Invalid offering ID. Please select a valid offering from the list.")
                         except ValueError:
                             print("Invalid input. Please enter a valid offering ID.")
 
-                    offerings_catalog.remove_instructor_from_offering(self, selected_offering)
-                    print(f"You have successfully removed yourself from offering with ID {selected_offering.id}.")
+                    if selected_offering:
+                        offerings_catalog.remove_instructor_from_offering(self, selected_offering)
+                        print(f"You have successfully removed yourself from offering with ID {selected_offering.id}.")
+                    else:
+                        print("No offering was selected.")
+
 
             if choice == 4:
                 print("\n--------Modify my Account--------")
