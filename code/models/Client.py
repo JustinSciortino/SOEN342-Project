@@ -49,7 +49,7 @@ class Client(User):
 
         client_menu_options = """
         Client Options:
-        1. View Offerings 
+        1. View Offerings (Available and Not Available)
         2. Book an Available Offering
         3. View My Bookings
         4. Cancel a Booking
@@ -77,12 +77,16 @@ class Client(User):
                     continue
 
             if choice == 1:
-                print("\n--------View Offerings--------")
+                print("\n--------View Offerings (Available and Not Available)--------")
                 _quit = False
 
                 offering_city = input("Enter offering city (or 'q' to quit or click 'enter' to not add a city): ").strip() or None
-                if offering_city is not None and offering_city.lower() == 'q':
-                    _quit = True
+
+                if offering_city is not None:
+                    if offering_city.lower() == 'q':
+                        _quit = True
+                    else:
+                        offering_city = offering_city.capitalize()
 
                 if not _quit:
                     from models import SpecializationType
@@ -183,7 +187,7 @@ class Client(User):
                     for offering in available_offerings:
                         print(offering.repr_client()) 
 
-                    offering_id = input("\nEnter the ID of the offering you'd like to book: ").strip()
+                    offering_id = input("\nEnter the ID of the offering you'd like to book (or enter to skip): ").strip()
 
                     selected_offering = next((offering for offering in available_offerings if str(offering.id) == offering_id), None)
 
