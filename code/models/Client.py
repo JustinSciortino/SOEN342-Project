@@ -190,7 +190,7 @@ class Client(User):
                     for offering in available_offerings:
                         print(offering.repr_client()) 
 
-                    offering_id = input("\nEnter the ID of the offering you'd like to book (or enter to skip): ").strip()
+                    offering_id = input("\nEnter the ID of the offering you'd like to book: ").strip()
 
                     selected_offering = next((offering for offering in available_offerings if str(offering.id) == offering_id), None)
 
