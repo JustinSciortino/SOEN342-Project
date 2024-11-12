@@ -14,8 +14,6 @@ class Location(Base):
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
     city: Mapped[str] = mapped_column(String, nullable=False) 
     space_type: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
-    #city: Mapped['City'] = relationship("City", backref="location")
-    #city_id: Mapped[int] = mapped_column(Integer, ForeignKey('cities.id'), nullable=False)
     schedule: Mapped["Schedule"] = relationship("Schedule", back_populates="location", uselist=False, cascade="all, delete-orphan")
     lessons: Mapped[list["Lesson"]] = relationship("Lesson", back_populates="location")
 
@@ -48,16 +46,14 @@ class Location(Base):
     
     def get_city(self) -> str:
         return self.city
-    
-    def delete(self):
-        if self.schedule:
-            for offering in self.offerings:
-                offering.cancel()  
-            self.schedule.timeslots = []
-        self.schedule = None  
 
     def __repr__(self):
-        return f"Location {self.id} {self.name} ({self.address}), has a capacity of {self.capacity} and is located in {self.city} and has {self.space_type} space type(s)"
+        return (
+            f"\nLocation ID: {self.id}\n"
+            f"Location: {self.name}, {self.address} {self.city}\n"
+            f"Capacity: {self.capacity}\n"
+            f"Space Type: {self.space_type}\n"
+        )
     
     def offering_repr(self):
         return f"Location {self.id} {self.name} ({self.address}), located in {self.city}"

@@ -26,19 +26,6 @@ class OfferingsCatalog:
         self.session.commit()
         return offering
     
-    def get_available_offerings_for_instructor(self, cities, specializations):
-        return (
-            self.session.query(Offering)
-            .join(Offering.lesson)
-            .join(Lesson.location)
-            .filter(
-                Location.city.in_(cities),
-                Lesson.specialization.in_(specializations),
-                Offering.instructor_id.is_(None)
-            )
-            .all()
-        )
-    
     def get_offerings(self, city: str = None, specialization: "SpecializationType" = None, _type: LessonType = None):
         query = self.session.query(Offering).join(Offering.lesson).join(Lesson.location)
 
@@ -65,7 +52,6 @@ class OfferingsCatalog:
             .all()
         )
 
-
     def get_offerings_by_instructor_id(self, instructor_id: int):
         return self.session.query(Offering).filter(Offering.instructor_id == instructor_id).all()
       
@@ -82,16 +68,6 @@ class OfferingsCatalog:
             query = query.filter(Lesson.type == _type)
 
         return query.all()
-
-    def has_time_conflict(self, instructorOfferings,  new_offering):
-        #! Test to make sure it works - You may get an error message because you cant compare date and datetime objects, check the conflict method in Schedule.py to see how I did it if theres errors
-        for offering in instructorOfferings:
-            if (offering.timeslot.start_date <= new_offering.timeslot.end_date and #! use getters for getting the timeslot, same for start_date, etc
-                new_offering.timeslot.start_date <= offering.timeslot.end_date):
-                if (offering.timeslot.start_time < new_offering.timeslot.end_time and
-                    new_offering.timeslot.start_time < offering.timeslot.end_time):
-                    return True
-        return False
     
     def get_offering_by_id(self, _id: int):
             offering = self.session.query(Offering).filter(Offering.id == _id).first()
@@ -99,24 +75,9 @@ class OfferingsCatalog:
                 raise ValueError(f"Offering with id '{_id}' does not exist")
             
             return offering
-        
-    def cancel_offering(self, offering: Offering):
-            offering.cancel_offering()
-            self.session.commit()
-            return offering
 
     def get_offerings_with_instructor(self):
         return self.session.query(Offering).filter(Offering.instructor_id.isnot(None)).all()
-
-    def assign_instructor_to_offering(self, instructor, offering: Offering):
-        try:
-            offering.instructor_id = instructor.id
-            instructor.offerings.append(offering)
-            self.session.commit()  # Commit the transaction in the catalog class
-        except Exception as e:
-            self.session.rollback()  # Rollback in case of an error
-            raise ValueError(f"Error assigning instructor to offering: {e}")
-
 
     def remove_instructor_from_offering(self, instructor, offering: Offering):
         try:
@@ -139,5 +100,3 @@ class OfferingsCatalog:
         self.session.delete(offering)
         self.session.commit()
         return offering
-
-

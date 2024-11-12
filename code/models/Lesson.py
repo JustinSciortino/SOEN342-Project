@@ -54,10 +54,50 @@ class Lesson(Base):
         return self.timeslot
     
     def get_offerings(self):
-        return self.offerings
+        return self.offering
     
     def repr_admin(self):
-        return f"\n\tLesson {self.id} is a {self.get_type().name} class with a capacity of {self.get_capacity()} at {self.get_location().get_name()}, {self.get_location().get_city()} on {self.get_timeslot().get_day_of_week()} from {self.get_timeslot().get_start_time()} {self.get_timeslot().get_start_date()} to {self.get_timeslot().get_end_time()} {self.get_timeslot().get_end_date()} doing {self.get_specialization().name}"
+        if self.get_type() == LessonType.group:
+            return(
+                f"\nLesson ID: {self.id}\n"
+                f"Location: {self.get_location().get_name()}, {self.get_location().get_address()} {self.get_location().get_city()}\n"
+                f"Capacity: {self.get_capacity()}\n"
+                f"Timeslot: {self.get_timeslot().get_day_of_week()}, {self.get_timeslot().get_start_time()} - {self.get_timeslot().get_end_time()}\n"
+                f"Available from {self.get_timeslot().get_start_date()} to {self.get_timeslot().get_end_date()}\n"
+                f"Lesson Type: {self.get_type().value}\n"
+                f"Specialization: {self.get_specialization().value}\n"
+                f"Offering ID: {self.get_offerings().get_id() if self.get_offerings() is not None else 'None'}\n"
+            )
+        else:
+            return(
+                f"\nLesson ID: {self.id}\n"
+                f"Location: {self.get_location().get_name()}, {self.get_location().get_address()} {self.get_location().get_city()}\n"
+                f"Capacity: Private Lesson\n"
+                f"Timeslot: {self.get_timeslot().get_day_of_week()}, {self.get_timeslot().get_start_time()} - {self.get_timeslot().get_end_time()}\n"
+                f"Available from {self.get_timeslot().get_start_date()} to {self.get_timeslot().get_end_date()}\n"
+                f"Lesson Type: {self.get_type().value}\n"
+                f"Specialization: {self.get_specialization().value}\n"
+                f"Offering ID: {self.get_offerings().get_id() if self.get_offerings() is not None else 'None'}\n"
+            )
 
     def repr_instructor(self):
-        return f"\nLesson ID: {self.get_id()}\nType: {self.get_type().name}\nSpecialization: {self.get_specialization().name}\nLocation: {self.get_location().get_name()}, {self.get_location().get_city()}\nTimeslot: {self.get_timeslot().get_day_of_week()}, {self.get_timeslot().get_start_time()} {self.get_timeslot().get_start_date()} - {self.get_timeslot().get_end_time()} {self.get_timeslot().get_end_date()}\nCapacity: {self.get_capacity()}"
+        if self.get_type() == LessonType.group:
+            return(
+                f"\nLesson ID: {self.id}\n"
+                f"Location: {self.get_location().get_name()}, {self.get_location().get_city()}\n"
+                f"Capacity: {self.get_capacity()}\n"
+                f"Timeslot: {self.get_timeslot().get_day_of_week()}, {self.get_timeslot().get_start_time()} - {self.get_timeslot().get_end_time()}\n"
+                f"Available from {self.get_timeslot().get_start_date()} to {self.get_timeslot().get_end_date()}\n"
+                f"Lesson Type: {self.get_type().value}\n"
+                f"Specialization: {self.get_specialization().value}"
+            )
+        else:
+            return(
+                f"\nLesson ID: {self.id}\n"
+                f"Location: {self.get_location().get_name()}, {self.get_location().get_city()}\n"
+                f"Capacity: Private Lesson\n"
+                f"Timeslot: {self.get_timeslot().get_day_of_week()}, {self.get_timeslot().get_start_time()} - {self.get_timeslot().get_end_time()}\n"
+                f"Available from {self.get_timeslot().get_start_date()} to {self.get_timeslot().get_end_date()}\n"
+                f"Lesson Type: {self.get_type().value}\n"
+                f"Specialization: {self.get_specialization().value}"
+            )
