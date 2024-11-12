@@ -97,8 +97,12 @@ class Client(User):
                     print(f"Available specialization types: {valid_specializations}")
                     
                     while True:
-                        offering_specialization = input("Enter offering specialization (or 'q' to quit or 'enter' to not add a specialization): ").strip() or None
-                        if offering_specialization is None or offering_specialization.lower() == 'q':
+                        offering_specialization = input("Enter offering specialization (or 'q' to quit or press 'Enter' to skip): ").strip() or None
+                        
+                        if offering_specialization is None:
+                            break
+
+                        if offering_specialization.lower() == 'q':
                             _quit = True
                             break
                         elif offering_specialization not in valid_specializations:
@@ -114,8 +118,13 @@ class Client(User):
                     print(f"Available offering types: {valid_types}")
                     
                     while True:
-                        offering_type = input("Enter offering type (or 'q' to quit or 'enter' to not add an offering type): ").strip() or None
-                        if offering_type is None or offering_type.lower() == 'q':
+                        offering_type = input("Enter offering type (or 'q' to quit or press 'Enter' to skip): ").strip() or None
+                        
+                        if offering_type is None:
+                            # Skip adding an offering type if Enter is pressed without input
+                            break
+
+                        if offering_type.lower() == 'q':
                             _quit = True
                             break
                         elif offering_type not in valid_types:
@@ -124,6 +133,7 @@ class Client(User):
                         else:
                             offering_type = LessonType(offering_type)
                             break
+
 
                 if not _quit:
                     offerings = offerings_catalog.get_offerings(city=offering_city, specialization=offering_specialization, _type=offering_type)
