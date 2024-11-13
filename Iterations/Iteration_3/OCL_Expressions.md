@@ -80,7 +80,7 @@
   - `instructor <> null and instructor.oclIsTypeOf(Instructor)`
   - `not instructor.schedule->exists(o | o.timeslot.overlaps(lesson.timeslot))`
 - **Postconditions:**
-  - result.oclIsTypeOf(Offering)
+  - `result.oclIsTypeOf(Offering)`
   - `result.lesson = lesson and result.instructor = instructor`
 
 ---
