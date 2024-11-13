@@ -44,7 +44,7 @@
 2. Instructor instance is added to the User and Instructor database tables
 
 
-# Contract CO4: Register Client
+# Contract CO3: Register Client
 
 **Operation: register_client(name: String, password: String, phone_number: String)**
 
@@ -64,7 +64,7 @@
 2. Client instance is added to the User and Client database tables
 
 
-# Contract CO5: Delete Instructor or Client 
+# Contract CO4: Delete Instructor or Client 
 
 **Operation: delete_user(name: String, id: int)**
 
@@ -89,7 +89,7 @@
 4. If a Instructor was deleted, break all associated Offerings (association broken), delete all associated Offerings (instance deletion), delete client bookings associated with any deleted Offering
 
 
-# Contract CO6: Create Offering 
+# Contract CO5: Create Offering 
 
 **Operation: create_offering(lesson: Lesson, instructor: Instructor)**
 
@@ -108,7 +108,7 @@
 
 ---
 
-## Contract CO7: Remove Instructor from Offering
+## Contract CO6: Remove Instructor from Offering
 
 **Operation**: `remove_instructor_from_offering(self, instructor, offering: Offering)`
 
@@ -129,7 +129,7 @@
 
 ---
 
-## Contract CO8: Create Booking for Client
+## Contract CO7: Create Booking for Client
 
 **Operation**: `create_booking(self, client: Client, offering: Offering, minor_id: int = None)`
 
@@ -151,7 +151,7 @@
 
 ---
 
-## Contract CO9: Cancel Client Booking
+## Contract CO8: Cancel Client Booking
 
 **Operation**: `cancel_booking(self, booking_id: int)`
 
@@ -168,7 +168,7 @@
 
 ---
 
-# Contract C010: Create Lesson
+# Contract C09: Create Lesson
 
 **Operation: create_lesson(location: Location, capacity: int, timeslot: Timeslot, lesson_type: LessonType, specialization: SpecializationType)**
 
