@@ -1,4 +1,4 @@
-# Contract CO1: Login
+# Login
 
 **Operation**: `login(name, password, phone_number: String = None)`
 
@@ -17,7 +17,7 @@
 
 ---
 
-# Contract CO2: Register Instructor
+# Register Instructor
 
 **Operation**: `register_instructor(name: String, password: String, phone_number: String, specialization: Set(SpecializationType), available_cities: Set(String))`
 
@@ -36,7 +36,7 @@
 
 ---
 
-# Contract CO4: Register Client
+# Register Client
 
 **Operation**: `register_client(name: String, password: String, phone_number: String)`
 
@@ -53,7 +53,7 @@
 
 ---
 
-# Contract CO5: Delete Instructor or Client
+# Delete Instructor or Client
 
 **Operation**: `delete_user(name: String, id: int)`
 
@@ -69,7 +69,7 @@
 
 ---
 
-# Contract CO6: Create Offering
+# Create Offering
 
 **Operation**: `create_offering(lesson: Lesson, instructor: Instructor)`
 
@@ -85,7 +85,7 @@
 
 ---
 
-# Contract CO7: Remove Instructor from Offering
+# Remove Instructor from Offering
 
 **Operation**: `remove_instructor_from_offering(self, instructor: Instructor, offering: Offering)`
 
@@ -102,7 +102,7 @@
 
 ---
 
-# Contract CO8: Create Booking for Client
+# Create Booking for Client
 
 **Operation**: `create_booking(self, client: Client, offering: Offering, minor_id: int = None)`
 
@@ -121,7 +121,7 @@
 
 ---
 
-# Contract CO9: Cancel Client Booking
+# Cancel Client Booking
 
 **Operation**: `cancel_booking(self, booking_id: int)`
 
@@ -134,7 +134,7 @@
 
 ---
 
-# Contract CO10: Create Lesson
+# Create Lesson
 
 **Operation**: `create_lesson(location: Location, capacity: int, timeslot: Timeslot, lesson_type: LessonType, specialization: SpecializationType)`
 
