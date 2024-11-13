@@ -107,14 +107,17 @@
 **Operation**: `create_booking(self, client: Client, offering: Offering, minor_id: int = None)`
 
 **Context**: `System::create_booking(client: Client, offering: Offering, minor_id: Integer = null) : Booking`
+
 - **Preconditions:**
   - `self.session.isActive()`
   - `client <> null and client.oclIsTypeOf(Client)`
   - `offering <> null and offering.oclIsTypeOf(Offering)`
   - `minor_id = null or Minor.allInstances()->exists(m | m.id = minor_id)`
+
 - **Postconditions:**
   - `result.oclIsTypeOf(Booking)`
-  - Additional conditions for booking inclusion.
+  - `offering.bookings->includes(result) and client.bookings->includes(result)`
+  - `if minor_id <> null then result.minor.id = minor_id endif`
 
 ---
 
@@ -136,9 +139,18 @@
 **Operation**: `create_lesson(location: Location, capacity: int, timeslot: Timeslot, lesson_type: LessonType, specialization: SpecializationType)`
 
 **Context**: `System::create_lesson(location: Location, capacity: Integer, timeslot: Timeslot, lesson_type: LessonType, specialization: SpecializationType) : Lesson`
+
 - **Preconditions:**
   - `self.session.isActive()`
-  - Additional conditions for lesson properties.
+  - `location.oclIsTypeOf(Location)`
+  - `capacity > 0 and capacity <= location.capacity`
+  - `timeslot.oclIsTypeOf(Timeslot) and not location.schedule.timeslots->exists(t | t.overlaps(timeslot))`
+  - `lesson_type <> null and lesson_type.oclIsTypeOf(LessonType)`
+  - `specialization <> null and specialization.oclIsTypeOf(SpecializationType)`
+
 - **Postconditions:**
-  - `result.oclIsTypeOf(Offering)`
-  - Additional conditions for lesson creation.
+  - `result.oclIsTypeOf(Lesson)`
+  - `result.timeslot = timeslot and result.location = location`
+  - `result.type = lesson_type and result.specialization = specialization`
+  - `location.schedule.timeslots->includes(timeslot)`
+
