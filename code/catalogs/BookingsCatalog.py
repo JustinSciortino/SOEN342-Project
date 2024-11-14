@@ -14,6 +14,31 @@ class BookingsCatalog:
             cls._instance = cls(session)
         return cls._instance
     
+    def cancel_booking_by_id(self, booking_id):
+        if not booking_id:
+            raise ValueError("Booking ID is required")
+        booking = self.session.query(Booking).filter(Booking.id == booking_id).first()
+        offering = self.session.merge(booking.get_offering())
+        if not offering:
+            raise ValueError("Offering does not exist")
+
+        lesson = self.session.merge(offering.get_lesson())
+        if not lesson:
+            raise ValueError("Lesson does not exist for this offering")
+
+        if lesson.get_type().value == 'private':
+            offering.set_status("Available")
+            print("Offering is now available (Private Lesson)")
+        else:
+            if len(offering.get_bookings()) < lesson.get_capacity():
+                offering.set_status("Available")
+                print("Offering is now available (Group Lesson)")
+
+        self.session.delete(booking)
+        self.session.commit()
+        return booking
+
+    
     def cancel_booking(self, booking):
         if not booking:
             raise ValueError("Booking does not exist")
