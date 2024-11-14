@@ -24,7 +24,8 @@ def create_tables():
         Base.metadata.create_all(bind=engine)
         #print("Tables created successfully!")
     except Exception as e:
-        print(f"An error occurred while creating tables: {e}")
+        print()
+        #print(f"An error occurred while creating tables: {e}")
 
 def get_session():
     db = SessionLocal()

@@ -16,7 +16,7 @@ def createSampleObjects(db: Session):
     try:
         new_admin = user_catalog.register_admin("admin", "pass")
 
-        instructor1 = user_catalog.register_instructor("instructor1", "pass", "1234567890", [SpecializationType.hockey, SpecializationType.soccer], ["Montreal", "Laval"])
+        instructor1 = user_catalog.register_instructor("i1", "pass", "1234567890", [SpecializationType.hockey, SpecializationType.soccer], ["Montreal", "Laval"])
         instructor2 = user_catalog.register_instructor("instructor2", "pass", "1234567891", [SpecializationType.swim, SpecializationType.yoga], ["Terrebonne", "Laval"])
         instructor3 = user_catalog.register_instructor("instructor3", "pass", "1234567892", [SpecializationType.dance, SpecializationType.soccer], ["Montreal", "Dorval"])
 
@@ -56,7 +56,8 @@ def createSampleObjects(db: Session):
 
 
     except ValueError as e:
-        print(f"Error creating admin: {str(e)}")    
+        print()
+        #print(f"Error creating admin: {str(e)}")    
 
 def main():
     create_tables()
@@ -269,6 +270,7 @@ def main():
                             break
 
                         user_catalog.create_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
+                        existing_guardian.client_menu(db)
                         print(f"Minor, {minor_name}, has been created.")
 
                     elif guardian_option == '2':
@@ -308,6 +310,7 @@ def main():
                             break
 
                         user_catalog.create_minor(guardian=existing_guardian, name=minor_name, age=minor_age, relationship_with_guardian=relationship_with_guardian)
+                        existing_guardian.client_menu(db)
                         print(f"Minor, {minor_name}, has been created and has successfully been linked to the guardian.")
 
                 elif client_is_minor == 'no':

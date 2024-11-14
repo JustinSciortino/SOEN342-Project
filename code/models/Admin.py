@@ -182,9 +182,10 @@ class Admin(User):
                         print("Id must be a number. Please try again.")
                         continue
                     break
-                location_id = int(location_id)
-                
-                location = locations_catalog.get_location_by_id(location_id)
+
+                if _quit == False:
+                    location_id = int(location_id)
+                    location = locations_catalog.get_location_by_id(location_id)
 
                 if location and _quit == False:
                     day_of_week = None
@@ -564,7 +565,7 @@ class Admin(User):
                             if _quit == False:
                                 cancel_booking_id = int(cancel_booking_id)
                                 try:
-                                    bookings_catalog.cancel_booking_(cancel_booking_id)
+                                    bookings_catalog.cancel_booking_by_id(cancel_booking_id)
                                     print(f"Booking {cancel_booking_id} has been successfully cancelled.")
                                     break
                                 except ValueError as e:
