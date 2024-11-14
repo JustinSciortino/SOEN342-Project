@@ -7,6 +7,10 @@ Vito Rizzuto 40246408
 
 All sequence diagrams, system sequence diagrams, operation contracts, domain model, package diagram and class diagram are in the Iterations_2 folder. Moving onwards, any updated/refined diagrams will be placed in the Iterations_2 folder even after the deadline of iteration 2. 
 
+Video of system functionality:
+
+Part 1 (main and admin menu): https://youtu.be/WgUVPPiWZEg
+
 ## Running the program instructions
 To run main.py
 
