@@ -10,6 +10,7 @@ All sequence diagrams, system sequence diagrams, operation contracts, domain mod
 Video of system functionality:
 
 Part 1 (main and admin menu): https://youtu.be/WgUVPPiWZEg
+Part 2 (instructor and client menu): https://youtu.be/i_QJ5Xl6YHc
 
 ## Running the program instructions
 To run main.py
