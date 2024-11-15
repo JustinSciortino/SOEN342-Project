@@ -7,9 +7,9 @@ Offerings must be unique. Multiple offerings on the same day and time slot must 
 ### Constraint
 context Offering
 
-inv: Offering.allInstances()->forAll(o1, o2 |
-    o1 <> o2 implies 
-    (o1.day <> o2.day or o1.timeSlot <> o2.timeSlot or o1.location <> o2.location)
+    inv: Offering.allInstances()->forAll(o1, o2 |
+        o1 <> o2 implies 
+        (o1.day <> o2.day or o1.timeSlot <> o2.timeSlot or o1.location <> o2.location)
 )
 
 ## Underage Clients with Guardians
@@ -19,7 +19,7 @@ Any client under the age of 18 must be accompanied by an adult guardian.
 ### Constraint
 context Client
 
-inv: self.age < 18 implies self.guardian->notEmpty()
+    inv: self.age < 18 implies self.guardian->notEmpty()
 
 ## Instructor Availability for Offerings
 ### Description
@@ -28,7 +28,7 @@ The city associated with an offering must be one of the cities indicated in the 
 ### Constraint
 context Offering
 
-inv: self.instructor.availabilities->exists(a | a.city = self.city)
+    inv: self.instructor.availabilities->exists(a | a.city = self.city)
 
 ## Unique Client Bookings
 ### Description
@@ -37,6 +37,6 @@ A client cannot have multiple bookings on the same day and time slot.
 ### Constraint
 context Client
 
-inv: self.bookings->forAll(b1, b2 | 
-    b1 <> b2 implies (b1.day <> b2.day or b1.timeSlot <> b2.timeSlot)
-)
+    inv: self.bookings->forAll(b1, b2 | 
+        b1 <> b2 implies (b1.day <> b2.day or b1.timeSlot <> b2.timeSlot)
+    )
