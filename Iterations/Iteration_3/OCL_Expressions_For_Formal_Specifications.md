@@ -11,7 +11,7 @@ inv: Offering.allInstances()->forAll(o1, o2 |
     o1 <> o2 implies 
     (o1.day <> o2.day or o1.timeSlot <> o2.timeSlot or o1.location <> o2.location)
 )
-
+ocl```
 ## Underage Clients with Guardians
 ### Description
 Any client under the age of 18 must be accompanied by an adult guardian.
